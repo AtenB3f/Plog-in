@@ -8,10 +8,11 @@
 import AVKit
 import SwiftUI
 
-enum EditStep: Hashable, Codable {
+enum EditImageStep: Hashable, Codable {
     case pickAsset
     case cropRatio
     case filter
+    case editImage
 }
 
 struct ContentView: View {
@@ -20,6 +21,8 @@ struct ContentView: View {
     
     var body: some View {
         NavigationStack(path: $viewModel.viewPath) {
+            LoadYoutubeView()
+            
             VStack {
                 Button {
                     viewModel.pushNavigation(.pickAsset)
@@ -27,14 +30,14 @@ struct ContentView: View {
                     Text("미디어 선택")
                 }
             }
-            .navigationDestination(for: EditStep.self) { step in
+            .navigationDestination(for: EditImageStep.self) { step in
                 stepView(step)
             }
         }
     }
     
     @ViewBuilder
-    func stepView(_ step: EditStep) -> some View {
+    func stepView(_ step: EditImageStep) -> some View {
         switch step {
         case .pickAsset:
             PickAssetView()
@@ -44,6 +47,9 @@ struct ContentView: View {
                 .environmentObject(viewModel)
         case .filter:
             FilterView()
+                .environmentObject(viewModel)
+        case .editImage:
+            WatermarkEditView()
                 .environmentObject(viewModel)
         }
     }

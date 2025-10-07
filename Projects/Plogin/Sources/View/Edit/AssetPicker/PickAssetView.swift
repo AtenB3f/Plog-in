@@ -36,11 +36,11 @@ struct PickAssetView: View {
             
             Button("사진 선택") {
                 showPicker = true
-                mediaType = .video
+                mediaType = .image
             }
             
             Button("다음") {
-                viewModel.pushNavigation(.filter)
+                viewModel.pushNavigation(.editImage)
             }
         }
         .padding()

@@ -11,38 +11,6 @@ import Photos
 import PhotosUI
 import AVFoundation
 
-enum MediaType {
-    case all
-    case video
-    case image
-}
-
-struct AssetData {
-    init(type: MediaType, data: Any) {
-        self.type = type
-        if let video = data as? AVAsset {
-            self.videoAsset = video
-        }
-        if let image = data as? UIImage {
-            self.imageAsset = image
-        }
-    }
-    
-    var type: MediaType
-    var videoAsset: AVAsset?
-    var imageAsset: UIImage?
-    var data: Any? {
-        switch type {
-        case .image:
-            return imageAsset
-        case .video:
-            return videoAsset
-        case .all:
-            return nil
-        }
-    }
-}
-
 struct AssetPickerView: UIViewControllerRepresentable {
     @Binding var assetDatas: [AssetData]
     var mediaType: MediaType

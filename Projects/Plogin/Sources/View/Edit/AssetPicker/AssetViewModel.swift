@@ -6,17 +6,23 @@
 //  Copyright © 2025 Plli. All rights reserved.
 //
 
-import Foundation
+import SwiftUI
+import UIKit
 
 class AssetViewModel: ObservableObject {
-    @Published var viewPath: [EditStep] = []
+    @Published var viewPath: [EditImageStep] = []
     @Published var assets: [AssetData] = []
     
-    func pushNavigation(_ step: EditStep? = nil) {
+    func pushNavigation(_ step: EditImageStep? = nil) {
         if let step = step {
             viewPath.append(step)
         } else {
             viewPath.removeAll()
         }
+    }
+    
+    func filterImage() -> [UIImage] {
+        let images = assets.filter { $0.imageAsset != nil }.map { $0.imageAsset! }
+        return images
     }
 }
