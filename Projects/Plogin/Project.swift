@@ -66,7 +66,8 @@ extension TargetType {
                 bundleId: targetBundleID,
                 deploymentTargets: .multiplatform(iOS: iOSMinimumVersion, macOS: macOSMinimumVersion),
                 infoPlist: .extendingDefault(with: getInfoPlist),
-                sources: ["../\(self.rawValue)/Sources/**"],
+                sources: ["Sources/**"],
+                resources: ["Resources/**"],
                 entitlements: .dictionary(getEntitlements),
                 dependencies: getTargetDependency,
                 settings: getSettings
@@ -80,11 +81,6 @@ extension TargetType {
             return [
                 .package(product: "YouTubeKit"),
                 .project(target: TargetType.design.rawValue, path: .relativeToRoot("Projects/Design"))
-//                .target(TargetType.design.getTarget)
-//                .target(TargetType.api.getTarget),
-//                .target(TargetType.utility.getTarget),
-//                .target(TargetType.imageModule.getTarget),
-//                .target(TargetType.videoModule.getTarget)
             ]
         default:
             return []
@@ -120,6 +116,11 @@ extension TargetType {
             return [
                 "CFBundleDisplayName": "\(projectName)",
                 "CFBundleIdentifier": "\(targetBundleID)",
+                "UIAppFonts": [
+                    "Pretendard-Bold.ttf",
+                    "Pretendard-SemiBold.ttf",
+                    "Pretendard-Regular.ttf"
+                ],
             ]
         }
     }

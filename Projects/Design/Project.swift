@@ -66,6 +66,7 @@ extension TargetType {
                 deploymentTargets: .multiplatform(iOS: iOSMinimumVersion, macOS: macOSMinimumVersion),
                 infoPlist: .extendingDefault(with: getInfoPlist),
                 sources: ["Sources/**"],
+                resources: ["Resources/**"],
                 entitlements: .dictionary(getEntitlements),
                 dependencies: getTargetDependency,
                 settings: getSettings
@@ -118,6 +119,11 @@ extension TargetType {
             return [
                 "CFBundleDisplayName": "\(projectName)",
                 "CFBundleIdentifier": "\(targetBundleID)",
+                "UIAppFonts": [
+                    "Pretendard-Bold.ttf",
+                    "Pretendard-SemiBold.ttf",
+                    "Pretendard-Regular.ttf"
+                ],
             ]
         }
     }
