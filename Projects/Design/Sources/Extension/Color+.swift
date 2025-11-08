@@ -7,15 +7,14 @@
 //
 
 import SwiftUI
-import UIKit
 
 public extension Color {
-    func toUI(_ opacity: CGFloat = 1.0) -> UIColor {
-        return UIColor(self).withAlphaComponent(opacity)
+    func toUI(_ opacity: CGFloat = 1.0) -> PColor {
+        return PColor(self).withAlphaComponent(opacity)
     }
 }
 
-public extension UIColor {
+public extension PColor {
     func toColor(_ opacity: CGFloat = 1.0) -> Color {
         return Color(self).opacity(opacity)
     }

@@ -63,6 +63,7 @@ public extension Color {
     enum Shadow {
         public static let disable      = Color("Shadow/Disable_10", bundle: .module)
         public static let light        = Color("Shadow/Light_20", bundle: .module)
+        public static let medium        = Color("Shadow/Medium_30", bundle: .module)
         public static let dark         = Color("Shadow/Dark_40", bundle: .module)
     }
 }
