@@ -19,6 +19,7 @@ struct WatermarkEditView: View {
     var body: some View {
         GeometryReader { proxy in
             VStack {
+#if os(iOS)
                 TabView(selection: $viewModel.index) {
                     ForEach(Array(viewModel.generatedImage.enumerated()), id: \.offset) { index, image in
                         Image(uiImage: image)
@@ -28,6 +29,8 @@ struct WatermarkEditView: View {
                     }
                 }
                 .tabViewStyle(.page)
+#elseif os(macOS)
+#endif
                 
                 TextField("텍스트를 입력하세요.", text: $viewModel.inputText)
                     .onSubmit {

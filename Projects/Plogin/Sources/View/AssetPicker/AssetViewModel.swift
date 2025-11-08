@@ -7,7 +7,7 @@
 //
 
 import SwiftUI
-import UIKit
+import Design
 
 class AssetViewModel: ObservableObject {
     @Published var viewPath: [EditImageStep] = []
@@ -21,7 +21,7 @@ class AssetViewModel: ObservableObject {
         }
     }
     
-    func filterImage() -> [UIImage] {
+    func filterImage() -> [PImage] {
         let images = assets.filter { $0.imageAsset != nil }.map { $0.imageAsset! }
         return images
     }

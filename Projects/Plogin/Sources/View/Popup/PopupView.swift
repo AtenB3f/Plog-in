@@ -1,0 +1,51 @@
+//
+//  PopupView.swift
+//  Plogin
+//
+//  Created by AtenB on 10/7/25.
+//  Copyright © 2025 AtenB. All rights reserved.
+//
+
+import SwiftUI
+import Design
+
+public enum PopupType {
+    case watermarkTextSave(callback: (Bool) -> Void)
+    case watermarkPreview(watermark: WatermarkModel)
+    case preview
+}
+
+public struct PopupView: View {
+    @StateObject var manager = AppManager.shared
+    
+    let type: PopupType
+    
+    public var body: some View {
+        if manager.isRootPopup {
+            ZStack {
+                Color.Shadow.medium
+                    .ignoresSafeArea()
+                
+                switch type {
+                case .watermarkTextSave:
+                    PopupWatermarkTextView()
+                    
+                case .preview:
+                    PopupPreviewView()
+                    
+                case .watermarkPreview(let watermark):
+                    PopupWatermarkPreviewView(watermark: watermark)
+                }
+            }
+        }
+    }
+}
+
+//#Preview {
+//    let manager = AppManager()
+//    let navigation = TabNavigationViewModel()
+//    @State var isShow = false
+//    PopupView(isShow: $isShow, type: .watermarkTextSave)
+//        .environmentObject(manager)
+//        .environmentObject(navigation)
+//}

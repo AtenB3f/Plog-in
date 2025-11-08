@@ -6,67 +6,86 @@
 //  Copyright © 2025 Plli. All rights reserved.
 //
 
+import Design
+import Foundation
+#if os(iOS)
 import UIKit
+#elseif os(macOS)
+import AppKit
+#endif
 
 class ImageEditManager {
     func drawTextOnImage(
-        image: UIImage,
+        image: PImage,
         text: String,
         at point: CGPoint,
-        font: UIFont =
-            .systemFont(ofSize: 40),
-        textColor: UIColor = .white
-    ) -> UIImage {
+        font: PFont = .systemFont(ofSize: 40),
+        textColor: PColor = .white
+    ) -> PImage {
+#if os(iOS)
         let renderer = UIGraphicsImageRenderer(size: image.size)
-
-        let newImage = renderer.image { context in
-            // 1. 원본 이미지 그리기
+        return renderer.image { context in
             image.draw(in: CGRect(origin: .zero, size: image.size))
-
-            // 2. 텍스트 스타일 설정
+            
             let paragraphStyle = NSMutableParagraphStyle()
             paragraphStyle.alignment = .left
-
+            
             let attrs: [NSAttributedString.Key: Any] = [
                 .font: font,
                 .foregroundColor: textColor,
                 .paragraphStyle: paragraphStyle
             ]
-
-            // 3. 텍스트 그리기
+            
             let textRect = CGRect(origin: point, size: image.size)
             text.draw(in: textRect, withAttributes: attrs)
         }
-
+#elseif os(macOS)
+        let newImage = PImage(size: image.size)
+        newImage.lockFocus()
+        
+        image.draw(in: CGRect(origin: .zero, size: image.size))
+        
+        let paragraphStyle = NSMutableParagraphStyle()
+        paragraphStyle.alignment = .left
+        
+        let attrs: [NSAttributedString.Key: Any] = [
+            .font: font,
+            .foregroundColor: textColor,
+            .paragraphStyle: paragraphStyle
+        ]
+        
+        let textRect = CGRect(origin: point, size: image.size)
+        text.draw(in: textRect, withAttributes: attrs)
+        
+        newImage.unlockFocus()
         return newImage
+#endif
     }
     
     func drawRepeatedTextOnImage(
-        image: UIImage,
+        image: PImage,
         text: String,
-        textColor: UIColor = .black,
-        font: UIFont = .systemFont(ofSize: 40),
+        textColor: PColor = .black,
+        font: PFont = .systemFont(ofSize: 40),
         spacing: CGSize = CGSize(width: 200, height: 200)
-    ) -> UIImage {
-        let gradientColors: [UIColor] = [
+    ) -> PImage {
+        let gradientColors: [PColor] = [
             .blue.withAlphaComponent(0.3),
             .purple.withAlphaComponent(0.3),
             .systemPink.withAlphaComponent(0.3),
             .red.withAlphaComponent(0.3),
             .black.withAlphaComponent(0.3)
         ]
-        let renderer = UIGraphicsImageRenderer(size: image.size)
         
-        let newImage = renderer.image { context in
-            // 원본 이미지 그리기
+#if os(iOS)
+        let renderer = UIGraphicsImageRenderer(size: image.size)
+        return renderer.image { context in
             image.draw(in: CGRect(origin: .zero, size: image.size))
             
-//            context.cgContext.setFillColor(UIColor.cyan.withAlphaComponent(0.3).cgColor)
-//            context.cgContext.fill(CGRect(origin: .zero, size: image.size))
             let colorSpace = CGColorSpaceCreateDeviceRGB()
             let cgColors = gradientColors.map { $0.cgColor } as CFArray
             let gradient = CGGradient(colorsSpace: colorSpace, colors: cgColors, locations: nil)!
-                    
+            
             let startPoint = CGPoint(x: 0, y: 0)
             let endPoint = CGPoint(x: image.size.width, y: image.size.height)
             
@@ -76,13 +95,12 @@ class ImageEditManager {
                 end: endPoint,
                 options: []
             )
-            // 텍스트 속성
+            
             let attributes: [NSAttributedString.Key: Any] = [
                 .font: font,
                 .foregroundColor: textColor
             ]
             
-            // 바둑판처럼 텍스트 반복
             for y in stride(from: 0, to: image.size.height, by: spacing.height) {
                 for x in stride(from: 0, to: image.size.width, by: spacing.width) {
                     let point = CGPoint(x: x, y: y)
@@ -90,7 +108,45 @@ class ImageEditManager {
                 }
             }
         }
+#elseif os(macOS)
+        let newImage = PImage(size: image.size)
+        newImage.lockFocus()
         
+        guard let context = NSGraphicsContext.current?.cgContext else {
+            newImage.unlockFocus()
+            return image
+        }
+        
+        image.draw(in: CGRect(origin: .zero, size: image.size))
+        
+        let colorSpace = CGColorSpaceCreateDeviceRGB()
+        let cgColors = gradientColors.map { $0.cgColor } as CFArray
+        let gradient = CGGradient(colorsSpace: colorSpace, colors: cgColors, locations: nil)!
+        
+        let startPoint = CGPoint(x: 0, y: 0)
+        let endPoint = CGPoint(x: image.size.width, y: image.size.height)
+        
+        context.drawLinearGradient(
+            gradient,
+            start: startPoint,
+            end: endPoint,
+            options: []
+        )
+        
+        let attributes: [NSAttributedString.Key: Any] = [
+            .font: font,
+            .foregroundColor: textColor
+        ]
+        
+        for y in stride(from: 0, to: image.size.height, by: spacing.height) {
+            for x in stride(from: 0, to: image.size.width, by: spacing.width) {
+                let point = CGPoint(x: x, y: y)
+                text.draw(at: point, withAttributes: attributes)
+            }
+        }
+        
+        newImage.unlockFocus()
         return newImage
+#endif
     }
 }

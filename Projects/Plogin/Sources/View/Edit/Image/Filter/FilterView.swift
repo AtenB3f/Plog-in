@@ -7,6 +7,7 @@
 //
 
 import SwiftUI
+import Design
 
 struct FilterView: View {
     @Environment(\.dismiss) var dismiss
@@ -15,8 +16,8 @@ struct FilterView: View {
     var multiple: Float = 3.0
     @State var index: Int = 0
     @State var image: Image?
-    @State var uiImage: UIImage?
-    @State var originUIImage: UIImage?
+    @State var uiImage: PImage?
+    @State var originUIImage: PImage?
     var body: some View {
         ScrollView() {
             HStack {
@@ -82,12 +83,21 @@ struct FilterView: View {
                 guard index < viewModel.assets.count,
                       let asset = viewModel.assets[index].imageAsset else { return }
                 uiImage = asset
+                
+#if os(iOS)
                 self.image = Image(uiImage: asset)
+#elseif os(macOS)
+                self.image = Image(nsImage: asset)
+#endif
             }
             
             uiImage = filterViewModel.upscaleImage(image: originUIImage!)
             guard let filterImage = uiImage else { return }
+#if os(iOS)
             image = Image(uiImage: filterImage)
+#elseif os(macOS)
+            image = Image(nsImage: filterImage)
+#endif
         }
         .onAppear {
             guard index < viewModel.assets.count,
@@ -96,7 +106,11 @@ struct FilterView: View {
             self.uiImage = filterViewModel.resizeImageByFactor(asset, scaleFactor: CGFloat(multiple))
             originUIImage = self.uiImage
             guard let origin = originUIImage else { return }
+#if os(iOS)
             self.image = Image(uiImage: origin)
+#elseif os(macOS)
+            self.image = Image(nsImage: origin)
+#endif
         }
     }
 }

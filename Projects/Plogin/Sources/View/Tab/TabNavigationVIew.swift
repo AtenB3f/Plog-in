@@ -7,62 +7,35 @@
 //
 
 import SwiftUI
+import Design
 
 struct TabNavigationView: View {
-    @EnvironmentObject var manager: AppManager
-
-    @StateObject var navigation = TabNavigationViewModel()
+    @StateObject var manager = AppManager.shared
     
-
     var body: some View {
         ZStack(alignment: .bottom) {
             VStack(spacing: 0) {
-                HeaderView()
+                NavigationTitle()
                 
-                NavigationRootLayout(path: $navigation.path) {
+                NavigationRootLayout(path: $manager.path) {
                     VStack(spacing: 0) {
                         switch manager.currentTab {
-                        case .connect:
-                            if manager.userMemberType == "sub" {
-                                VPNDetailView(manager.username)
-                                    .environmentObject(navigation)
-                            } else if manager.userMemberType == "main" {
-                                VPNListView()
-                                    .environmentObject(navigation)
-                            }
-                            
-                        case .announce:
-                            AnnounceListView()
-                                .environmentObject(navigation)
-                            
+                        case .home:
+                            HomeView()
                         case .setting:
                             SettingView()
-                                .environmentObject(navigation)
                         }
                     }
                     .hiddenNavigationBarStyle()
-                    .navigations(navigation)
+                    .navigations()
                 }
             }
             
-            TabBarView()
-                .environmentObject(navigation)
-                .environmentObject(manager)
+//            TabBarView()
+//                .environmentObject(navigation)
+//                .environmentObject(manager)
         }
-        .background(Color.white)
         .ignoresSafeArea(edges: .bottom)
-        .onAppear {if let memberType = dataManager.getUserMemberType(),
-                !memberType.isEmpty {
-                manager.userMemberType = memberType
-            } else {
-                manager.userMemberType = "sub"
-            }
-        }
-        .task {
-            if manager.username.isEmpty {
-                manager.username = await manager.requestMemberID() ?? ""
-            }
-        }
         .onReceive(NotificationCenter.default.publisher(for: .pushPopup)) { notification in
             if let type = notification.object as? PopupType {
                 manager.pushPopup(type)
@@ -70,12 +43,12 @@ struct TabNavigationView: View {
                 manager.pushPopup()
             }
         }
-        .onReceive(NotificationCenter.default.publisher(for: .logout)) { _ in
-            manager.logout()
-        }
+//        .onReceive(NotificationCenter.default.publisher(for: .logout)) { _ in
+//            manager.logout()
+//        }
     }
 }
 
-//#Preview {
-//    TabNavigationVIew()
-//}
+#Preview {
+    TabNavigationView()
+}

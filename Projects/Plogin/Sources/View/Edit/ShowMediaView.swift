@@ -8,6 +8,7 @@
 
 import SwiftUI
 import AVKit
+import Design
 
 struct ShowMediaView: View {
     @EnvironmentObject var viewModel: AssetViewModel
@@ -22,11 +23,18 @@ struct ShowMediaView: View {
                         VideoPlayer(player: AVPlayer(url: urlAsset.url))
                             .frame(height: 300)
                     }
-                } else if let image = viewModel.assets[index].data as? UIImage {
+                } else if let image = viewModel.assets[index].data as? PImage {
+#if os(iOS)
                     Image(uiImage: image)
                         .resizable()
                         .aspectRatio(contentMode: .fit)
                         .frame(height: 300)
+#elseif os(macOS)
+                    Image(nsImage: image)
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(height: 300)
+#endif
                 }
             }
             

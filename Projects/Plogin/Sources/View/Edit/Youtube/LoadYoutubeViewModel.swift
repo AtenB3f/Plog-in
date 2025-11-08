@@ -36,12 +36,16 @@ class LoadYoutubeViewModel: ObservableObject {
     }
     
     func setupAudioSession() {
+#if os(iOS)
         do {
             try AVAudioSession.sharedInstance().setCategory(.playback, mode: .moviePlayback, options: [])
             try AVAudioSession.sharedInstance().setActive(true)
         } catch {
             print("AVAudioSession 설정 실패: \(error)")
         }
+#elseif os(macOS)
+        // TODO: 
+#endif
     }
     
     

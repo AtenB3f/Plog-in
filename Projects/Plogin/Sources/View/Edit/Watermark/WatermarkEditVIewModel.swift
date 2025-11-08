@@ -6,8 +6,8 @@
 //  Copyright © 2025 Plli. All rights reserved.
 //
 
-import UIKit
 import SwiftUI
+import Design
 
 class WatermarkEditVIewModel: ObservableObject {
     @Published var index: Int = 0
@@ -18,11 +18,11 @@ class WatermarkEditVIewModel: ObservableObject {
     @Published var backgroundColor: Color = .clear
     @Published var backgroundOpacity: CGFloat = 1.0
     @Published var spacing: CGSize = CGSize(width: 200, height: 80)
-    @Published var generatedImage: [UIImage] = []
+    @Published var generatedImage: [PImage] = []
     
     let editer = ImageEditManager()
     
-    func generatedImage(_ origin: UIImage, index: Int) {
+    func generatedImage(_ origin: PImage, index: Int) {
         guard generatedImage.count > index else { return }
         
         let newImage = editer.drawRepeatedTextOnImage(
@@ -34,7 +34,7 @@ class WatermarkEditVIewModel: ObservableObject {
          generatedImage[index] = newImage
     }
     
-    func generatedImageAll(_ origin: [UIImage]) {
+    func generatedImageAll(_ origin: [PImage]) {
         if generatedImage.count != origin.count {
             generatedImage.removeAll()
             generatedImage = origin

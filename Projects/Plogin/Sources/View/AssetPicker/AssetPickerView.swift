@@ -11,6 +11,7 @@ import Photos
 import PhotosUI
 import AVFoundation
 
+#if os(iOS)
 struct AssetPickerView: UIViewControllerRepresentable {
     @Binding var assetDatas: [AssetData]
     var mediaType: MediaType
@@ -79,3 +80,18 @@ struct AssetPickerView: UIViewControllerRepresentable {
         }
     }
 }
+#elseif os(macOS)
+struct AssetPickerView: View {
+    @Binding var assetDatas: [AssetData]
+    var mediaType: MediaType
+    
+    init(avAsset: Binding<[AssetData]>, type: MediaType) {
+        self._assetDatas = avAsset
+        self.mediaType = type
+    }
+    var body: some View {
+        
+        Text("")
+    }
+}
+#endif

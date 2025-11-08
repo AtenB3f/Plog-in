@@ -7,41 +7,39 @@
 //
 
 import SwiftUI
+import Design
 
 struct TabBarView: View {
-    @EnvironmentObject var manager: AppManager
-    @EnvironmentObject var navigation: TabNavigationViewModel
+    @StateObject var manager = AppManager.shared
     
     var body: some View {
         // Bottom Tabbar List
         VStack(spacing: 0) {
             HStack(spacing: 60) {
                 Button {
-                    navigation.pushRoot()
-                    manager.currentTab = .connect
+                    manager.pushRoot()
+                    manager.currentTab = .home
                 } label: {
-                    Image(manager.currentTab == Tab.connect ? "" : "")
-                }
-                .basicButtonStyle(.basic)
-                
-                Button {
-                    navigation.pushRoot()
-                    manager.currentTab = .announce
-                } label: {
-                    Image(manager.currentTab == Tab.announce ? "" : "")
+//                    Image(manager.currentTab == Tab.connect ? "" : "")
                 }
                 
                 Button {
-                    navigation.pushRoot()
-                    manager.currentTab = .setting
+                    manager.pushRoot()
+//                    manager.currentTab = .announce
                 } label: {
-                    Image(manager.currentTab == Tab.setting ? "" : "")
+//                    Image(manager.currentTab == Tab.announce ? "" : "")
+                }
+                
+                Button {
+                    manager.pushRoot()
+//                    manager.currentTab = .setting
+                } label: {
+//                    Image(manager.currentTab == Tab.setting ? "" : "")
                 }
             }
             .frame(maxWidth: .infinity)
         }
         .padding(.vertical, 7)
-        .background(Color.balck)
         .cornerRadius(20, corner: .top)
     }
 }
