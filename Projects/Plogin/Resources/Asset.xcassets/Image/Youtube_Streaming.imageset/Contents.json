@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "Youtube_Streaming.svg",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}
