@@ -9,7 +9,6 @@
 import SwiftUI
 
 public struct TitleContentTwoPopup<Content: View>: View {
-    @Binding var isShow: Bool
     var title: String
     var leftText: String
     var rightText: String
@@ -17,14 +16,12 @@ public struct TitleContentTwoPopup<Content: View>: View {
     var callback: ((Bool) -> Void)?
     
     public init(
-        isShow: Binding<Bool>,
         title: String,
         leftText: String,
         rightText: String,
         @ViewBuilder content: () -> Content,
         callback: ((Bool) -> Void)? = nil
     ) {
-        self._isShow = isShow
         self.title = title
         self.leftText = leftText
         self.rightText = rightText
@@ -43,7 +40,6 @@ public struct TitleContentTwoPopup<Content: View>: View {
             HStack {
                 Button {
                     callback?(false)
-                    isShow = false
                 } label: {
                     GrayFillBoxLabel(leftText)
                 }
@@ -51,7 +47,6 @@ public struct TitleContentTwoPopup<Content: View>: View {
                 
                 Button {
                     callback?(true)
-                    isShow = false
                 } label: {
                     BlackFillBoxLabel(rightText)
                 }
@@ -67,7 +62,6 @@ public struct TitleContentTwoPopup<Content: View>: View {
 #Preview {
     @State var isShow: Bool = true
     TitleContentTwoPopup(
-        isShow: $isShow,
         title: "문구등록",
         leftText: "취소",
         rightText: "다음",

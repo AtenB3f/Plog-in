@@ -8,15 +8,24 @@
 
 import SwiftUI
 
-struct Spinner: View {
+public struct Spinner: View {
     let color: Color
+    let lineWidth: CGFloat
     
     @State private var isAnimating = false
     
-    var body: some View {
+    public init(
+        _ color: Color = .white,
+        _ lineWidth: CGFloat = 3
+    ) {
+        self.color = color
+        self.lineWidth = lineWidth
+    }
+    
+    public var body: some View {
         Circle()
             .trim(from: 0, to: 1)
-            .stroke(lineWidth: 3)
+            .stroke(lineWidth: lineWidth)
             .aspectRatio(contentMode: .fit)
             .foregroundStyle(Gradient(colors: [.clear, color.opacity(0.8), color, color]))
             .rotationEffect(.degrees(isAnimating ? 360 : 0))
@@ -29,7 +38,7 @@ struct Spinner: View {
     }
 }
 
-//#Preview {
-//    Spinner(color: .Yejun.disable)
-//        .frame(width: 20, height: 20)
-//}
+#Preview {
+    Spinner()
+        .frame(width: 20, height: 20)
+}

@@ -20,7 +20,7 @@ extension View {
     func shadow(_ type: ShadowType) -> some View {
         switch type {
         case .disable:
-            return self.shadow(color: .Shadow.disable, radius: 8, x: 0, y: 0)
+            return self.shadow(color: .Shadow.disable, radius: 6, x: 2, y: 4)
         case .light:
             return self.shadow(color: .Shadow.light, radius: 4, x: 0, y: 0)
         case .medium:

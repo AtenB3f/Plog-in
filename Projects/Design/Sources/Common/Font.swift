@@ -97,11 +97,11 @@ public enum FontType: CaseIterable {
 
 public class FontLoader {
     public static func loadModuleFont() {
-        let fonts = FontType.allCases
+        let fonts = Array(Set(FontType.allCases.map{ $0.fontName }))
         guard let urls = Bundle.module.urls(forResourcesWithExtension: "ttf", subdirectory: nil) else { return }
 
         for font in fonts {
-            if let url = urls.first(where: { $0.lastPathComponent.contains(font.fontName) }) {
+            if let url = urls.first(where: { $0.lastPathComponent.contains(font) }) {
                 loadFont(url)
             }
         }
@@ -119,6 +119,30 @@ public class FontLoader {
             print("[Design] registered \(url.lastPathComponent)")
         } else {
             print("[Design] unable to register font: \(error!.takeUnretainedValue())")
+        }
+    }
+}
+
+// 폰트가 실제로 등록되었는지 확인
+public func checkFontList() {
+    #if os(iOS)
+    let familyNames = UIFont.familyNames.sorted()
+    #elseif os(macOS)
+    let familyNames = NSFontManager.shared.availableFontFamilies.sorted()
+    #endif
+
+    for family in familyNames {
+        print("\n📁 Family: \(family)")
+        
+        #if os(iOS)
+        let fontNames = UIFont.fontNames(forFamilyName: family)
+        #elseif os(macOS)
+        let fontNames = NSFontManager.shared.availableMembers(ofFontFamily: family)?
+            .compactMap { $0[0] as? String } ?? []
+        #endif
+        
+        for fontName in fontNames {
+            print("  └─ \(fontName)")
         }
     }
 }
