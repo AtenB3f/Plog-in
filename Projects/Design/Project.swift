@@ -14,8 +14,8 @@ private let projectName: String = "Design"
 private let appScheme: String = "plogin"
 private let organization: String = "AtenB"
 private let bundleID: String = "com.AtenB."
-private let iOSMinimumVersion: String = "16.0"
-private let macOSMinimumVersion: String = "13.0"
+private let iOSMinimumVersion: String = "17.0"
+private let macOSMinimumVersion: String = "14.0"
 
 private enum TargetType: String, CaseIterable {
     case plogin = "Plogin"

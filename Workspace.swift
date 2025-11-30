@@ -12,7 +12,7 @@ let workspace = Workspace(name: "Plogin",
                             .relativeToRoot("Projects/Plogin"),
                             .relativeToRoot("Projects/Design"),
                             .relativeToRoot("Projects/Utility"),
-                            .relativeToRoot("Projects/Network"),
-                            .relativeToRoot("Projects/ImageModule"),
-                            .relativeToRoot("Projects/VideoModule")
+//                            .relativeToRoot("Projects/Network"),
+//                            .relativeToRoot("Projects/ImageModule"),
+//                            .relativeToRoot("Projects/VideoModule")
                           ])

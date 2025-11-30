@@ -15,8 +15,8 @@ private let projectName: String = "Plogin"
 private let appScheme: String = "plogin"
 private let organization: String = "AtenB"
 private let bundleID: String = "com.AtenB."
-private let iOSMinimumVersion: String = "16.0"
-private let macOSMinimumVersion: String = "13.0"
+private let iOSMinimumVersion: String = "17.0"
+private let macOSMinimumVersion: String = "14.0"
 
 private enum TargetType: String, CaseIterable {
     case plogin = "Plogin"
@@ -167,7 +167,8 @@ extension TargetType {
 }
 
 private let packages: [Package] = [
-    .package(url: "https://github.com/alexeichhorn/YouTubeKit", .upToNextMajor(from: "0.2.9"))
+    .package(url: "https://github.com/alexeichhorn/YouTubeKit", .upToNextMajor(from: "0.2.9")),
+    .package(url: "https://github.com/realm/realm-swift.git", .upToNextMajor(from: ""))
 ]
 
 let project = Project(
