@@ -10,7 +10,7 @@ import SwiftUI
 import Design
 
 public enum PopupType {
-    case watermarkTextSave(callback: (Bool) -> Void)
+    case watermarkTextSave(text: Binding<String> ,callback: (Bool) -> Void)
     case watermarkPreview(watermark: WatermarkModel)
     case preview
 }
@@ -21,14 +21,14 @@ public struct PopupView: View {
     let type: PopupType
     
     public var body: some View {
-        if manager.isRootPopup {
+        if let type = manager.rootPopup {
             ZStack {
                 Color.Shadow.medium
                     .ignoresSafeArea()
                 
                 switch type {
-                case .watermarkTextSave:
-                    PopupWatermarkTextView()
+                case .watermarkTextSave(let text, let callback):
+                    PopupWatermarkTextView(text: text, callback: callback)
                     
                 case .preview:
                     PopupPreviewView()

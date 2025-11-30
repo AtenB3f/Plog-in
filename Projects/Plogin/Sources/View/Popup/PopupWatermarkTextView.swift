@@ -10,38 +10,52 @@ import SwiftUI
 import Design
 
 struct PopupWatermarkTextView: View {
-    @StateObject var manager = AppManager.shared
+    @Binding var text: String
+    let description: String
+    let left: String
+    let right: String
+    let callback: (Bool)->Void
     
-    @State private var text: String = ""
+    init(
+        text: Binding<String>,
+        description: String = "이미지 생성에 필요한\n워터마크 문구를 입력해주세요.",
+        left: String = "취소",
+        right: String = "다음",
+        callback: @escaping (Bool) -> Void
+    ) {
+        self._text = text
+        self.description = description
+        self.left = left
+        self.right = right
+        self.callback = callback
+    }
+    
     var body: some View {
         TitleContentTwoPopup(
-            isShow: $manager.isRootPopup,
             title: "문구등록",
-            leftText: "취소",
-            rightText: "다음",
+            leftText: left,
+            rightText: right,
             content: {
                 VStack(spacing: 30) {
-                    Text("처음 인증 이미지를 만드시는군요!\n이미지 생성에 필요한\n워터마크 문구를 입력해주세요.")
-                        .body2()
+                    Text(description)
+                        .font(.body2)
                         .foreground(.Gray.light)
                         .multilineTextAlignment(.center)
                     
                     BasicTextField(text: $text, placeholder: "워터마크 문구를 입력하세요.")
                 }
+                .padding(.vertical)
             }
         ) { isNext in
-            if isNext {
-                // TODO: 로컬 저장
-                manager.isRootPopup = false
-            } else {
-                manager.isRootPopup = false
-            }
+            callback(isNext)
         }
         .padding(.horizontal, 30)
     }
 }
 
-#Preview {
-    @State var isShow = false
-    PopupWatermarkTextView()
-}
+//#Preview {
+//    @State var text: String = ""
+//    PopupWatermarkTextView(text: $text, callback: { isNext in
+//        
+//    })
+//}
