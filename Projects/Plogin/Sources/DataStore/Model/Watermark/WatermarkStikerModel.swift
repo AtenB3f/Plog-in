@@ -12,7 +12,6 @@ import Design
 
 @Model
 public final class WatermarkStikerModel {
-    // Data, CGPoint 등 Codable을 구현한 타입은 기본적으로 저장 가능합니다.
     var image: Data?
     var alpha: CGFloat
     var position: CGPoint
@@ -20,7 +19,6 @@ public final class WatermarkStikerModel {
     var scale: CGFloat
     var layer: Int
     
-    // 역관계를 위한 속성 추가
     var watermark: WatermarkModel?
     
     init(

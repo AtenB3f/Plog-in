@@ -13,7 +13,6 @@ import Design
 extension DataStore {
     func loadWatermarkWord() -> [WatermarkWordModel] {
         let list = fetch(type: WatermarkWordModel.self)
-        print(list.map{ $0.text })
         return list
     }
     
@@ -39,7 +38,6 @@ extension DataStore {
 extension DataStore {
     func loadWatermark() -> [WatermarkModel] {
         let list = fetch(type: WatermarkModel.self)
-        print(list)
         return list
     }
     
@@ -56,7 +54,7 @@ extension DataStore {
     func getWatermark(_ frameTitle: String) -> WatermarkModel? {
         let list = loadWatermark()
         if let data = list.first(where: { $0.frameSetting.title == frameTitle
-            && $0.frameSetting.type == WatermarkFrameType.custom.rawValue}) {
+            && $0.frameSetting.type == WatermarkFrameType.custom}) {
             return data
         }
         return nil
@@ -64,13 +62,13 @@ extension DataStore {
     
     func getWatermark(type: BasicWatermarkType) -> WatermarkModel? {
         let watermarkName = type.rawValue
-        let typeName = WatermarkFrameType.basic.rawValue
         let list = fetch(
             type: WatermarkModel.self,
             predicate: #Predicate<WatermarkModel>{
-                $0.frameSetting.type == typeName && $0.frameSetting.title == watermarkName
+                $0.frameSetting.title == watermarkName
             }
         )
-        return list.first
+        
+        return list.filter { $0.frameSetting.type == WatermarkFrameType.basic }.first
     }
 }

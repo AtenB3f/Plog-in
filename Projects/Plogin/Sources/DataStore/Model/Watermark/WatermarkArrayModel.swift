@@ -22,10 +22,13 @@ public final class WatermarkArrayModel {
     var rows: Int
     var columns: Int
     
-    // 역관계를 위한 속성 추가
     var watermark: WatermarkModel?
     
-    init(type: WatermarkArrayType, rows: Int, columns: Int) {
+    init(
+        type: WatermarkArrayType = .none,
+        rows: Int = 1,
+        columns: Int = 1
+    ) {
         self.type = type
         self.rows = rows
         self.columns = columns

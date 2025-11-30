@@ -39,19 +39,19 @@ enum BasicWatermarkType: String, CaseIterable {
 
 extension BasicWatermarkType {
     var watermark: WatermarkModel {
-        let font = FontType.body2
-        let name = font.fontName
+        let fontSize: CGFloat = 32
+        let name = FontType.body1.fontName
         
         switch self {
         case .melonStreaming:
             return .init(
                 textSetting: .init(text: "",
                                    fontName: name,
-                                   fontSize: font.size,
-                                   scale: 1.0,
-                                   color: .white,
-                                   alpha: 0.2,
-                                   spacing: 10,
+                                   fontSize: 24,
+                                   rotation: -20.0,
+                                   color: .Gray.medium,
+                                   alpha: 0.3,
+                                   spacing: .init(width: 20, height: 10),
                                    isGradient: true,
                                    isDate: true),
                 stikers: [],
@@ -63,11 +63,11 @@ extension BasicWatermarkType {
             return .init(
                 textSetting: .init(text: "",
                                    fontName: name,
-                                   fontSize: font.size,
-                                   scale: 1.0,
+                                   fontSize: fontSize,
+                                   rotation: -20.0,
                                    color: .white,
                                    alpha: 0.2,
-                                   spacing: 10,
+                                   spacing: .init(width: 100, height: 50),
                                    isGradient: true,
                                    isDate: true),
                 stikers: [],
@@ -79,11 +79,11 @@ extension BasicWatermarkType {
             return .init(
                 textSetting: .init(text: "",
                                    fontName: name,
-                                   fontSize: font.size,
-                                   scale: 1.0,
+                                   fontSize: fontSize,
+                                   rotation: -20.0,
                                    color: .white,
                                    alpha: 0.2,
-                                   spacing: 10,
+                                   spacing: .init(width: 100, height: 50),
                                    isGradient: true,
                                    isDate: true),
                 stikers: [],
@@ -97,7 +97,7 @@ extension BasicWatermarkType {
 
 extension DataStore {
     func installBasicWatermark() {
-        let frame = WatermarkFrameType.basic.rawValue
+        let frame = WatermarkFrameType.basic
         let list = fetch(
             type: WatermarkModel.self,
             predicate: #Predicate<WatermarkModel>{ $0.frameSetting.type == frame })

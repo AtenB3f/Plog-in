@@ -16,15 +16,21 @@ enum WatermarkExportType: String, Codable {
 
 @Model
 public final class WatermarkExportModel {
-    var type: String
+    var type: WatermarkExportType
     var width: CGFloat
     var height: CGFloat
     
     var watermark: WatermarkModel?
     
-    init(type: WatermarkExportType, size: CGSize) {
-        self.type = type.rawValue
+    init(type: WatermarkExportType = .auto, size: CGSize = .zero) {
+        self.type = type
         self.width = size.width
         self.height = size.height
+    }
+}
+
+extension WatermarkExportModel {
+    func getRect() -> CGSize {
+        return .init(width: self.width, height: self.height)
     }
 }
