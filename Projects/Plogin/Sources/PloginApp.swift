@@ -15,10 +15,8 @@ struct PloginApp: App {
     let dataStore = DataStore.shared
     
     init() {
-//        FontLoader.loadModuleFont()
+        FontLoader.loadModuleFont()
         dataStore.installBasicWatermark()
-        dataStore.loadWatermark()
-        dataStore.loadWatermarkWord()
     }
     
     var body: some Scene {

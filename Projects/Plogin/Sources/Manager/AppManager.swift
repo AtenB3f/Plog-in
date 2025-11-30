@@ -19,8 +19,11 @@ public final class AppManager: ObservableObject {
     public static var shared = AppManager()
     
     // MARK: Popup
-    @Published var isRootPopup: Bool = false
     @Published var rootPopup: PopupType?
+    
+    // MARK: Toast
+    @Published var rootToast: ToastData?
+    var toastAction: (() -> Void)?
     
     // MARK: Root
     @Published var rootView: RootStatus = .splash
@@ -35,8 +38,26 @@ public final class AppManager: ObservableObject {
 // MARK: Popup
 public extension AppManager {
     func pushPopup(_ type: PopupType? = nil) {
-        isRootPopup = type != nil
         rootPopup = type
+    }
+}
+
+// MARK: Toast
+public extension AppManager {
+    @MainActor
+    func pushToast(
+        _ data: ToastData? = nil,
+        _ duration: CGFloat? = 2.0,
+        _ toastAction: (() -> Void)? = nil
+    ) {
+        self.toastAction = toastAction
+        Task {
+            withAnimation { rootToast = data }
+            if let duration = duration {
+                try await Task.sleep(for: .seconds(duration))
+                withAnimation { rootToast = nil }
+            }
+        }
     }
 }
 

@@ -22,7 +22,11 @@ struct RootView: View {
             case .navigation:
                 TabNavigationView()
             }
-            if manager.isRootPopup, let type = manager.rootPopup {
+            if let data = manager.rootToast {
+                Toast(data, callback: manager.toastAction)
+                    .transition(.move(edge: .top))
+            }
+            if let type = manager.rootPopup {
                 PopupView(type: type)
             }
         }

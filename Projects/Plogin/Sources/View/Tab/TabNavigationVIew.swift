@@ -14,21 +14,17 @@ struct TabNavigationView: View {
     
     var body: some View {
         ZStack(alignment: .bottom) {
-            VStack(spacing: 0) {
-                NavigationTitle()
-                
-                NavigationRootLayout(path: $manager.path) {
-                    VStack(spacing: 0) {
-                        switch manager.currentTab {
-                        case .home:
-                            HomeView()
-                        case .setting:
-                            SettingView()
-                        }
+            NavigationRootLayout(path: $manager.path) {
+                VStack(spacing: 0) {
+                    switch manager.currentTab {
+                    case .home:
+                        HomeView()
+                    case .setting:
+                        SettingView()
                     }
-                    .hiddenNavigationBarStyle()
-                    .navigations()
                 }
+                .hiddenNavigationBarStyle()
+                .navigations()
             }
             
 //            TabBarView()
