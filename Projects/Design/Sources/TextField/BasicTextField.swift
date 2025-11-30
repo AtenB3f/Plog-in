@@ -23,7 +23,7 @@ public struct BasicTextField: View {
 
             TextField(text: $text) {
                 Text(placeholder)
-                    .body2()
+                    .font(.body2)
                     .foreground(.Gray.disable)
                     .lineLimit(1)
                     .frame(height: 20)

@@ -18,7 +18,7 @@ public struct BlackFillBoxLabel: View {
     public var body: some View {
         HStack(alignment: .center) {
             Text(text)
-                .bold2()
+                .font(.bold2)
                 .foreground(.Text.light)
         }
         .padding(.vertical, 12)

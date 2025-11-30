@@ -51,7 +51,6 @@ public struct ContentOnePopup<Content: View>: View {
         buttonText: "다음",
         content: {
         Text("처음 인증 이미지를 만드시는군요!\n이미지 생성에 필요한\n워터마크 문구를 입력해주세요.")
-            .body2()
     }, callback: {
         
     })

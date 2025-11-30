@@ -47,8 +47,6 @@ public struct SkeletonView: View {
                     self.height = proxy.size.height/1.2
                     withAnimation(.linear(duration: duration).repeatForever(autoreverses: false)) {
                         isAnimating.toggle()
-                        print(isAnimating)
-                        
                     }
                     
                     Timer.scheduledTimer(withTimeInterval: duration, repeats: true) { _ in
@@ -73,7 +71,7 @@ public struct SkeletonView: View {
                 }
             if let text = text{
                 Text(text+dots)
-                    .body2()
+                    .font(.body2)
                     .foreground(.Text.medium)
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
             }

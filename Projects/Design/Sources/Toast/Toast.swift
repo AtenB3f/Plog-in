@@ -59,7 +59,7 @@ public struct Toast: View {
             }
             
             Text(data.text)
-                .body1()
+                .font(.body1)
                 .foreground(.Text.medium)
             
             if let button = data.button {
@@ -68,7 +68,7 @@ public struct Toast: View {
                 } label: {
                     HStack(spacing: 0) {
                         Text(button)
-                            .bold1()
+                            .font(.bold1)
                             .foreground(.Text.light)
                         Image(.chevronRightSM)
                             .resizable()

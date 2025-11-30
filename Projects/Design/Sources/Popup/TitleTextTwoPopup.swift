@@ -36,11 +36,11 @@ public struct TitleTextTwoPopup: View {
     public var body: some View {
         VStack(alignment: .center, spacing: 20) {
             Text(title)
-                .sub1()
+                .font(.sub1)
                 .foreground(.Text.light)
             
             Text(text)
-                .body2()
+                .font(.body2)
                 .foreground(.Gray.light)
                 .multilineTextAlignment(.center)
             

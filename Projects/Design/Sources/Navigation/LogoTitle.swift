@@ -1,15 +1,16 @@
 //
-//  NavigationTitle.swift
+//  LogoTitle.swift
 //  Plogin
 //
-//  Created by AtenB on 10/19/25.
+//  Created by AtenB on 11/24/25.
 //  Copyright © 2025 AtenB. All rights reserved.
 //
 
 import SwiftUI
 
-struct NavigationTitle: View {
-    var body: some View {
+public struct LogoTitle: View {
+    public init() {}
+    public var body: some View {
         HStack {
             Image("Logo_Image")
                 .resizable()
@@ -23,7 +24,3 @@ struct NavigationTitle: View {
         .background(Color.black)
     }
 }
-
-//#Preview {
-//    NavigationTitle()
-//}

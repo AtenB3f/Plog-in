@@ -49,7 +49,7 @@ public struct CategoryTabbar: View {
                             index = item
                         } label: {
                             Text(list[item])
-                                .body2()
+                                .font(.body2)
                                 .foreground(index == item ? .white : .Text.dark)
                                 .padding(.vertical, 5)
                                 .padding(.horizontal, 10)

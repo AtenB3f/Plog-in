@@ -38,6 +38,7 @@ public struct IconLabel: View {
         HStack(spacing: 0) {
             if alignment == .leading {
                 icon
+                    .resizable()
                     .renderingMode(.template)
                     .aspectRatio(contentMode: .fit)
                     .frame(width: size)
@@ -45,11 +46,12 @@ public struct IconLabel: View {
             }
             
             Text(text)
-                .bold2()
+                .font(.bold2)
                 .foreground(color)
             
             if alignment == .trailing {
                 icon
+                    .resizable()
                     .renderingMode(.template)
                     .aspectRatio(contentMode: .fit)
                     .frame(width: size)

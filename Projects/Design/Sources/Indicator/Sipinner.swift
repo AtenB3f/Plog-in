@@ -29,11 +29,11 @@ public struct Spinner: View {
             .aspectRatio(contentMode: .fit)
             .foregroundStyle(Gradient(colors: [.clear, color.opacity(0.8), color, color]))
             .rotationEffect(.degrees(isAnimating ? 360 : 0))
-            .animation(
-                .linear(duration: 1.3)
-                .repeatForever(autoreverses: false),
-                value: isAnimating
-            )
+//            .animation(
+//                .linear(duration: 1.3)
+//                .repeatForever(autoreverses: false),
+//                value: isAnimating
+//            )
             .onAppear { isAnimating = true }
     }
 }

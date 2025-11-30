@@ -66,4 +66,8 @@ public extension Color {
         public static let medium        = Color("Shadow/Medium_30", bundle: .module)
         public static let dark         = Color("Shadow/Dark_40", bundle: .module)
     }
+    
+    static var disablePrimarys: [Color] {
+        return [.Yejun.disable, .Noah.disable, .Bamby.disable, .Eunho.disable, .Hamin.disable]
+    }
 }
