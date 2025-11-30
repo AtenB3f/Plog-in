@@ -15,10 +15,16 @@ import AVFoundation
 struct AssetPickerView: UIViewControllerRepresentable {
     @Binding var assetDatas: [AssetData]
     var mediaType: MediaType
+    var limit: Int
     
-    init(avAsset: Binding<[AssetData]>, type: MediaType) {
+    init(
+        avAsset: Binding<[AssetData]>,
+        type: MediaType,
+        limit: Int = 10
+    ) {
         self._assetDatas = avAsset
         self.mediaType = type
+        self.limit = limit 
     }
     
     func makeCoordinator() -> Coordinator {
@@ -27,7 +33,7 @@ struct AssetPickerView: UIViewControllerRepresentable {
     
     func makeUIViewController(context: Context) -> PHPickerViewController {
         var config = PHPickerConfiguration(photoLibrary: .shared())
-        config.selectionLimit = 10
+        config.selectionLimit = limit
         if mediaType != .all {
             config.filter = mediaType == .video ? .videos : .images
         }
@@ -47,6 +53,11 @@ struct AssetPickerView: UIViewControllerRepresentable {
         }
         
         func picker(_ picker: PHPickerViewController, didFinishPicking results: [PHPickerResult]) {
+            if results.isEmpty {
+                picker.dismiss(animated: true)
+                return
+            }
+            
             picker.dismiss(animated: true)
             
             for result in results {

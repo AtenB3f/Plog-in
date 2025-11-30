@@ -10,9 +10,11 @@ import SwiftUI
 import Design
 
 struct WatermarkEditMenuExport: View {
+    @EnvironmentObject var viewModel: WatermarkEditViewModel
     var body: some View {
-        VStack {
+        VStack(spacing: 0) {
             
         }
+        .padding(.vertical, 12)
     }
 }

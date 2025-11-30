@@ -7,46 +7,52 @@
 //
 
 import SwiftUI
+import Design
 
 struct WatermarkEditView: View {
     @Environment(\.dismiss) var dismiss
-    @EnvironmentObject var assetViewModel: AssetViewModel
-    @StateObject var viewModel = WatermarkEditVIewModel()
-    let editer = ImageEditManager()
-    
-    @State var index: Int = 0
+    @StateObject var viewModel = WatermarkEditViewModel()
     
     var body: some View {
-        GeometryReader { proxy in
-            VStack {
-#if os(iOS)
-                TabView(selection: $viewModel.index) {
-                    ForEach(Array(viewModel.generatedImage.enumerated()), id: \.offset) { index, image in
+        VStack(spacing: 0) {
+            NavigationTitle(
+                title: "워터마크 편집",
+                leftIcon: .iconCloseMD,
+                rightIcon: .iconSave, callback: { isRight in
+                if isRight {
+                    viewModel.saveWatermarkImage()
+                } else {
+                    dismiss()
+                }
+            })
+            ScrollView(.horizontal) {
+                LazyHStack(spacing: 0) {
+                    ForEach(Array(viewModel.previews), id: \.self) { image in
                         Image(uiImage: image)
                             .resizable()
                             .aspectRatio(contentMode: .fit)
-                            .frame(height: 300)
+                            .containerRelativeFrame(.horizontal)
                     }
                 }
-                .tabViewStyle(.page)
-#elseif os(macOS)
-#endif
-                
-                TextField("텍스트를 입력하세요.", text: $viewModel.inputText)
-                    .onSubmit {
-                        viewModel.generatedImageAll(assetViewModel.filterImage())
-                    }
-                    .padding()
+                .scrollTargetLayout()
             }
+            .scrollTargetBehavior(.paging)
+            .scrollIndicators(.hidden)
+            .padding(10)
+            .task {
+                viewModel.isShowPicker = true
+            }
+            
+            WatermarkEditMenuView()
+                .environmentObject(viewModel)
         }
-        .onChange(of: viewModel.inputText) { _ in
-//            viewModel.generatedImageAll(assetViewModel.filterImage())
-            let origin = assetViewModel.filterImage()[index]
-            viewModel.generatedImage(origin, index: index) 
-        }
-        .task {
-            viewModel.generatedImage = assetViewModel.filterImage()
-            viewModel.generatedImageAll(assetViewModel.filterImage())
+        .background(Color.black)
+        .fullScreenCover(isPresented: $viewModel.isShowPicker, onDismiss: {
+            viewModel.loadImages()
+            viewModel.autoSetting()
+            viewModel.makePreview()
+        }) {
+            AssetPickerView(avAsset: $viewModel.assets, type: .image, limit: 30)
         }
     }
 }

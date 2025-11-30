@@ -10,20 +10,37 @@ import SwiftUI
 
 struct ImageEditView: View {
     @Environment(\.dismiss) var dismiss
-    @EnvironmentObject var viewModel: AssetViewModel
+    
+    @StateObject var viewModel = WatermarkEditViewModel()
     
     var body: some View {
-        NavigationView {
-            GeometryReader { proxy in
-                VStack {
-                    Button {
-                        dismiss()
-                        print(viewModel.viewPath)
-                    } label: {
-                        Text("뒤로가기")
-                    }
+        VStack {
+            Text("\(viewModel.watermark.textSetting.color.opacity)")
+                .foreground(.red)
+                
+            Slider(value: $viewModel.watermark.textSetting.color.opacity, onEditingChanged: { _ in
+                viewModel.makePreview()
+            })
+            TabView(selection: $viewModel.page) {
+                ForEach(viewModel.previews, id: \.self) { image in
+                    Image(uiImage: image)
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
                 }
             }
+            .tabViewStyle(.page)
+        }
+        .task {
+            viewModel.watermark.textSetting.text = "test"
+            viewModel.watermark.textSetting.color = .init(.white)
+            viewModel.isShowPicker = true
+        }
+        .fullScreenCover(isPresented: $viewModel.isShowPicker, onDismiss: {
+            viewModel.loadImages()
+            viewModel.autoSetting()
+            viewModel.makePreview()
+        }) {
+            AssetPickerView(avAsset: $viewModel.assets, type: .image, limit: 30)
         }
     }
 }
