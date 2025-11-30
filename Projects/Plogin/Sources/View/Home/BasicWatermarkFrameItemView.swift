@@ -20,11 +20,11 @@ struct BasicWatermarkItemView: View {
             
             VStack(alignment: .leading, spacing: 4) {
                 Text(type.title)
-                    .sub1()
+                    .font(.sub1)
                     .foreground(.Text.light)
                 
                 Text(type.description)
-                    .body1()
+                    .font(.body1)
                     .foreground(.Text.dark)
                     .multilineTextAlignment(.leading)
             }

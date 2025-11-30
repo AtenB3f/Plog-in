@@ -15,7 +15,7 @@ struct HomeMenuTitle: View {
     var body: some View {
         HStack {
             Text(title)
-                .body1()
+                .font(.body1)
                 .foreground(.Text.medium)
                 .padding(.horizontal, 6)
                 .padding(.vertical)

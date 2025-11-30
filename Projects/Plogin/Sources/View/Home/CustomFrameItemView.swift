@@ -18,7 +18,7 @@ struct CustomFrameItemView: View {
             thumbnail
             
             Text(title)
-                .bold2()
+                .font(.bold2)
                 .foreground(.Text.light)
                 .padding(.vertical, 8)
                 .padding(.horizontal)

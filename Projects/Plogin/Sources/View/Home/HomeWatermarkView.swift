@@ -15,12 +15,12 @@ struct HomeWatermarkView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             Text("워터마크 생성기")
-                .header1()
+                .font(.header1)
                 .foreground(.Text.light)
                 .padding(.bottom, 4)
             
             Text("스트리밍 인증을 위한 나만의 워터마크 프레임")
-                .body3()
+                .font(.body3)
                 .foreground(.Text.dark)
                 .padding(.bottom, 28)
             
