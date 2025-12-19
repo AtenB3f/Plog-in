@@ -13,6 +13,7 @@ public struct TextSlider: View {
     @Binding var value: CGFloat
     let minValue: CGFloat
     let maxValue: CGFloat
+    let distance: CGFloat
     
     @State private var width: CGFloat = .zero
     @State private var isPress: Bool = false
@@ -20,11 +21,13 @@ public struct TextSlider: View {
     public init(
         value: Binding<CGFloat>,
         min: CGFloat,
-        max: CGFloat
+        max: CGFloat,
+        distance: CGFloat = 0.05
     ) {
         self._value = value
         self.minValue = min
         self.maxValue = max
+        self.distance = distance
     }
     
     public var body: some View {
@@ -44,7 +47,7 @@ public struct TextSlider: View {
                 width = value * geometry.size.width / (maxValue - minValue)
             }
             .gesture(
-                DragGesture(minimumDistance: 0)
+                DragGesture(minimumDistance: distance)
                     .onChanged { gesture in
                         isPress = true
                         if gesture.location.x >= geometry.size.width {

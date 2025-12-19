@@ -1,0 +1,100 @@
+//
+//  FrameListItem.swift
+//  Design
+//
+//  Created by AtenB on 12/15/25.
+//  Copyright © 2025 AtenB. All rights reserved.
+//
+
+import SwiftUI
+
+public struct FrameListItemView<T: TitleImagable>: View {
+    let item: T
+    let index: Int
+    let mode: FrameListMode
+    let isDragging: Bool
+    let onTap: () -> Void
+    let onDelete: () -> Void
+    let onLongPress: () -> Void
+    
+    init(
+        item: T,
+        index: Int,
+        mode: FrameListMode,
+        isDragging: Bool,
+        onTap: @escaping () -> Void,
+        onDelete: @escaping () -> Void,
+        onLongPress: @escaping () -> Void
+    ) {
+        self.item = item
+        self.index = index
+        self.mode = mode
+        self.isDragging = isDragging
+        self.onTap = onTap
+        self.onDelete = onDelete
+        self.onLongPress = onLongPress
+    }
+    
+    public var body: some View {
+        VStack(spacing: 2) {
+            RoundedCorner(radius: 4, corner: .all)
+                .frame(width: item.size, height: item.size)
+                .foreground(Color.Base.medium)
+                .scaleEffect(isDragging ? 0.7 : 1.0)
+                .overlay(alignment: .topTrailing) {
+                    ZStack(alignment: .topTrailing) {
+                        if let image = item.image {
+                            Image(uiImage: image)
+                                .resizable()
+                                .aspectRatio(contentMode: .fit)
+                                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
+                        }
+                        LinearGradient(gradient: .shallow, startPoint: .bottom, endPoint: .top)
+                            .frame(height: 24)
+                            .opacity((mode == .edit || mode == .sort) ? 1.0 : .zero)
+                        
+                        if mode == .edit {
+                            Button(action: onDelete) {
+                                Image.iconCloseSM
+                                    .resizable()
+                                    .renderingMode(.template)
+                                    .frame(width: 18, height: 18)
+//                                    .padding(6)
+                                    .foreground(.Text.light)
+                            }
+                        }
+                        if mode == .sort {
+                            Image.iconMenuDuo
+                                .resizable()
+                                .renderingMode(.template)
+                                .frame(width: 18, height: 18)
+//                                .padding(6)
+                                .foreground(.Text.light)
+                            
+                            if isDragging { Color.Shadow.disable }
+                        }
+                        if mode == .select {
+                            RoundedCorner(radius: 4, corner: .all)
+                                .stroke()
+                                .foreground(.Text.light)
+                        }
+                    }
+                    .cornerRadius(4, corner: .all)
+                    .scaleEffect(isDragging ? 0.7 : 1.0)
+                    .transition(.opacity)
+                }
+            
+            if let title = item.title {
+                Text(title)
+                    .font(.body1)
+                    .foreground(.Text.light)
+                    .frame(width: item.size)
+                    .lineLimit(1)
+                    .truncationMode(.tail)
+            }
+        }
+        .onTapGesture {
+            onTap()
+        }
+    }
+}
