@@ -37,23 +37,22 @@ class ImageEditManager {
             rows = watermark.arraySetting.rows
             columns = watermark.arraySetting.columns
         }
-        let image = mergeImages(images: images, rows: rows, columns: columns)
+        let image = mergeImages(images: images, rows: rows, columns: columns, exportSize: watermark.exportSetting.getSize())
         watermarks.append(drawWatermark(image: image, watermark: watermark))
         return watermarks
     }
 
     func drawWatermark(image: PImage, watermark: WatermarkModel) -> PImage {
         guard let font = watermark.textSetting.getFont() else { return image }
-        let size = watermark.exportSetting.getRect()
+        let exportSize = watermark.exportSetting.getSize()
         var spacing: CGSize = watermark.textSetting.getSpacing()
         spacing.height = spacing.width
         let gradientColor: [UIColor] = Color.disablePrimarys.map { PColor($0.opacity(0.3)) }
 #if os(iOS)
-        let renderer = UIGraphicsImageRenderer(size: size)
+        let renderer = UIGraphicsImageRenderer(size: exportSize)
         
         return renderer.image { context in
-            
-            image.draw(in: CGRect(origin: .zero, size: size))
+            image.draw(in: CGRect(origin: .zero, size: exportSize))
             
             if watermark.textSetting.isGradient {
                 let colorSpace = CGColorSpaceCreateDeviceRGB()
@@ -85,8 +84,8 @@ class ImageEditManager {
             
             let stepX = rotatedWidth + spacing.width
             let stepY = rotatedHeight + spacing.height
-            for y in stride(from: 0, to: size.height + stepY, by: stepY) {
-                for x in stride(from: 0, to: size.width + stepX, by: stepX) {
+            for y in stride(from: 0, to: exportSize.height + stepY, by: stepY) {
+                for x in stride(from: 0, to: exportSize.width + stepX, by: stepX) {
                     let point = CGPoint(x: x, y: y)
                     
                     context.cgContext.saveGState()
@@ -101,44 +100,6 @@ class ImageEditManager {
             }
         }
 #elseif os(macOS)
-        let newImage = PImage(size: image.size)
-        newImage.lockFocus()
-        
-        guard let context = NSGraphicsContext.current?.cgContext else {
-            newImage.unlockFocus()
-            return image
-        }
-        
-        image.draw(in: CGRect(origin: .zero, size: image.size))
-        
-        let colorSpace = CGColorSpaceCreateDeviceRGB()
-        let cgColors = gradientColors.map { $0.cgColor } as CFArray
-        let gradient = CGGradient(colorsSpace: colorSpace, colors: cgColors, locations: nil)!
-        
-        let startPoint = CGPoint(x: 0, y: 0)
-        let endPoint = CGPoint(x: image.size.width, y: image.size.height)
-        
-        context.drawLinearGradient(
-            gradient,
-            start: startPoint,
-            end: endPoint,
-            options: []
-        )
-        
-        let attributes: [NSAttributedString.Key: Any] = [
-            .font: font,
-            .foregroundColor: textColor
-        ]
-        
-        for y in stride(from: 0, to: image.size.height, by: spacing.height) {
-            for x in stride(from: 0, to: image.size.width, by: spacing.width) {
-                let point = CGPoint(x: x, y: y)
-                text.draw(at: point, withAttributes: attributes)
-            }
-        }
-        
-        newImage.unlockFocus()
-        return newImage
 #endif
     }
     
@@ -168,129 +129,80 @@ class ImageEditManager {
 }
 
 extension ImageEditManager {
-    func mergeImages(images: [PImage], rows: Int, columns: Int) -> PImage {
+    func mergeImages(images: [PImage], rows: Int, columns: Int, exportSize: CGSize) -> PImage {
         // 첫 번째 이미지를 기준으로 설정
         let referenceImage = images[0]
-        let cellSize = referenceImage.size
+        var cellSize = referenceImage.size
+        cellSize.height = (images.map { $0.size.height/$0.size.width }.max() ?? 1.0) * referenceImage.size.width
         
         // 최종 이미지 크기 계산
         let finalWidth = cellSize.width * CGFloat(columns)
         let finalHeight = cellSize.height * CGFloat(rows)
         let finalSize = CGSize(width: finalWidth, height: finalHeight)
-        
-        #if os(iOS)
-        let renderer = UIGraphicsImageRenderer(size: finalSize)
+        let format = UIGraphicsImageRendererFormat.default()
+        format.opaque = true
+        format.scale = 1.0
+#if os(iOS)
+        let renderer = UIGraphicsImageRenderer(size: finalSize, format: format)
         return renderer.image { context in
             placeGrid(
+                context: context.cgContext,
                 images: images,
                 rows: rows,
                 columns: columns,
-                cellSize: cellSize,
-                context: context.cgContext
+                cellSize: .init(width: exportSize.width/CGFloat(columns), height: exportSize.height/CGFloat(rows))
             )
         }
-        #elseif os(macOS)
-        let finalImage = NSImage(size: finalSize)
-        finalImage.lockFocus()
-        
-        guard let context = NSGraphicsContext.current?.cgContext else {
-            finalImage.unlockFocus()
-            return nil
-        }
-        
-        placeGrid(
-            images: images,
-            rows: rows,
-            columns: columns,
-            cellSize: cellSize,
-            context: context
-        )
-        
-        finalImage.unlockFocus()
-        return finalImage
-        #endif
+#elseif os(macOS)
+#endif
     }
-
-    /// 그리드에 이미지를 그리는 헬퍼 함수
-    /// - Parameters:
-    ///   - images: 그릴 이미지 배열
-    ///   - rows: 행 개수
-    ///   - columns: 열 개수
-    ///   - cellSize: 각 셀의 크기
-    ///   - context: 그래픽 컨텍스트
-    private func placeGrid(
+    
+    func placeGrid(
+        context: CGContext,
         images: [PImage],
         rows: Int,
         columns: Int,
-        cellSize: CGSize,
-        context: CGContext
+        cellSize: CGSize
     ) {
         for (index, image) in images.enumerated() {
-            let row = index / columns
-            let column = index % columns
-            
-            guard row < rows else { break }
+            let row = (index/columns) + 1
+            let column = (index%columns) + 1
             
             // 셀의 위치 계산
-            let x = CGFloat(column) * cellSize.width
-            let y = CGFloat(row) * cellSize.height
+            let x = CGFloat(column-1) * cellSize.width
+            let y = CGFloat(row-1) * cellSize.height
             let cellRect = CGRect(x: x, y: y, width: cellSize.width, height: cellSize.height)
             
             // 이미지를 셀 크기에 맞게 조정하여 그리기
-            resizeImage(image: image, in: cellRect, context: context)
+            resizeFitImage(image: image, rect: cellRect, context: context)
         }
     }
 
-    /// 이미지를 주어진 영역에 꽉 차게 그리는 함수 (비율 유지, 크롭)
-    /// - Parameters:
-    ///   - image: 그릴 이미지
-    ///   - rect: 그릴 영역
-    ///   - context: 그래픽 컨텍스트
-    private func resizeImage(
+    func resizeFitImage(
         image: PImage,
-        in rect: CGRect,
+        rect: CGRect,
         context: CGContext
     ) {
         let imageSize = image.size
-        
-        // 이미지와 셀의 비율 계산
-        let imageAspect = imageSize.width / imageSize.height
-        let rectAspect = rect.width / rect.height
-        
-        var drawRect = CGRect.zero
-        
-        if imageAspect > rectAspect {
-            // 이미지가 더 넓음 - 높이를 맞추고 너비를 크롭
-            let scaledWidth = rect.height * imageAspect
-            drawRect = CGRect(
-                x: rect.minX - (scaledWidth - rect.width) / 2,
-                y: rect.minY,
-                width: scaledWidth,
-                height: rect.height
-            )
+        let targetSize = rect.size
+        var ratio: CGFloat = 1.0
+        if targetSize.width > targetSize.height {
+            ratio = imageSize.height / targetSize.height
         } else {
-            // 이미지가 더 높음 - 너비를 맞추고 높이를 크롭
-            let scaledHeight = rect.width / imageAspect
-            drawRect = CGRect(
-                x: rect.minX,
-                y: rect.minY - (scaledHeight - rect.height) / 2,
-                width: rect.width,
-                height: scaledHeight
-            )
+            ratio = imageSize.width / targetSize.width
         }
-        
-        // 클리핑 영역 설정
-        context.saveGState()
-        context.clip(to: rect)
-        
-        #if os(iOS)
+        let scaledWidth: CGFloat = imageSize.width * (ratio > 1 ? (1/ratio) : ratio)
+        let scaledHeight: CGFloat = imageSize.height * (ratio > 1 ? (1/ratio) : ratio)
+        let drawRect = CGRect(x: rect.minX,
+                              y: rect.minY,
+                              width: scaledWidth,
+                              height: scaledHeight)
+#if os(iOS)
         image.draw(in: drawRect)
-        #elseif os(macOS)
+#elseif os(macOS)
         if let cgImage = image.cgImage(forProposedRect: nil, context: nil, hints: nil) {
             context.draw(cgImage, in: drawRect)
         }
-        #endif
-        
-        context.restoreGState()
+#endif
     }
 }
