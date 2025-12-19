@@ -9,11 +9,24 @@
 import Foundation
 import SwiftData
 
-enum WatermarkArrayType: String, Codable {
+enum WatermarkArrayType: String, Codable, CaseIterable {
     case none
     case horizontal
     case vertical
     case grid
+    
+    var menuName: String {
+        switch self {
+        case .none:
+            return "개별"
+        case .horizontal:
+            return "가로"
+        case .vertical:
+            return "세로"
+        case .grid:
+            return "바둑판"
+        }
+    }
 }
 
 @Model

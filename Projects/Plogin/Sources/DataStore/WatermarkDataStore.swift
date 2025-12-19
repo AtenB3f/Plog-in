@@ -51,6 +51,7 @@ extension DataStore {
         }
     }
     
+    /// curstom 워터마크
     func getWatermark(_ frameTitle: String) -> WatermarkModel? {
         let list = loadWatermark()
         if let data = list.first(where: { $0.frameSetting.title == frameTitle
@@ -60,6 +61,7 @@ extension DataStore {
         return nil
     }
     
+    /// Basic 워터마크
     func getWatermark(type: BasicWatermarkType) -> WatermarkModel? {
         let watermarkName = type.rawValue
         let list = fetch(
