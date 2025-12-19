@@ -1,5 +1,5 @@
 //
-//  PopupWatermarkTextView.swift
+//  PopupWatermarkText.swift
 //  Plogin
 //
 //  Created by AtenB on 10/20/25.
@@ -9,7 +9,7 @@
 import SwiftUI
 import Design
 
-struct PopupWatermarkTextView: View {
+struct PopupWatermarkText: View {
     @Binding var text: String
     let description: String
     let left: String

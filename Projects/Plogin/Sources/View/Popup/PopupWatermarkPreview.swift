@@ -1,5 +1,5 @@
 //
-//  PopupWatermarkPreviewView.swift
+//  PopupWatermarkPreview.swift
 //  Plogin
 //
 //  Created by AtenB on 10/23/25.
@@ -10,7 +10,7 @@ import SwiftUI
 import Design
 import Combine
 
-struct PopupWatermarkPreviewView: View {
+struct PopupWatermarkPreview: View {
     @StateObject private var manager = AppManager.shared
     private let dataManager = DataStore.shared
     @StateObject var viewModel = PopupWatermarkPreviewViewModel()
@@ -32,7 +32,7 @@ struct PopupWatermarkPreviewView: View {
                     viewModel.step = viewModel.text.isEmpty ? .textInput : .preview
                 }
         case .textInput:
-            PopupWatermarkTextView(text: $viewModel.text) { isNext in
+            PopupWatermarkText(text: $viewModel.text) { isNext in
                 if isNext {
                     viewModel.saveText()
                 } else { manager.pushPopup()}

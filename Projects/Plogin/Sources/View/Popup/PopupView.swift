@@ -13,6 +13,7 @@ public enum PopupType {
     case watermarkTextSave(text: Binding<String> ,callback: (Bool) -> Void)
     case watermarkPreview(watermark: WatermarkModel)
     case preview
+    case titleChange(text: Binding<String>, callback: (String?) -> Void)
 }
 
 public struct PopupView: View {
@@ -28,13 +29,17 @@ public struct PopupView: View {
                 
                 switch type {
                 case .watermarkTextSave(let text, let callback):
-                    PopupWatermarkTextView(text: text, callback: callback)
+                    PopupWatermarkText(text: text, callback: callback)
                     
                 case .preview:
                     PopupPreviewView()
                     
                 case .watermarkPreview(let watermark):
-                    PopupWatermarkPreviewView(watermark: watermark)
+                    PopupWatermarkPreview(watermark: watermark)
+                    
+                case .titleChange(let text, let callback):
+                    PopupTitleChange(text: text,
+                                     callback: callback)
                 }
             }
         }
