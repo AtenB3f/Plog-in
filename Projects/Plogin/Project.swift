@@ -167,8 +167,7 @@ extension TargetType {
 }
 
 private let packages: [Package] = [
-    .package(url: "https://github.com/alexeichhorn/YouTubeKit", .upToNextMajor(from: "0.2.9")),
-    .package(url: "https://github.com/realm/realm-swift.git", .upToNextMajor(from: ""))
+    .package(url: "https://github.com/alexeichhorn/YouTubeKit", .upToNextMajor(from: "0.2.9"))
 ]
 
 let project = Project(
