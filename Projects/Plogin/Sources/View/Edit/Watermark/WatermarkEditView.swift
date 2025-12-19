@@ -21,6 +21,7 @@ struct WatermarkEditView: View {
                 rightIcon: .iconSave, callback: { isRight in
                 if isRight {
                     viewModel.saveWatermarkImage()
+                    dismiss()
                 } else {
                     dismiss()
                 }
@@ -28,10 +29,12 @@ struct WatermarkEditView: View {
             ScrollView(.horizontal) {
                 LazyHStack(spacing: 0) {
                     ForEach(Array(viewModel.previews), id: \.self) { image in
-                        Image(uiImage: image)
-                            .resizable()
-                            .aspectRatio(contentMode: .fit)
-                            .containerRelativeFrame(.horizontal)
+                        VStack {
+                            Image(uiImage: image)
+                                .resizable()
+                                .aspectRatio(contentMode: .fit)
+                        }
+                        .containerRelativeFrame(.horizontal)
                     }
                 }
                 .scrollTargetLayout()
@@ -40,7 +43,7 @@ struct WatermarkEditView: View {
             .scrollIndicators(.hidden)
             .padding(10)
             .task {
-                viewModel.isShowPicker = true
+                viewModel.pushPicker(.watermark)
             }
             
             WatermarkEditMenuView()
@@ -48,11 +51,23 @@ struct WatermarkEditView: View {
         }
         .background(Color.black)
         .fullScreenCover(isPresented: $viewModel.isShowPicker, onDismiss: {
+            guard let type = viewModel.pickerType else { return }
             viewModel.loadImages()
             viewModel.autoSetting()
             viewModel.makePreview()
         }) {
-            AssetPickerView(avAsset: $viewModel.assets, type: .image, limit: 30)
+            if let type = viewModel.pickerType {
+                switch type {
+                case .watermark:
+                    AssetPickerView(avAsset: $viewModel.assets,
+                                    type: type.mediaType,
+                                    limit: type.maxCount)
+                case .sticker:
+                    AssetPickerView(avAsset: $viewModel.stickerAsset,
+                                    type: type.mediaType,
+                                    limit: type.maxCount)
+                }
+            }
         }
     }
 }

@@ -17,7 +17,7 @@ struct WatermarkEditMenuText: View {
     let colorPalet: [Color] = [.white, .Gray.medium, .black, .Yejun.main, .Noah.main, .Bamby.main, .Eunho.main, .Hamin.main]
     
     var body: some View {
-        VStack(spacing: 6) {
+        VStack {
             VStack(spacing: 0) {
                 CategoryButtonItemView(
                     title: "문구",
@@ -58,7 +58,9 @@ struct WatermarkEditMenuText: View {
                     .padding(.vertical, 4)
                 }
                 .background(Color.Base.medium)
+                .foldingHeight(!viewModel.words.isEmpty)
             }
+            
             CategoryContentItemView(title: "색상") {
                 HStack(spacing: 6) {
                     ForEach(colorPalet, id: \.self) { color in
@@ -77,7 +79,7 @@ struct WatermarkEditMenuText: View {
             }
             CategoryContentItemView(title: "불투명도") {
                 HStack(alignment: .center, spacing: 8) {
-                    TextSlider(value: $viewModel.watermark.textSetting.color.opacity, min: 0, max: 1)
+                    TextSlider(value: $viewModel.watermark.textSetting.color.opacity, min: 0, max: 1, distance: 1)
                     Text(String(format: "%.0f", viewModel.watermark.textSetting.color.opacity * 100) + "%")
                         .font(.body2)
                         .foreground(.Text.light)
@@ -86,7 +88,7 @@ struct WatermarkEditMenuText: View {
             }
             CategoryContentItemView(title: "간격") {
                 HStack(alignment: .center, spacing: 8) {
-                    TextSlider(value: $viewModel.watermark.textSetting.spacingWidth, min: 0, max: 100)
+                    TextSlider(value: $viewModel.watermark.textSetting.spacingWidth, min: 0, max: 100, distance: 1)
                     Text(String(format: "%.1f", viewModel.watermark.textSetting.spacingWidth))
                         .font(.body2)
                         .foreground(.Text.light)

@@ -10,11 +10,35 @@ import SwiftUI
 import Design
 import Combine
 
+struct GridValue: Equatable {
+    var row: Int = 1
+    var colums: Int = 1
+}
+
+enum PickerType {
+    case watermark
+    case sticker
+    
+    var maxCount: Int {
+        switch self {
+        case .watermark:
+            return 30
+        case .sticker:
+            return 10
+        }
+    }
+    var mediaType: MediaType {
+        return .image
+    }
+}
+
 class WatermarkEditViewModel: ObservableObject {
     private let dataManager = DataStore.shared
+    private let manager = AppManager.shared
     let editor = ImageEditManager()
     
     @Published var isShowPicker: Bool = false
+    @Published var pickerType: PickerType?
     @Published var page: Int = 0
     
     @Published var assets: [AssetData] = [] {
@@ -38,15 +62,53 @@ class WatermarkEditViewModel: ObservableObject {
     
     // MARK: - Category
     @Published var isShowMenu: Bool = false
-    @Published var indexCategory: Int = 0 
+    @Published var indexCategory: Int = 0
+    @Published var menuHeight: CGFloat = .zero
     
     // MARK: - Category Text
     @Published var textColor: Color = .white
     
     // MARK: - Category Sticker
+    @Published var stickerAsset: [AssetData] = [] {
+        didSet {
+            self.stickers = stickerAsset.compactMap { $0.imageAsset }
+            self.stickerList = stickers.map { .init(image: $0) }
+        }
+    }
+    @Published var stickers: [PImage] = []
+    @Published var stickerListMode: FrameListMode = .none
+    @Published var stickerList: [WatermarkStickerItemModel] = []
+    @Published var stickerSelect: Int?
+    
     // MARK: - Category Array
+    @Published var isShowArrayType: Bool = false {
+        didSet { isShowGrid = isShowArrayType && watermark.arraySetting.type == .grid }
+    }
+    @Published var isShowGrid: Bool = false
+    @Published var arrayType: WatermarkArrayType = .none
+    @Published var grid = GridValue()
+    
+    @Published var arrayItems: [WatermarkArrayItemModel] = [] {
+        didSet {
+            images = arrayItems.compactMap { $0.image }
+        }
+    }
+    
     // MARK: - Category Export
+    @Published var isShowExport: Bool = false
+    @Published var isShowExportSlider: Bool = false
+    
     // MARK: - Category Frame
+    @Published var frameListMode: FrameListMode = .none
+    @Published var setFrame = WatermarkFrameModel()
+    @Published var frames: [WatermarkModel] = [] {
+        didSet {
+            frameList = frames.map { WatermarkFrameItemModel(image: $0.frameSetting.thumbnail , title: $0.frameSetting.title) }
+        }
+    }
+    @Published var frameList: [WatermarkFrameItemModel] = []
+    @Published var frameSelect: Int?
+    var frameTitle: String = ""
     
     private var cancellables = Set<AnyCancellable>()
     
@@ -54,6 +116,8 @@ class WatermarkEditViewModel: ObservableObject {
         words = dataManager.loadWatermarkWord().map { $0.text }
         watermark.textSetting.text = words.first ?? ""
         textColor = watermark.textSetting.color.toUI
+        arrayType = watermark.arraySetting.type
+        frames = dataManager.loadWatermark()
     }
 }
 
@@ -120,11 +184,27 @@ extension WatermarkEditViewModel {
         columns: Int? = nil
     ) {
         let newValue = watermark.arraySetting
-        if let type = type { newValue.type = type }
+        if let type = type {
+            arrayType = type
+            newValue.type = type
+            switch type {
+            case .horizontal:
+                newValue.rows = 1
+                newValue.columns = images.count
+            case .vertical:
+                newValue.rows = images.count
+                newValue.columns = 1
+            default:
+                newValue.rows = 1
+                    newValue.columns = 1
+            }
+        }
         if let rows = rows { newValue.rows = rows }
         if let columns = columns { newValue.columns = columns }
         
         watermark.arraySetting = newValue
+        isShowGrid = isShowArrayType && newValue.type == .grid
+        calculateSize()
         makePreview()
     }
     
@@ -136,7 +216,11 @@ extension WatermarkEditViewModel {
         if let type = type { newValue.type = type }
         if let size = size { newValue.width = size.width; newValue.height = size.height }
         
+        isShowExportSlider = type == .multifple
+        if type == .auto { newValue.multiple = 1.0 }
+        
         watermark.exportSetting = newValue
+        calculateSize()
         makePreview()
     }
     
@@ -167,6 +251,65 @@ extension WatermarkEditViewModel {
         let fontSize = CGFloat(Int(24.0 * watermark.exportSetting.width / 650.0))
         watermark.textSetting.fontSize = fontSize
     }
+    
+    func calculateSize() {
+        guard let firstImage = images.first else { return }
+        guard let maxRatio = images.map({ $0.size.height / $0.size.width }).max() else { return }
+        let multiple: CGFloat = watermark.exportSetting.multiple
+        let originCellSize: CGSize = .init(width: firstImage.size.width, height: firstImage.size.width * maxRatio)
+        switch watermark.arraySetting.type {
+        case .none:
+            watermark.exportSetting.width = firstImage.size.width * multiple
+            watermark.exportSetting.height = firstImage.size.height * multiple
+        case .horizontal:
+            let width = originCellSize.width * CGFloat(watermark.arraySetting.columns)
+            let height = originCellSize.height
+            if 3600 > width {
+                watermark.exportSetting.width = width * multiple
+                watermark.exportSetting.height = height * multiple
+            } else {
+                watermark.exportSetting.width = 3600 * multiple
+                watermark.exportSetting.height = height * (3600/width) * multiple
+            }
+        case .vertical:
+            let width = originCellSize.width
+            let height = originCellSize.height * CGFloat(watermark.arraySetting.rows)
+            if 3600 > height {
+                watermark.exportSetting.width = width * multiple
+                watermark.exportSetting.height = height * multiple
+            } else {
+                watermark.exportSetting.width =  width * (3600/height) * multiple
+                watermark.exportSetting.height = 3600 * multiple
+            }
+        case .grid:
+            let width = originCellSize.width * CGFloat(watermark.arraySetting.columns)
+            let height = originCellSize.height * CGFloat(watermark.arraySetting.rows)
+            if width > height || maxRatio < 1 {
+                if 3600 > width {
+                    watermark.exportSetting.width = width * multiple
+                    watermark.exportSetting.height = height * multiple
+                } else {
+                    watermark.exportSetting.width = 3600 * multiple
+                    watermark.exportSetting.height = height * (3600/width) * multiple
+                }
+            } else {
+                if 3600 > height {
+                    watermark.exportSetting.width = width * multiple
+                    watermark.exportSetting.height = height * multiple
+                } else {
+                    watermark.exportSetting.width =  width * (3600/height) * multiple
+                    watermark.exportSetting.height = 3600 * multiple
+                }
+            }
+        }
+    }
+}
+
+extension WatermarkEditViewModel {
+    func pushPicker(_ type: PickerType?) {
+        isShowPicker = type != nil
+        pickerType = type
+    }
 }
 
 extension WatermarkEditViewModel {
@@ -180,6 +323,7 @@ extension WatermarkEditViewModel {
 extension WatermarkEditViewModel {
     func loadImages() {
         images = assets.compactMap { $0.imageAsset }
+        arrayItems = images.map { .init(image: $0) }
     }
     
     func makePreview() {
@@ -196,5 +340,10 @@ extension WatermarkEditViewModel {
                 }
             }
         }
+    }
+    
+    func saveWatermarkFrame() {
+        dataManager.saveWatermark(watermark)
+        frames = dataManager.loadWatermark()
     }
 }

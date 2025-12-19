@@ -70,40 +70,31 @@ struct WatermarkEditMenuView: View {
                 ScrollViewReader { proxy in
                     ScrollView(.horizontal) {
                         HStack(spacing: 0) {
-                            WatermarkEditMenuText()
-                                .containerRelativeFrame(.horizontal)
-                                .environmentObject(viewModel)
-                                .id(0)
-                            
-                            WatermarkEditMenuSticker()
-                                .containerRelativeFrame(.horizontal)
-                                .environmentObject(viewModel)
-                                .id(1)
-
-                            WatermarkEditMenuArray()
-                                .containerRelativeFrame(.horizontal)
-                                .environmentObject(viewModel)
-                                .id(2)
-
-                            WatermarkEditMenuExport()
-                                .containerRelativeFrame(.horizontal)
-                                .environmentObject(viewModel)
-                                .id(3)
-
-                            WatermarkEditMenuFrame()
-                                .containerRelativeFrame(.horizontal)
-                                .environmentObject(viewModel)
-                                .id(4)
+                            ForEach(WatermarkEditMenuType.allCases, id: \.self) { type in
+                                if WatermarkEditMenuType.allCases[viewModel.indexCategory] == type {
+                                    menuItems(type)
+                                        .containerRelativeFrame(.horizontal)
+                                        .environmentObject(viewModel)
+                                        .id(type.rawValue)
+                                } else {
+                                    Spacer()
+                                        .containerRelativeFrame(.horizontal)
+                                        .frame(height: 1)
+                                        .id(type.rawValue)
+                                }
+                            }
                         }
                     }
                     .scrollTargetBehavior(.paging)
                     .scrollIndicators(.hidden)
                     .background(Color.Base.dark)
                     .onChange(of: viewModel.indexCategory) {
+                        let tag = WatermarkEditMenuType.allCases[viewModel.indexCategory]
                         withAnimation {
-                            proxy.scrollTo(viewModel.indexCategory)
+                            proxy.scrollTo(tag.rawValue)
                         }
                     }
+                    .onAppear { proxy.scrollTo(viewModel.indexCategory) }
                 }
                 .transition(.move(edge: .bottom))
             }
@@ -116,5 +107,23 @@ struct WatermarkEditMenuView: View {
             .background(Color.black)
         }
         .background(Color.Base.dark)
+    }
+}
+
+extension WatermarkEditMenuView {
+    @ViewBuilder
+    func menuItems(_ type: WatermarkEditMenuType) -> some View {
+        switch type {
+        case .text:
+            WatermarkEditMenuText()
+        case .sticker:
+            WatermarkEditMenuSticker()
+        case .array:
+            WatermarkEditMenuArray()
+        case .export:
+            WatermarkEditMenuExport()
+        case .frame:
+            WatermarkEditMenuFrame()
+        }
     }
 }
