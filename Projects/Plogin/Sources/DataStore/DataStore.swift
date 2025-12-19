@@ -17,7 +17,24 @@ public final class DataStore {
             )
             return DataStore(modelContainer: container)
         } catch {
+#if DEBUG
+            print("⚠️ Preview 환경: 임시 DataStore 생성")
+            let schema = Schema([
+                WatermarkModel.self,
+                WatermarkWordModel.self
+            ])
+            let configuration = ModelConfiguration(
+                schema: schema,
+                isStoredInMemoryOnly: true
+            )
+            let container = try! ModelContainer(
+                for: schema,
+                configurations: [configuration]
+            )
+            return DataStore(modelContainer: container)
+            #else
             fatalError("DataStore: ModelContainer 설정 실패: \(error)")
+            #endif
         }
     }()
 
