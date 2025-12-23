@@ -35,7 +35,7 @@ enum PickerType {
 class WatermarkEditViewModel: ObservableObject {
     private let dataManager = DataStore.shared
     private let manager = AppManager.shared
-    let editor = ImageEditManager()
+    let editor = WatermarkManager()
     
     @Published var isShowPicker: Bool = false
     @Published var pickerType: PickerType?
@@ -73,6 +73,17 @@ class WatermarkEditViewModel: ObservableObject {
         didSet {
             self.stickers = stickerAsset.compactMap { $0.imageAsset }
             self.stickerList = stickers.map { .init(image: $0) }
+            for index in stickers.indices {
+                self.watermark.stickers.removeAll()
+                self.watermark.stickers.append(.init(
+                    image: stickers[index],
+                    alpha: 0.5,
+                    position: .zero,
+                    rotation: -30,
+                    scale: 0.5,
+                    layer: index
+                ))
+            }
         }
     }
     @Published var stickers: [PImage] = []
@@ -151,8 +162,8 @@ extension WatermarkEditViewModel {
         makePreview()
     }
     
-    func setSticker(_ stickers: [WatermarkStikerModel]) {
-        watermark.stikers = stickers
+    func setSticker(_ stickers: [WatermarkStickerModel]) {
+        watermark.stickers = stickers
         makePreview()
     }
     
@@ -165,16 +176,16 @@ extension WatermarkEditViewModel {
         scale: CGFloat? = nil,
         layer: Int? = nil
     ) {
-        guard index >= 0 && index < watermark.stikers.count else { return }
-        let newValue = watermark.stikers[index]
-        if let image = image { newValue.image = image.pngData() }
+        guard index >= 0 && index < watermark.stickers.count else { return }
+        let newValue = watermark.stickers[index]
+        if let image = image { newValue.imageData = image.pngData() }
         if let alpha = alpha { newValue.alpha = alpha }
         if let position = position { newValue.position = position }
         if let rotation = rotation { newValue.rotation = rotation }
         if let scale = scale { newValue.scale = scale }
         if let layer = layer { newValue.layer = layer }
         
-        watermark.stikers[index] = newValue
+        watermark.stickers[index] = newValue
         makePreview()
     }
     
@@ -250,6 +261,10 @@ extension WatermarkEditViewModel {
         }
         let fontSize = CGFloat(Int(24.0 * watermark.exportSetting.width / 650.0))
         watermark.textSetting.fontSize = fontSize
+    }
+    
+    func calculateSticker() {
+        
     }
     
     func calculateSize() {

@@ -17,7 +17,7 @@ enum WatermarkShortStep {
 
 class PopupWatermarkPreviewViewModel: ObservableObject {
     private let dataManager = DataStore.shared
-    let editer = ImageEditManager()
+    let editer = WatermarkManager()
     
     @Published var assets: [AssetData] = []
     @Published var words: [String] = []

@@ -11,8 +11,8 @@ import SwiftData
 import Design
 
 @Model
-public final class WatermarkStikerModel {
-    var image: Data?
+public final class WatermarkStickerModel {
+    var imageData: Data?
     var alpha: CGFloat
     var position: CGPoint
     var rotation: CGFloat
@@ -29,11 +29,16 @@ public final class WatermarkStikerModel {
         scale: CGFloat,
         layer: Int
     ) {
-        self.image = image.pngData()
+        self.imageData = image.pngData()
         self.alpha = alpha
         self.position = position
         self.rotation = rotation
         self.scale = scale
         self.layer = layer
+    }
+    
+    var image: PImage? {
+        guard let data = imageData else { return nil }
+        return PImage(data: data)
     }
 }

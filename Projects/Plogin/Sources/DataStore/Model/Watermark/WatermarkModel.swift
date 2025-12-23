@@ -15,7 +15,7 @@ public final class WatermarkModel: Identifiable, ObservableObject {
     public var id: UUID
     
     var textSetting: WatermarkTextModel
-    var stikers: [WatermarkStikerModel]
+    var stickers: [WatermarkStickerModel]
     var arraySetting: WatermarkArrayModel
     var exportSetting: WatermarkExportModel
     var frameSetting: WatermarkFrameModel
@@ -31,14 +31,14 @@ public final class WatermarkModel: Identifiable, ObservableObject {
             spacing: .init(width: 20, height: 20),
             isGradient: true,
             isDate: true),
-        stikers: [WatermarkStikerModel] = [],
+        stickers: [WatermarkStickerModel] = [],
         arraySetting: WatermarkArrayModel = .init(type: .none, rows: 1, columns: 1),
         exportSetting: WatermarkExportModel = .init(type: .auto, size: .zero),
         frameSetting: WatermarkFrameModel = .init(title: "제목 없음", type: .custom)
     ) {
         self.id = UUID()
         self.textSetting = textSetting
-        self.stikers = stikers
+        self.stickers = stickers
         self.arraySetting = arraySetting
         self.exportSetting = exportSetting
         self.frameSetting = frameSetting

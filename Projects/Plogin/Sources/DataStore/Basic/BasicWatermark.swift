@@ -54,7 +54,7 @@ extension BasicWatermarkType {
                                    spacing: .init(width: 20, height: 10),
                                    isGradient: true,
                                    isDate: true),
-                stikers: [],
+                stickers: [],
                 arraySetting: .init(type: .none, rows: 1, columns: 1),
                 exportSetting: .init(type: .auto, size: .init(width: 650, height: 650)),
                 frameSetting: .init(title: self.rawValue, type: .basic)
@@ -70,7 +70,7 @@ extension BasicWatermarkType {
                                    spacing: .init(width: 100, height: 50),
                                    isGradient: true,
                                    isDate: true),
-                stikers: [],
+                stickers: [],
                 arraySetting: .init(type: .none, rows: 1, columns: 1),
                 exportSetting: .init(type: .auto, size: .zero),
                 frameSetting: .init(title: self.rawValue, type: .basic)
@@ -86,7 +86,7 @@ extension BasicWatermarkType {
                                    spacing: .init(width: 100, height: 50),
                                    isGradient: true,
                                    isDate: true),
-                stikers: [],
+                stickers: [],
                 arraySetting: .init(type: .none, rows: 1, columns: 1),
                 exportSetting: .init(type: .auto, size: .zero),
                 frameSetting: .init(title: self.rawValue, type: .basic)
