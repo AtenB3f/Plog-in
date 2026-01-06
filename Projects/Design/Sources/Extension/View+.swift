@@ -61,9 +61,16 @@ public extension View {
     }
 }
 
-internal struct RectPreferenceKey: PreferenceKey {
-    static var defaultValue: CGRect { .zero }
-    static func reduce(value: inout CGRect, nextValue: () -> CGRect) {
+public struct RectPreferenceKey: PreferenceKey {
+    public static var defaultValue: CGRect { .zero }
+    public static func reduce(value: inout CGRect, nextValue: () -> CGRect) {
+        value = nextValue()
+    }
+}
+
+public struct SizePreferenceKey: PreferenceKey {
+    public static var defaultValue: CGSize { .zero }
+    public static func reduce(value: inout CGSize, nextValue: () -> CGSize) {
         value = nextValue()
     }
 }

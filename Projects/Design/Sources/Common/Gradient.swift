@@ -9,6 +9,7 @@
 import SwiftUI
 
 public extension Gradient {
+    static let plave: Gradient = .init(colors: Color.disablePrimarys.map{ $0.opacity(0.3) })
     
     static let deep: Gradient = .init(colors: [.clear, Color("Gradient/Deep", bundle: .module)])
     static let shallow: Gradient = .init(colors: [.clear, Color("Gradient/Shallow", bundle: .module)])

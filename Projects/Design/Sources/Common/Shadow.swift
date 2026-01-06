@@ -8,7 +8,7 @@
 
 import SwiftUI
 
-enum ShadowType {
+public enum ShadowType {
     case none
     case disable
     case light
@@ -16,7 +16,7 @@ enum ShadowType {
     case dark
 }
 
-extension View {
+public extension View {
     func shadow(_ type: ShadowType) -> some View {
         switch type {
         case .disable:
