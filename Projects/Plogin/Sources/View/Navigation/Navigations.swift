@@ -7,9 +7,11 @@
 //
 
 import SwiftUI
+import Design
 
 public enum Navigation: Hashable {
     case watermark
+    case watermarkResult(results: [PImage])
 }
 
 public extension View {
@@ -19,7 +21,9 @@ public extension View {
             case .watermark:
                 WatermarkEditView()
                     .hiddenNavigationBarStyle()
-                
+            case .watermarkResult(let results):
+                WatermarkResultView(results: results)
+                    .hiddenNavigationBarStyle()
             default:
                 EmptyView()
                     .hiddenNavigationBarStyle()

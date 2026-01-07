@@ -22,17 +22,18 @@ struct WatermarkStickerItemModel: TitleImagable {
 
 struct WatermarkEditMenuSticker: View {
     @EnvironmentObject var viewModel: WatermarkEditViewModel
+    @EnvironmentObject var watermarkViewModel: WatermarkViewModel
     var body: some View {
         VStack {
             CategoryContentItemView(title: "스티커") {
                 HStack {
-                    if let index = viewModel.stickerSelect,
+                    if let index = watermarkViewModel.selectSticker,
                         viewModel.stickerListMode == .select {
                         Button {
-                            guard viewModel.stickerAsset.count < PickerType.sticker.maxCount else { return }
-                            let asset = viewModel.stickerAsset[index]
-                            viewModel.stickerAsset.append(asset)
-                            viewModel.stickerSelect = nil
+                            guard watermarkViewModel.originSticker.count < PickerType.sticker.maxCount else { return }
+                            let asset = watermarkViewModel.originSticker[index]
+                            watermarkViewModel.originSticker.append(asset)
+                            watermarkViewModel.selectSticker = nil
                         } label: {
                             Text("복제하기")
                                 .font(.bold2)
@@ -53,7 +54,7 @@ struct WatermarkEditMenuSticker: View {
                     HStack {
                         if viewModel.stickerListMode == .edit {
                             Button {
-                                viewModel.stickerAsset.removeAll()
+                                watermarkViewModel.originSticker.removeAll()
                                 viewModel.stickerListMode = .none
                             } label: {
                                 Text("모두 삭제")
@@ -81,10 +82,10 @@ struct WatermarkEditMenuSticker: View {
                 })
                 FrameList(mode: $viewModel.stickerListMode,
                           list: $viewModel.stickerList,
-                          select: $viewModel.stickerSelect)
-                .foldingHeight(!viewModel.stickers.isEmpty)
+                          select: $watermarkViewModel.selectSticker)
+                .foldingHeight(!watermarkViewModel.stickers.isEmpty)
             }
-            .foldingHeight(!viewModel.stickerAsset.isEmpty)
+            .foldingHeight(!watermarkViewModel.originSticker.isEmpty)
         }
         .padding(.vertical, 12)
         .onTapGesture {

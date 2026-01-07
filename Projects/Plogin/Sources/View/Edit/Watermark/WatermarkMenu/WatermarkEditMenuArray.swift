@@ -18,6 +18,7 @@ struct WatermarkArrayItemModel: TitleImagable {
 
 struct WatermarkEditMenuArray: View {
     @EnvironmentObject var viewModel: WatermarkEditViewModel
+    @EnvironmentObject var watermarkViewModel: WatermarkViewModel
     
     var body: some View {
         VStack {
@@ -44,11 +45,12 @@ struct WatermarkEditMenuArray: View {
                     Spacer()
                     ForEach(WatermarkArrayType.allCases, id: \.self) { type in
                         Button {
-                            viewModel.setArray(type: type)
+                            watermarkViewModel.setArray(type: type)
+                            viewModel.setArray(watermark: watermarkViewModel.watermark, type: type)
                         } label: {
                             Text(type.menuName)
-                                .font(viewModel.arrayType == type ? .bold2 : .body2)
-                                .foreground(viewModel.arrayType == type ?  .Text.light : .Gray.medium)
+                                .font(watermarkViewModel.watermark.arraySetting.type == type ? .bold2 : .body2)
+                                .foreground(watermarkViewModel.watermark.arraySetting.type == type ?  .Text.light : .Gray.medium)
                                 .padding(.vertical, 6)
                                 .padding(.horizontal, 6)
                                 .background(Color.Base.medium)
@@ -61,14 +63,17 @@ struct WatermarkEditMenuArray: View {
                 .foldingHeight(viewModel.isShowArrayType)
                 
                 GridSelector(
-                    rows: $viewModel.grid.row,
-                    columns: $viewModel.grid.colums)
+                    rows: $watermarkViewModel.watermark.arraySetting.rows,
+                    columns: $watermarkViewModel.watermark.arraySetting.columns)
                 .frame(width: viewModel.isShowGrid ? nil : 0)
                 .padding(.vertical, 12)
                 .foldingHeight(viewModel.isShowGrid)
-                .onChange(of: viewModel.grid) {
-                    print(viewModel.grid)
-                    viewModel.setArray(rows: viewModel.grid.row, columns: viewModel.grid.colums)
+                .onChange(of: watermarkViewModel.watermark.arraySetting) {
+                    watermarkViewModel.setArray()
+                    viewModel.setArray(
+                        watermark: watermarkViewModel.watermark,
+                        rows: watermarkViewModel.watermark.arraySetting.rows,
+                        columns: watermarkViewModel.watermark.arraySetting.columns)
                 }
             }
             

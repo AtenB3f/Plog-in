@@ -34,6 +34,7 @@ enum WatermarkEditMenuType: String, CaseIterable {
 
 struct WatermarkEditMenuView: View {
     @EnvironmentObject var viewModel: WatermarkEditViewModel
+    @EnvironmentObject var watermarkViewModel: WatermarkEditViewModel
     
     var body: some View {
         VStack(spacing: 0) {
@@ -75,6 +76,7 @@ struct WatermarkEditMenuView: View {
                                     menuItems(type)
                                         .containerRelativeFrame(.horizontal)
                                         .environmentObject(viewModel)
+                                        .environmentObject(watermarkViewModel)
                                         .id(type.rawValue)
                                 } else {
                                     Spacer()

@@ -23,6 +23,8 @@ struct WatermarkFrameItemModel: TitleImagable {
 
 struct WatermarkEditMenuFrame: View {
     @EnvironmentObject var viewModel: WatermarkEditViewModel
+    @EnvironmentObject var watermarkViewModel: WatermarkViewModel
+    
     let manager = AppManager.shared
     var body: some View {
         VStack {
@@ -37,7 +39,7 @@ struct WatermarkEditMenuFrame: View {
             }
             
             Button {
-                viewModel.saveWatermarkFrame()
+//                viewModel.saveWatermarkFrame()
             } label: {
                 HStack(spacing: 0) {
                     Image.iconSave
@@ -51,20 +53,20 @@ struct WatermarkEditMenuFrame: View {
                 }
             }
             .padding(16)
-            .foldingHeight(!viewModel.frames.contains(where: { $0.id == viewModel.watermark.id }))
+            .foldingHeight(!viewModel.frames.contains(where: { $0.id == watermarkViewModel.watermark.id }))
             
             CategoryButtonItemView(title: "제목",
-                                   button: viewModel.watermark.frameSetting.title,
+                                   button: watermarkViewModel.watermark.frameSetting.title,
                                    onClick: {
                 manager.pushPopup(.titleChange(
                     text: $viewModel.frameTitle,
                     callback: { title in
                         guard let title = title else { return }
-                        viewModel.watermark.frameSetting.title = title
-                        viewModel.saveWatermarkFrame()
+                        watermarkViewModel.watermark.frameSetting.title = title
+//                        viewModel.saveWatermarkFrame()
                 }))
             })
-            .foldingHeight(viewModel.frames.contains(where: { $0.id == viewModel.watermark.id }))
+            .foldingHeight(viewModel.frames.contains(where: { $0.id == watermarkViewModel.watermark.id }))
         }
         .padding(.vertical, 12)
     }

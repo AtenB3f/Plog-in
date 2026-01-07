@@ -10,9 +10,10 @@ import SwiftUI
 import Design
 
 struct WatermarkEditMenuText: View {
+    @EnvironmentObject var viewModel: WatermarkEditViewModel
+    @EnvironmentObject var watermarkViewModel: WatermarkViewModel
     let manager = AppManager.shared
     let dataManager = DataStore.shared
-    @EnvironmentObject var viewModel: WatermarkEditViewModel
     
     let colorPalet: [Color] = [.white, .Gray.medium, .black, .Yejun.main, .Noah.main, .Bamby.main, .Eunho.main, .Hamin.main]
     
@@ -26,7 +27,7 @@ struct WatermarkEditMenuText: View {
                     manager.pushPopup(.watermarkTextSave(
                         text: $viewModel.newWord,
                         callback: { isSave in
-                            if isSave { viewModel.saveWatermarkWord() }
+                            if isSave { viewModel.saveWatermarkWord(watermark: watermarkViewModel.watermark) }
                             manager.pushPopup()
                     }))
                 })
@@ -35,13 +36,13 @@ struct WatermarkEditMenuText: View {
                     HStack(spacing: 8) {
                         ForEach(viewModel.words, id: \.self) { word in
                             Button {
-                                viewModel.setText(text: word)
+                                viewModel.setText(watermark: watermarkViewModel.watermark, text: word)
                             } label: {
                                 HStack(spacing: 0) {
                                     Text(word)
-                                        .font(viewModel.watermark.textSetting.text == word ? .bold2 : .body2)
-                                        .foreground(viewModel.watermark.textSetting.text == word ? .Text.light : .Gray.medium)
-                                    if viewModel.watermark.textSetting.text == word {
+                                        .font(watermarkViewModel.watermark.textSetting.text == word ? .bold2 : .body2)
+                                        .foreground(watermarkViewModel.watermark.textSetting.text == word ? .Text.light : .Gray.medium)
+                                    if watermarkViewModel.watermark.textSetting.text == word {
                                         Image.iconCheckSM
                                             .resizable()
                                             .renderingMode(.template)
@@ -65,13 +66,16 @@ struct WatermarkEditMenuText: View {
                 HStack(spacing: 6) {
                     ForEach(colorPalet, id: \.self) { color in
                         Button {
-                            viewModel.setText(color: color, alpha: viewModel.watermark.textSetting.color.opacity)
+                            viewModel.setText(
+                                watermark: watermarkViewModel.watermark,
+                                color: color,
+                                alpha: watermarkViewModel.watermark.textSetting.color.opacity)
                         } label: {
-                            let colorData = ColorData(color, alpha: viewModel.watermark.textSetting.color.opacity)
+                            let colorData = ColorData(color, alpha: watermarkViewModel.watermark.textSetting.color.opacity)
                             RoundedRectangle(cornerRadius: 2)
-                                .foreground(color.opacity(viewModel.watermark.textSetting.color == colorData ? 1.0 : 0.3))
-                                .frame(width: viewModel.watermark.textSetting.color == colorData ? 16: 12,
-                                       height: viewModel.watermark.textSetting.color == colorData ? 16: 12)
+                                .foreground(color.opacity(watermarkViewModel.watermark.textSetting.color == colorData ? 1.0 : 0.3))
+                                .frame(width: watermarkViewModel.watermark.textSetting.color == colorData ? 16: 12,
+                                       height: watermarkViewModel.watermark.textSetting.color == colorData ? 16: 12)
                                 .padding(4)
                         }
                     }
@@ -79,8 +83,8 @@ struct WatermarkEditMenuText: View {
             }
             CategoryContentItemView(title: "불투명도") {
                 HStack(alignment: .center, spacing: 8) {
-                    TextSlider(value: $viewModel.watermark.textSetting.color.opacity, min: 0, max: 1, distance: 1)
-                    Text(String(format: "%.0f", viewModel.watermark.textSetting.color.opacity * 100) + "%")
+                    TextSlider(value: $watermarkViewModel.watermark.textSetting.color.opacity, min: 0, max: 1, distance: 1)
+                    Text(String(format: "%.0f", watermarkViewModel.watermark.textSetting.color.opacity * 100) + "%")
                         .font(.body2)
                         .foreground(.Text.light)
                         .frame(width: 35)
@@ -88,8 +92,12 @@ struct WatermarkEditMenuText: View {
             }
             CategoryContentItemView(title: "간격") {
                 HStack(alignment: .center, spacing: 8) {
-                    TextSlider(value: $viewModel.watermark.textSetting.spacingWidth, min: 0, max: 100, distance: 1)
-                    Text(String(format: "%.1f", viewModel.watermark.textSetting.spacingWidth))
+                    TextSlider(value: $watermarkViewModel.watermark.textSetting.spacingWidth, min: 0, max: 100, distance: 1)
+                        .onChange(of: watermarkViewModel.watermark.textSetting.spacingWidth) {
+                            watermarkViewModel.watermark.textSetting.spacingHeight = watermarkViewModel.watermark.textSetting.spacingWidth
+                            
+                        }
+                    Text(String(format: "%.1f", watermarkViewModel.watermark.textSetting.spacingWidth))
                         .font(.body2)
                         .foreground(.Text.light)
                         .frame(width: 35)
@@ -98,21 +106,21 @@ struct WatermarkEditMenuText: View {
             CategoryContentItemView(title: "옵션") {
                 HStack(alignment: .center, spacing: 4) {
                     Button {
-                        let value = viewModel.watermark.textSetting.isDate
-                        viewModel.setText(isDate: !value)
+                        let value = watermarkViewModel.watermark.textSetting.isDate
+                        viewModel.setText(watermark: watermarkViewModel.watermark, isDate: !value)
                     } label: {
                         IconLabel(text: "날짜",
                                   icon: .iconCheckSM,
-                                  color: viewModel.watermark.textSetting.isDate ?  .Text.light : .Gray.dark,
+                                  color: watermarkViewModel.watermark.textSetting.isDate ?  .Text.light : .Gray.dark,
                                   size: 16)
                     }
                     Button {
-                        let value = viewModel.watermark.textSetting.isGradient
-                        viewModel.setText(isGradient: !value)
+                        let value = watermarkViewModel.watermark.textSetting.isGradient
+                        viewModel.setText(watermark: watermarkViewModel.watermark, isGradient: !value)
                     } label: {
                         IconLabel(text: "그라데이션",
                                   icon: .iconCheckSM,
-                                  color: viewModel.watermark.textSetting.isGradient ? .Text.light : .Gray.dark,
+                                  color: watermarkViewModel.watermark.textSetting.isGradient ? .Text.light : .Gray.dark,
                                   size: 16)
                     }
                 }

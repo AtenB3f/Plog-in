@@ -14,7 +14,7 @@ struct PopupWatermarkText: View {
     let description: String
     let left: String
     let right: String
-    let callback: (Bool)->Void
+    let callback: (Bool) -> Void
     
     init(
         text: Binding<String>,

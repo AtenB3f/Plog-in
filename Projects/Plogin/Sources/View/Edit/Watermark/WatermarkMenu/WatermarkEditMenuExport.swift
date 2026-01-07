@@ -11,6 +11,8 @@ import Design
 
 struct WatermarkEditMenuExport: View {
     @EnvironmentObject var viewModel: WatermarkEditViewModel
+    @EnvironmentObject var watermarkViewModel: WatermarkViewModel
+    
     var body: some View {
         VStack {
             VStack(spacing: 0) {
@@ -19,7 +21,7 @@ struct WatermarkEditMenuExport: View {
                         viewModel.isShowExport.toggle()
                     } label: {
                         HStack(spacing: 0) {
-                            if viewModel.watermark.exportSetting.type == .auto {
+                            if watermarkViewModel.watermark.exportSetting.type == .auto {
                                 Text("auto")
                                     .font(.body1)
                                     .foreground(.Text.dark)
@@ -27,7 +29,7 @@ struct WatermarkEditMenuExport: View {
                                 
                             }
                             
-                            Text(viewModel.watermark.exportSetting.getSizeStr())
+                            Text(watermarkViewModel.watermark.exportSetting.getSizeStr())
                                 .font(.bold1)
                                 .foreground(.Text.light)
                             
@@ -44,11 +46,14 @@ struct WatermarkEditMenuExport: View {
                     Spacer()
                     ForEach(WatermarkExportType.allCases, id: \.self) { type in
                         Button {
-                            viewModel.setExport(type: type, size: viewModel.watermark.exportSetting.getSize())
+                            viewModel.setExport(
+                                watermark: watermarkViewModel.watermark,
+                                type: type,
+                                size: watermarkViewModel.watermark.exportSetting.getSize())
                         } label: {
                             Text(type.menuName)
-                                .font(viewModel.watermark.exportSetting.type == type ? .bold2 : .body2)
-                                .foreground(viewModel.watermark.exportSetting.type == type ?  .Text.light : .Gray.medium)
+                                .font(watermarkViewModel.watermark.exportSetting.type == type ? .bold2 : .body2)
+                                .foreground(watermarkViewModel.watermark.exportSetting.type == type ?  .Text.light : .Gray.medium)
                                 .padding(.vertical, 6)
                                 .padding(.horizontal, 6)
                                 .background(Color.Base.medium)
@@ -63,8 +68,8 @@ struct WatermarkEditMenuExport: View {
             
             CategoryContentItemView(title: "배율") {
                 HStack(alignment: .center, spacing: 8) {
-                    TextSlider(value: $viewModel.watermark.exportSetting.multiple, min: 0.1, max: 1.5)
-                    Text("×" + String(format: "%.2f", viewModel.watermark.exportSetting.multiple))
+                    TextSlider(value: $watermarkViewModel.watermark.exportSetting.multiple, min: 0.1, max: 1.5)
+                    Text("×" + String(format: "%.2f", watermarkViewModel.watermark.exportSetting.multiple))
                         .font(.body2)
                         .foreground(.Text.light)
                         .frame(width: 35)

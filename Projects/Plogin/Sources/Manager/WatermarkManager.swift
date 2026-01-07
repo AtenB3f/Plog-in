@@ -17,29 +17,52 @@ import AppKit
 
 class WatermarkManager {
     func generateWatermarks(_ images: [PImage], watermark: WatermarkModel) -> [PImage] {
-        var watermarks: [PImage] = []
+        var exportImage: [PImage] = []
+        guard watermark.arraySetting.type != .none else {
+            for image in images {
+                exportImage.append(drawWatermark(image: image, watermark: watermark))
+            }
+            return exportImage
+        }
+        
+        let arr = getRowColums(imageCount: images.count, watermark: watermark)
+        let image = mergeImages(
+            images: images,
+            rows: arr.0,
+            columns: arr.1,
+            exportSize: watermark.exportSetting.getSize())
+        exportImage.append(drawWatermark(image: image, watermark: watermark))
+        return exportImage
+    }
+    
+    func getRowColums(imageCount: Int, watermark: WatermarkModel) -> (Int, Int) {
         let arrayType = watermark.arraySetting.type
-        var rows: Int = 1
-        var columns: Int = 1
+        var rows = 1
+        var columns = 1
         switch arrayType {
         case .none:
-            for image in images {
-                watermarks.append(drawWatermark(image: image, watermark: watermark))
-            }
-            return watermarks
+            break
         case .horizontal:
             rows = 1
-            columns = watermarks.count
+            columns = imageCount
         case .vertical:
-            rows = watermarks.count
+            rows = imageCount
             columns = 1
         case .grid:
             rows = watermark.arraySetting.rows
             columns = watermark.arraySetting.columns
         }
-        let image = mergeImages(images: images, rows: rows, columns: columns, exportSize: watermark.exportSetting.getSize())
-        watermarks.append(drawWatermark(image: image, watermark: watermark))
-        return watermarks
+        return (rows, columns)
+    }
+    
+    /// 이미지 리스트 중 첫 번째 이미지의 너비와 기준 이미지 너비로 이미지들의 너비를 조정했을 때 가장 값이 큰 높이를 구하는 함수
+    func getCellSize(images: [PImage]) -> CGSize {
+        // 첫 번째 이미지를 기준으로 설정
+        let referenceImage = images[0]
+        var cellSize = referenceImage.size
+        cellSize.height = (images.map { $0.size.height/$0.size.width }.max() ?? 1.0) * referenceImage.size.width
+        
+        return cellSize
     }
 
     func drawWatermark(image: PImage, watermark: WatermarkModel) -> PImage {
@@ -132,7 +155,7 @@ class WatermarkManager {
         textSetting: WatermarkTextModel,
         exportSize: CGSize
     ) {
-        guard let font = textSetting.getFont() else { return }
+        guard let font = textSetting.getPFont() else { return }
         var spacing: CGSize = textSetting.getSpacing()
         spacing.height = spacing.width
         let attributes: [NSAttributedString.Key: Any] = [
@@ -211,15 +234,12 @@ class WatermarkManager {
 
 extension WatermarkManager {
     func mergeImages(images: [PImage], rows: Int, columns: Int, exportSize: CGSize) -> PImage {
-        // 첫 번째 이미지를 기준으로 설정
-        let referenceImage = images[0]
-        var cellSize = referenceImage.size
-        cellSize.height = (images.map { $0.size.height/$0.size.width }.max() ?? 1.0) * referenceImage.size.width
-        
+        let cellSize = getCellSize(images: images)
         // 최종 이미지 크기 계산
-        let finalWidth = cellSize.width * CGFloat(columns)
-        let finalHeight = cellSize.height * CGFloat(rows)
+        let finalWidth = cellSize.width * CGFloat(rows)
+        let finalHeight = cellSize.height * CGFloat(columns)
         let finalSize = CGSize(width: finalWidth, height: finalHeight)
+        
         let format = UIGraphicsImageRendererFormat.default()
         format.opaque = true
         format.scale = 1.0
@@ -231,7 +251,7 @@ extension WatermarkManager {
                 images: images,
                 rows: rows,
                 columns: columns,
-                cellSize: .init(width: exportSize.width/CGFloat(columns), height: exportSize.height/CGFloat(rows))
+                cellSize: .init(width: cellSize.width, height: cellSize.height)
             )
         }
 #elseif os(macOS)

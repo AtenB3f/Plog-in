@@ -12,6 +12,8 @@ import Design
 struct WatermarkEditView: View {
     @Environment(\.dismiss) var dismiss
     @StateObject var viewModel = WatermarkEditViewModel()
+    @StateObject var watermarkViewModel = WatermarkViewModel()
+    let manager = AppManager.shared
     
     var body: some View {
         VStack(spacing: 0) {
@@ -20,50 +22,44 @@ struct WatermarkEditView: View {
                 leftIcon: .iconCloseMD,
                 rightIcon: .iconSave, callback: { isRight in
                 if isRight {
-                    viewModel.saveWatermarkImage()
-                    dismiss()
+                    watermarkViewModel.generateResults()
+                    manager.push(.watermarkResult(results: watermarkViewModel.results))
                 } else {
                     dismiss()
                 }
             })
-            ScrollView(.horizontal) {
-                LazyHStack(spacing: 0) {
-                    ForEach(Array(viewModel.previews), id: \.self) { image in
-                        VStack {
-                            Image(uiImage: image)
-                                .resizable()
-                                .aspectRatio(contentMode: .fit)
-                        }
-                        .containerRelativeFrame(.horizontal)
-                    }
-                }
-                .scrollTargetLayout()
-            }
-            .scrollTargetBehavior(.paging)
-            .scrollIndicators(.hidden)
-            .padding(10)
-            .task {
-                viewModel.pushPicker(.watermark)
-            }
+            WatermarkView()
+                .environmentObject(watermarkViewModel)
+                .padding(10)
             
             WatermarkEditMenuView()
                 .environmentObject(viewModel)
+                .environmentObject(watermarkViewModel)
         }
+        .frame(maxHeight: .infinity)
         .background(Color.black)
+        .task {
+            if viewModel.images.isEmpty {
+                viewModel.pushPicker(.watermark)
+            }
+        }
+        .onChange(of: watermarkViewModel.stickers) {
+            viewModel.stickerList = watermarkViewModel.stickers.map { .init(image: $0) }
+        }
         .fullScreenCover(isPresented: $viewModel.isShowPicker, onDismiss: {
-            guard let type = viewModel.pickerType else { return }
+//            guard let type = viewModel.pickerType else { return }
             viewModel.loadImages()
-            viewModel.autoSetting()
-            viewModel.makePreview()
+//            viewModel.autoSetting()
+//            viewModel.makePreview()
         }) {
             if let type = viewModel.pickerType {
                 switch type {
                 case .watermark:
-                    AssetPickerView(avAsset: $viewModel.assets,
+                    AssetPickerView(avAsset: $watermarkViewModel.originImages,
                                     type: type.mediaType,
                                     limit: type.maxCount)
                 case .sticker:
-                    AssetPickerView(avAsset: $viewModel.stickerAsset,
+                    AssetPickerView(avAsset: $watermarkViewModel.originSticker,
                                     type: type.mediaType,
                                     limit: type.maxCount)
                 }

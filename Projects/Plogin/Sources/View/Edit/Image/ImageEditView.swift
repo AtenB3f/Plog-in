@@ -10,16 +10,17 @@ import SwiftUI
 
 struct ImageEditView: View {
     @Environment(\.dismiss) var dismiss
-    
+    @EnvironmentObject var watermarkViewModel: WatermarkViewModel
     @StateObject var viewModel = WatermarkEditViewModel()
     
     var body: some View {
         VStack {
-            Text("\(viewModel.watermark.textSetting.color.opacity)")
+            Text("\(watermarkViewModel.watermark.textSetting.color.opacity)")
                 .foreground(.red)
                 
-            Slider(value: $viewModel.watermark.textSetting.color.opacity, onEditingChanged: { _ in
-                viewModel.makePreview()
+            Slider(value: $watermarkViewModel.watermark.textSetting.color.opacity,
+                   onEditingChanged: { _ in
+//                viewModel.makePreview()
             })
             TabView(selection: $viewModel.page) {
                 ForEach(viewModel.previews, id: \.self) { image in
@@ -31,14 +32,14 @@ struct ImageEditView: View {
             .tabViewStyle(.page)
         }
         .task {
-            viewModel.watermark.textSetting.text = "test"
-            viewModel.watermark.textSetting.color = .init(.white)
+            watermarkViewModel.watermark.textSetting.text = "test"
+            watermarkViewModel.watermark.textSetting.color = .init(.white)
             viewModel.isShowPicker = true
         }
         .fullScreenCover(isPresented: $viewModel.isShowPicker, onDismiss: {
             viewModel.loadImages()
-            viewModel.autoSetting()
-            viewModel.makePreview()
+//            viewModel.autoSetting()
+//            viewModel.makePreview()
         }) {
             AssetPickerView(avAsset: $viewModel.assets, type: .image, limit: 30)
         }

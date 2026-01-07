@@ -9,7 +9,7 @@
 import Foundation
 import SwiftData
 
-enum WatermarkArrayType: String, Codable, CaseIterable {
+public enum WatermarkArrayType: String, Codable, CaseIterable {
     case none
     case horizontal
     case vertical
@@ -45,5 +45,21 @@ public final class WatermarkArrayModel {
         self.type = type
         self.rows = rows
         self.columns = columns
+    }
+    
+    func setRowColumn(_ imageCount: Int) {
+        switch type {
+        case .none:
+            rows = 1
+            columns = 1
+        case .horizontal:
+            rows = imageCount
+            columns = 1
+        case .vertical:
+            rows = 1
+            columns = imageCount
+        case .grid:
+            break
+        }
     }
 }

@@ -54,11 +54,11 @@ class WatermarkEditViewModel: ObservableObject {
     @Published var newWord: String = ""
     
     // MARK: - Watermark
-    @Published var watermark: WatermarkModel = WatermarkModel() {
-        didSet {
-            makePreview()
-        }
-    }
+//    @Published var watermark: WatermarkModel = WatermarkModel() {
+//        didSet {
+//            makePreview()
+//        }
+//    }
     
     // MARK: - Category
     @Published var isShowMenu: Bool = false
@@ -69,35 +69,36 @@ class WatermarkEditViewModel: ObservableObject {
     @Published var textColor: Color = .white
     
     // MARK: - Category Sticker
-    @Published var stickerAsset: [AssetData] = [] {
-        didSet {
-            self.stickers = stickerAsset.compactMap { $0.imageAsset }
-            self.stickerList = stickers.map { .init(image: $0) }
-            for index in stickers.indices {
-                self.watermark.stickers.removeAll()
-                self.watermark.stickers.append(.init(
-                    image: stickers[index],
-                    alpha: 0.5,
-                    position: .zero,
-                    rotation: -30,
-                    scale: 0.5,
-                    layer: index
-                ))
-            }
-        }
-    }
-    @Published var stickers: [PImage] = []
+//    @Published var stickerAsset: [AssetData] = [] {
+//        didSet {
+//            self.stickers = stickerAsset.compactMap { $0.imageAsset }
+//            self.stickerList = stickers.map { .init(image: $0) }
+//            for index in stickers.indices {
+//                self.watermark.stickers.removeAll()
+//                self.watermark.stickers.append(.init(
+//                    image: stickers[index],
+//                    alpha: 0.5,
+//                    position: .zero,
+//                    rotation: -30,
+//                    scale: 0.5,
+//                    layer: index
+//                ))
+//            }
+//        }
+//    }
+//    @Published var stickers: [PImage] = []
     @Published var stickerListMode: FrameListMode = .none
     @Published var stickerList: [WatermarkStickerItemModel] = []
-    @Published var stickerSelect: Int?
+//    @Published var stickerSelect: Int?
     
     // MARK: - Category Array
-    @Published var isShowArrayType: Bool = false {
-        didSet { isShowGrid = isShowArrayType && watermark.arraySetting.type == .grid }
-    }
+    @Published var isShowArrayType: Bool = false
+//    {
+//        didSet { isShowGrid = isShowArrayType && watermark.arraySetting.type == .grid }
+//    }
     @Published var isShowGrid: Bool = false
     @Published var arrayType: WatermarkArrayType = .none
-    @Published var grid = GridValue()
+//    @Published var grid = GridValue()
     
     @Published var arrayItems: [WatermarkArrayItemModel] = [] {
         didSet {
@@ -112,11 +113,12 @@ class WatermarkEditViewModel: ObservableObject {
     // MARK: - Category Frame
     @Published var frameListMode: FrameListMode = .none
     @Published var setFrame = WatermarkFrameModel()
-    @Published var frames: [WatermarkModel] = [] {
-        didSet {
-            frameList = frames.map { WatermarkFrameItemModel(image: $0.frameSetting.thumbnail , title: $0.frameSetting.title) }
-        }
-    }
+    @Published var frames: [WatermarkModel] = []
+//    {
+//        didSet {
+//            frameList = frames.map { WatermarkFrameItemModel(image: $0.frameSetting.thumbnail , title: $0.frameSetting.title) }
+//        }
+//    }
     @Published var frameList: [WatermarkFrameItemModel] = []
     @Published var frameSelect: Int?
     var frameTitle: String = ""
@@ -125,16 +127,18 @@ class WatermarkEditViewModel: ObservableObject {
     
     init() {
         words = dataManager.loadWatermarkWord().map { $0.text }
-        watermark.textSetting.text = words.first ?? ""
-        textColor = watermark.textSetting.color.toUI
-        arrayType = watermark.arraySetting.type
+//        textColor = watermark.textSetting.color.toUI
+//        arrayType = watermark.arraySetting.type
         frames = dataManager.loadWatermark()
     }
+    
+    
 }
 
 // MARK: - Binding
 extension WatermarkEditViewModel {
     func setText(
+        watermark: WatermarkModel,
         text: String? = nil,
         fontName: String? = nil,
         fontSize: CGFloat? = nil,
@@ -159,15 +163,19 @@ extension WatermarkEditViewModel {
         if let isDate = isDate { newValue.isDate = isDate }
         
         watermark.textSetting = newValue
-        makePreview()
-    }
-    
-    func setSticker(_ stickers: [WatermarkStickerModel]) {
-        watermark.stickers = stickers
-        makePreview()
+//        makePreview()
     }
     
     func setSticker(
+        watermark: WatermarkModel,
+        _ stickers: [WatermarkStickerModel]
+    ) {
+        watermark.stickers = stickers
+//        makePreview()
+    }
+    
+    func setSticker(
+        watermark: WatermarkModel,
         index: Int,
         image: PImage? = nil,
         alpha: CGFloat? = nil,
@@ -186,40 +194,22 @@ extension WatermarkEditViewModel {
         if let layer = layer { newValue.layer = layer }
         
         watermark.stickers[index] = newValue
-        makePreview()
+//        makePreview()
     }
     
     func setArray(
+        watermark: WatermarkModel,
         type: WatermarkArrayType? = nil,
         rows: Int? = nil,
         columns: Int? = nil
     ) {
-        let newValue = watermark.arraySetting
-        if let type = type {
-            arrayType = type
-            newValue.type = type
-            switch type {
-            case .horizontal:
-                newValue.rows = 1
-                newValue.columns = images.count
-            case .vertical:
-                newValue.rows = images.count
-                newValue.columns = 1
-            default:
-                newValue.rows = 1
-                    newValue.columns = 1
-            }
-        }
-        if let rows = rows { newValue.rows = rows }
-        if let columns = columns { newValue.columns = columns }
-        
-        watermark.arraySetting = newValue
-        isShowGrid = isShowArrayType && newValue.type == .grid
-        calculateSize()
-        makePreview()
+        isShowGrid = isShowArrayType && type == .grid
+//        calculateSize()
+//        makePreview()
     }
     
     func setExport(
+        watermark: WatermarkModel,
         type: WatermarkExportType? = nil,
         size: CGSize? = nil
     ) {
@@ -231,43 +221,19 @@ extension WatermarkEditViewModel {
         if type == .auto { newValue.multiple = 1.0 }
         
         watermark.exportSetting = newValue
-        calculateSize()
-        makePreview()
+//        calculateSize()
+//        makePreview()
     }
     
-    func setFrame(_ watermark: WatermarkModel) {
-        self.watermark = watermark
+    func setFrame(
+        watermark: WatermarkModel
+    ) {
+//        self.watermark = watermark
     }
 }
 
 extension WatermarkEditViewModel {
-    func autoSetting() {
-        
-        if watermark.exportSetting.type == .auto {
-            switch watermark.arraySetting.type {
-            case .none:
-                watermark.exportSetting.width = images.first?.size.width ?? 0
-                watermark.exportSetting.height = images.first?.size.height ?? 0
-            case .horizontal:
-                watermark.exportSetting.width = (images.first?.size.width ?? 0) * CGFloat(images.count)
-                watermark.exportSetting.height = images.first?.size.height ?? 0
-            case .vertical:
-                watermark.exportSetting.width = (images.first?.size.width ?? 0)
-                watermark.exportSetting.height = (images.first?.size.height ?? 0) * CGFloat(images.count)
-            case .grid:
-                watermark.exportSetting.width = (images.first?.size.width ?? 0) * CGFloat(watermark.arraySetting.rows)
-                watermark.exportSetting.height = (images.first?.size.height ?? 0) * CGFloat(watermark.arraySetting.columns)
-            }
-        }
-        let fontSize = CGFloat(Int(24.0 * watermark.exportSetting.width / 650.0))
-        watermark.textSetting.fontSize = fontSize
-    }
-    
-    func calculateSticker() {
-        
-    }
-    
-    func calculateSize() {
+    func calculateSize(watermark: WatermarkModel,) {
         guard let firstImage = images.first else { return }
         guard let maxRatio = images.map({ $0.size.height / $0.size.width }).max() else { return }
         let multiple: CGFloat = watermark.exportSetting.multiple
@@ -328,8 +294,8 @@ extension WatermarkEditViewModel {
 }
 
 extension WatermarkEditViewModel {
-    func saveWatermarkWord() {
-        setText(text: self.newWord)
+    func saveWatermarkWord(watermark: WatermarkModel) {
+        setText(watermark: watermark, text: self.newWord)
         dataManager.saveWatermarkWord(self.newWord)
         words = dataManager.loadWatermarkWord().map { $0.text }
     }
@@ -341,9 +307,9 @@ extension WatermarkEditViewModel {
         arrayItems = images.map { .init(image: $0) }
     }
     
-    func makePreview() {
-        previews = editor.generateWatermarks(images, watermark: watermark)
-    }
+//    func makePreview() {
+//        previews = editor.generateWatermarks(images, watermark: watermark)
+//    }
     
     func saveWatermarkImage() {
         Task.detached {
@@ -357,8 +323,8 @@ extension WatermarkEditViewModel {
         }
     }
     
-    func saveWatermarkFrame() {
-        dataManager.saveWatermark(watermark)
-        frames = dataManager.loadWatermark()
-    }
+//    func saveWatermarkFrame() {
+//        dataManager.saveWatermark(watermark)
+//        frames = dataManager.loadWatermark()
+//    }
 }
