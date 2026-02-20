@@ -51,12 +51,16 @@ public struct WatermarkTextModel: Codable {
 }
 
 public extension WatermarkTextModel {
-    func getPFont() -> PFont? {
-        return .init(name: self.fontName, size: self.fontSize)
+    func getPFont(size: CGFloat? = nil) -> PFont? {
+        if let size = size {
+            return .init(name: self.fontName, size: size)
+        } else {
+            return .init(name: self.fontName, size: self.fontSize*self.scale)
+        }
     }
     
     func getFont() -> Font {
-        return .custom(self.fontName, size: self.fontSize)
+        return .custom(self.fontName, size: self.fontSize*self.scale)
     }
     
     func getFontSize(_ imageSize: CGFloat) -> CGFloat {
@@ -64,6 +68,6 @@ public extension WatermarkTextModel {
     }
     
     func getSpacing() -> CGSize {
-        return .init(width: self.spacingWidth, height: self.spacingHeight)
+        return .init(width: self.spacingWidth*self.scale, height: self.spacingHeight*self.scale)
     }
 }
