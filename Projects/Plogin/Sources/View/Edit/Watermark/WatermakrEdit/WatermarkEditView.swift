@@ -39,19 +39,19 @@ struct WatermarkEditView: View {
         .frame(maxHeight: .infinity)
         .background(Color.black)
         .task {
-            if viewModel.images.isEmpty {
+            if watermarkViewModel.images.isEmpty {
                 viewModel.pushPicker(.watermark)
             }
         }
         .onChange(of: watermarkViewModel.stickers) {
             viewModel.stickerList = watermarkViewModel.stickers.map { .init(image: $0) }
         }
-        .fullScreenCover(isPresented: $viewModel.isShowPicker, onDismiss: {
+        .fullScreenCover(isPresented: $viewModel.isShowPicker) {
 //            guard let type = viewModel.pickerType else { return }
             viewModel.loadImages()
 //            viewModel.autoSetting()
 //            viewModel.makePreview()
-        }) {
+        } content: {
             if let type = viewModel.pickerType {
                 switch type {
                 case .watermark:

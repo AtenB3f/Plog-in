@@ -95,7 +95,6 @@ struct WatermarkEditMenuText: View {
                     TextSlider(value: $watermarkViewModel.watermark.textSetting.spacingWidth, min: 0, max: 100, distance: 1)
                         .onChange(of: watermarkViewModel.watermark.textSetting.spacingWidth) {
                             watermarkViewModel.watermark.textSetting.spacingHeight = watermarkViewModel.watermark.textSetting.spacingWidth
-                            
                         }
                     Text(String(format: "%.1f", watermarkViewModel.watermark.textSetting.spacingWidth))
                         .font(.body2)

@@ -45,6 +45,7 @@ extension WatermarkExportModel {
         return .init(width: self.width*multiple, height: self.height*multiple)
     }
     
+    // View 출력 용
     func getSizeStr() -> String {
         return "\(Int(width*multiple)) × \(Int(height*multiple))"
     }

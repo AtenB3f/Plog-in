@@ -233,57 +233,6 @@ extension WatermarkEditViewModel {
 }
 
 extension WatermarkEditViewModel {
-    func calculateSize(watermark: WatermarkModel,) {
-        guard let firstImage = images.first else { return }
-        guard let maxRatio = images.map({ $0.size.height / $0.size.width }).max() else { return }
-        let multiple: CGFloat = watermark.exportSetting.multiple
-        let originCellSize: CGSize = .init(width: firstImage.size.width, height: firstImage.size.width * maxRatio)
-        switch watermark.arraySetting.type {
-        case .none:
-            watermark.exportSetting.width = firstImage.size.width * multiple
-            watermark.exportSetting.height = firstImage.size.height * multiple
-        case .horizontal:
-            let width = originCellSize.width * CGFloat(watermark.arraySetting.columns)
-            let height = originCellSize.height
-            if 3600 > width {
-                watermark.exportSetting.width = width * multiple
-                watermark.exportSetting.height = height * multiple
-            } else {
-                watermark.exportSetting.width = 3600 * multiple
-                watermark.exportSetting.height = height * (3600/width) * multiple
-            }
-        case .vertical:
-            let width = originCellSize.width
-            let height = originCellSize.height * CGFloat(watermark.arraySetting.rows)
-            if 3600 > height {
-                watermark.exportSetting.width = width * multiple
-                watermark.exportSetting.height = height * multiple
-            } else {
-                watermark.exportSetting.width =  width * (3600/height) * multiple
-                watermark.exportSetting.height = 3600 * multiple
-            }
-        case .grid:
-            let width = originCellSize.width * CGFloat(watermark.arraySetting.columns)
-            let height = originCellSize.height * CGFloat(watermark.arraySetting.rows)
-            if width > height || maxRatio < 1 {
-                if 3600 > width {
-                    watermark.exportSetting.width = width * multiple
-                    watermark.exportSetting.height = height * multiple
-                } else {
-                    watermark.exportSetting.width = 3600 * multiple
-                    watermark.exportSetting.height = height * (3600/width) * multiple
-                }
-            } else {
-                if 3600 > height {
-                    watermark.exportSetting.width = width * multiple
-                    watermark.exportSetting.height = height * multiple
-                } else {
-                    watermark.exportSetting.width =  width * (3600/height) * multiple
-                    watermark.exportSetting.height = 3600 * multiple
-                }
-            }
-        }
-    }
 }
 
 extension WatermarkEditViewModel {
