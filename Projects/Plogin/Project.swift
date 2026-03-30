@@ -1,185 +1,61 @@
-//
-//  Project.swift
-//  Manifests
-//
-//  Created by AtenB on 3/15/25.
-//
-
 import ProjectDescription
-import Foundation
+import ProjectDescriptionHelpers
 
-// MARK: - 프로젝트마다 설정 필요
-private let releaseVersion: String = "0.0.1"
-private let buildVersion: String = "1"
-private let projectName: String = "Plogin"
-private let appScheme: String = "plogin"
-private let organization: String = "AtenB"
-private let bundleID: String = "com.AtenB."
-private let iOSMinimumVersion: String = "17.0"
-private let macOSMinimumVersion: String = "14.0"
+private let name = "Plogin"
 
-private enum TargetType: String, CaseIterable {
-    case plogin = "Plogin"
-    case design = "Design"
-    case api = "API"
-    case imageModule = "ImageModule"
-    case videoModule = "VideoModule"
-    case utility = "Utility"
-}
-
-extension TargetType {
-    var targetName: String {
-        return self.rawValue
-    }
-
-    var targetBundleID: String {
-        switch self {
-        case .plogin:
-            return bundleID + projectName
-        default:
-            return bundleID + projectName + "." + self.rawValue
-        }
-    }
-
-    var getTarget: Target {
-        switch self {
-        case .plogin:
-            return .target(
-                name: targetName,
-                destinations: [.iPhone, .iPad, .mac, .macCatalyst],
-                product: .app,
-                bundleId: targetBundleID,
-                deploymentTargets: .multiplatform(iOS: iOSMinimumVersion, macOS: macOSMinimumVersion),
-                infoPlist: .extendingDefault(with: getInfoPlist),
-                sources: ["Sources/**"],
-                resources: ["Resources/**"],
-                entitlements: .dictionary(getEntitlements),
-                scripts: scripts,
-                dependencies: getTargetDependency,
-                settings: getSettings
-            )
-        default:
-            return .target(
-                name: targetName,
-                destinations: [.iPhone, .iPad, .mac, .macCatalyst],
-                product: .framework,
-                bundleId: targetBundleID,
-                deploymentTargets: .multiplatform(iOS: iOSMinimumVersion, macOS: macOSMinimumVersion),
-                infoPlist: .extendingDefault(with: getInfoPlist),
-                sources: ["Sources/**"],
-                resources: ["Resources/**"],
-                entitlements: .dictionary(getEntitlements),
-                dependencies: getTargetDependency,
-                settings: getSettings
-            )
-        }
-    }
-
-    var getTargetDependency: [TargetDependency] {
-        switch self {
-        case .plogin:
-            return [
-                .package(product: "YouTubeKit"),
-                .project(target: TargetType.design.rawValue, path: .relativeToRoot("Projects/Design"))
-            ]
-        default:
-            return []
-        }
-    }
-
-    var getInfoPlist: [String: Plist.Value] {
-        switch self {
-        case .plogin:
-            return [
-                "CFBundleDisplayName": "\(projectName)",
-                "CFBundleIdentifier": "\(targetBundleID)",
-                "CFBundleVersion": "\(buildVersion)",
-                "CFBundleShortVersionString": "\(releaseVersion)",
-                "CFBundleURLSchemes": [
-                    "\(appScheme)"
-                ],
-                "NSAppTransportSecurity": [
-                    "NSAllowsArbitraryLoads": true
-                ],
-                "UIUserInterfaceStyle": "Light",
-                "UIRequiresFullScreen": true,
-                "UILaunchStoryboardName": "LaunchScreen",
-                "CFBundleURLTypes": [
-                    "CFBundleTypeRole": "Editor",
-                    "CFBundleURLSchemes": [
-                        "\(projectName)"
-                    ]
-                ],
-                "NSPhotoLibraryUsageDescription": "사진 및 영상 권한"
-            ]
-        default:
-            return [
-                "CFBundleDisplayName": "\(projectName)",
-                "CFBundleIdentifier": "\(targetBundleID)",
-                "UIAppFonts": [
-                    "Pretendard-Bold.ttf",
-                    "Pretendard-SemiBold.ttf",
-                    "Pretendard-Regular.ttf"
-                ],
-            ]
-        }
-    }
-    
-    var getEntitlements: [String: Plist.Value] {
-        switch self {
-        default:
-            return [:]
-        }
-    }
-    
-    var getSettings: Settings {
-        switch self {
-        default:
-            return .settings(
-                base: [
-                    "MARKETING_VERSION": "\(releaseVersion)",
-                    "CURRENT_PROJECT_VERSION": "\(buildVersion)"
-                ],
-                configurations: [
-                    .debug(name: "Debug", settings: [
-                        "SWIFT_ACTIVE_COMPILATION_CONDITIONS": "DEBUG"
-                    ]),
-                    .release(name: "Release", settings: [
-                        "SWIFT_ACTIVE_COMPILATION_CONDITIONS": "RELEASE"
-                    ])
-                ]
-            )
-        }
-    }
-    
-    var scripts: [TargetScript] {
-        return [
-            .pre(
-               script: """
-               ROOT_DIR=\(ProcessInfo.processInfo.environment["TUIST_ROOT_DIR"] ?? "")
-               ${ROOT_DIR}/swiftlint --config ${ROOT_DIR}/.swiftlint.yml
-               """,
-               name: "SwiftLint",
-               basedOnDependencyAnalysis: false
-              )
+private let infoPlist: [String: Plist.Value] = [
+    "CFBundleDisplayName": "Plogin",
+    "CFBundleIdentifier": "$(PRODUCT_BUNDLE_IDENTIFIER)",
+    "CFBundleVersion": "$(CURRENT_PROJECT_VERSION)",
+    "CFBundleShortVersionString": "$(MARKETING_VERSION)",
+    "CFBundleURLSchemes": ["plogin"],
+    "NSAppTransportSecurity": ["NSAllowsArbitraryLoads": true],
+    "UIUserInterfaceStyle": "Light",
+    "UIRequiresFullScreen": true,
+    "UILaunchStoryboardName": "LaunchScreen",
+    "CFBundleURLTypes": [
+        [
+            "CFBundleTypeRole": "Editor",
+            "CFBundleURLSchemes": ["Plogin"]
         ]
-    }
-}
-
-private let packages: [Package] = [
-    .package(url: "https://github.com/alexeichhorn/YouTubeKit", .upToNextMajor(from: "0.2.9"))
+    ],
+    "NSPhotoLibraryUsageDescription": "사진 및 영상 권한"
 ]
 
-let project = Project(
-    name: TargetType.plogin.targetName,
-    organizationName: organization,
+private let project = Project(
+    name: name,
+    organizationName: ManifestShared.organization,
     options: .options(
         defaultKnownRegions: ["ko"],
         developmentRegion: "ko"
     ),
-    packages: packages,
+    packages: [
+        .package(url: "https://github.com/alexeichhorn/YouTubeKit", .upToNextMajor(from: "0.2.9"))
+    ],
     targets: [
-        TargetType.plogin
-    ].map { $0.getTarget },
-    schemes: []
+        .target(
+            name: name,
+            destinations: ManifestShared.destinations,
+            product: .app,
+            bundleId: ManifestShared.appBundleID,
+            deploymentTargets: ManifestShared.deploymentTargets,
+            infoPlist: .extendingDefault(with: infoPlist),
+            sources: ["Sources/**"],
+            resources: ["Resources/**"],
+            entitlements: .dictionary([:]),
+            scripts: [ManifestShared.swiftLintScript],
+            dependencies: [
+                .package(product: "YouTubeKit"),
+                .project(target: "Design", path: .relativeToRoot("Projects/Design")),
+                .project(target: "CoreDomain", path: .relativeToRoot("Projects/CoreDomain")),
+                .project(target: "Persistence", path: .relativeToRoot("Projects/Persistence")),
+                .project(target: "PlatformAdapter", path: .relativeToRoot("Projects/PlatformAdapter")),
+                .project(target: "RenderEngine", path: .relativeToRoot("Projects/RenderEngine")),
+                .project(target: "WatermarkFeature", path: .relativeToRoot("Projects/WatermarkFeature")),
+                .project(target: "ImageFeature", path: .relativeToRoot("Projects/ImageFeature")),
+                .project(target: "VideoFeature", path: .relativeToRoot("Projects/VideoFeature"))
+            ],
+            settings: ManifestShared.appSettings()
+        )
+    ]
 )

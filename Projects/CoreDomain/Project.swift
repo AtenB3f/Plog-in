@@ -1,23 +1,10 @@
 import ProjectDescription
 import ProjectDescriptionHelpers
 
-private let name = "Design"
-
-private let infoPlist: [String: Plist.Value] = [
-    "UIAppFonts": [
-        "Pretendard-Bold.ttf",
-        "Pretendard-SemiBold.ttf",
-        "Pretendard-Regular.ttf"
-    ]
-]
+private let name = "CoreDomain"
 
 private let project = Project(
     name: name,
-    organizationName: ManifestShared.organization,
-    options: .options(
-        defaultKnownRegions: ["ko"],
-        developmentRegion: "ko"
-    ),
     targets: [
         .target(
             name: name,
@@ -25,9 +12,8 @@ private let project = Project(
             product: .framework,
             bundleId: ManifestShared.moduleBundleID(name),
             deploymentTargets: ManifestShared.deploymentTargets,
-            infoPlist: .extendingDefault(with: infoPlist),
+            infoPlist: .default,
             sources: ["Sources/**"],
-            resources: ["Resources/**"],
             scripts: [ManifestShared.swiftLintScript],
             settings: ManifestShared.moduleSettings()
         )
