@@ -4,7 +4,7 @@ import ProjectDescriptionHelpers
 private let name = "Plogin"
 
 private let infoPlist: [String: Plist.Value] = [
-    "CFBundleDisplayName": "Plogin",
+    "CFBundleDisplayName": "\(name)",
     "CFBundleIdentifier": "$(PRODUCT_BUNDLE_IDENTIFIER)",
     "CFBundleVersion": "$(CURRENT_PROJECT_VERSION)",
     "CFBundleShortVersionString": "$(MARKETING_VERSION)",
@@ -47,9 +47,9 @@ private let project = Project(
             dependencies: [
                 .package(product: "YouTubeKit"),
                 .project(target: "Design", path: .relativeToRoot("Projects/Design")),
-                .project(target: "CoreDomain", path: .relativeToRoot("Projects/CoreDomain")),
+                .project(target: "WatermarkDomain", path: .relativeToRoot("Projects/WatermarkDomain")),
                 .project(target: "Persistence", path: .relativeToRoot("Projects/Persistence")),
-                .project(target: "PlatformAdapter", path: .relativeToRoot("Projects/PlatformAdapter")),
+                .project(target: "PlatformCore", path: .relativeToRoot("Projects/PlatformCore")),
                 .project(target: "RenderEngine", path: .relativeToRoot("Projects/RenderEngine")),
                 .project(target: "WatermarkFeature", path: .relativeToRoot("Projects/WatermarkFeature")),
                 .project(target: "ImageFeature", path: .relativeToRoot("Projects/ImageFeature")),

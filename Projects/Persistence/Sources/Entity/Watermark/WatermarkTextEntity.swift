@@ -1,0 +1,51 @@
+//
+//  WatermarkTextEntity.swift
+//  Plogin
+//
+//  Created by AtenB on 10/21/25.
+//  Copyright © 2025 AtenB. All rights reserved.
+//
+
+import Foundation
+import SwiftData
+import PlatformCore
+
+@Model
+public final class WatermarkTextEntity {
+    var text: String
+    var fontName: String
+    var fontSize: CGFloat
+    var rotation: CGFloat
+    var scale: CGFloat
+    var color: ColorData
+    var spacingWidth: CGFloat
+    var spacingHeight: CGFloat
+    var isGradient: Bool
+    var isDate: Bool
+    
+    var watermark: WatermarkEntity?
+    
+    public init(
+        text: String = "",
+        fontName: String = "",
+        fontSize: CGFloat = .zero,
+        rotation: CGFloat = .zero,
+        scale: CGFloat = 1.0,
+        color: ColorData = .init(red: .zero, green: .zero, blue: .zero, opacity: 1.0),
+        spacingWidth: CGFloat = .zero,
+        spacingHeight: CGFloat = .zero,
+        isGradient: Bool = true,
+        isDate: Bool = true
+    ) {
+        self.text = text
+        self.fontName = fontName
+        self.fontSize = fontSize
+        self.rotation = rotation
+        self.scale = scale
+        self.color = color
+        self.spacingWidth = spacingWidth
+        self.spacingHeight = spacingHeight
+        self.isGradient = isGradient
+        self.isDate = isDate
+    }
+}

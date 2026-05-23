@@ -29,6 +29,10 @@ private let project = Project(
             sources: ["Sources/**"],
             resources: ["Resources/**"],
             scripts: [ManifestShared.swiftLintScript],
+            dependencies: [
+                .project(target: "PlatformCore", path: .relativeToRoot("Projects/PlatformCore")),
+                .project(target: "UISchema", path: .relativeToRoot("Projects/UISchema"))
+            ],
             settings: ManifestShared.moduleSettings()
         )
     ]

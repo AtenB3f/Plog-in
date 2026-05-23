@@ -7,6 +7,7 @@
 //
 
 import SwiftUI
+import PlatformCore
 
 public enum FrameListMode {
     case none

@@ -16,7 +16,7 @@ private let project = Project(
             sources: ["Sources/**"],
             scripts: [ManifestShared.swiftLintScript],
             dependencies: [
-                .project(target: "CoreDomain", path: .relativeToRoot("Projects/CoreDomain")),
+                .project(target: "WatermarkDomain", path: .relativeToRoot("Projects/WatermarkDomain")),
                 .project(target: "RenderEngine", path: .relativeToRoot("Projects/RenderEngine")),
                 .project(target: "Design", path: .relativeToRoot("Projects/Design"))
             ],

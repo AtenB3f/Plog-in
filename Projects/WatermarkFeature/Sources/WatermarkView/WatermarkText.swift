@@ -1,0 +1,166 @@
+//
+//  WatermarkText.swift
+//  WatermarkFeature
+//
+//  Created by AtenB on 5/21/26.
+//
+
+import SwiftUI
+import PlatformCore
+import Design
+import WatermarkDomain
+
+public struct WatermarkText: View {
+    @EnvironmentObject var viewModel: WatermarkViewModel
+    
+    private let image: PImage
+
+    public init(
+        image: PImage
+    ) {
+        self.image = image
+    }
+
+    public var body: some View {
+        GeometryReader { proxy in
+            let renderSize = viewModel.format.getRenderSize(
+                originSize: image.size,
+                containerSize: proxy.size
+            )
+            
+            let renderRatio = viewModel.format.getRenderRatio(
+                originSize: image.size,
+                renderSize: renderSize
+            )
+            
+            let renderFontSize = viewModel.store.watermark.text.fontSize * renderRatio
+            let renderKerning = -0.25 * renderRatio
+
+            let renderCellSize = viewModel.format.getTextCellSize(
+                text: viewModel.store.watermark.text.text,
+                font: viewModel.store.watermark.text.toPFont,
+                fontSize: renderFontSize,
+                kerning: renderKerning
+            )
+            
+            let grid = viewModel.format.getGrid(
+                renderSize: renderSize,
+                cellSize: renderCellSize,
+                spacingHorizontal: viewModel.store.watermark.text.spacingWidth * renderRatio,
+                spacingVertical: viewModel.store.watermark.text.spacingHeight * renderRatio
+            )
+
+            GridLayer(
+                proxy: proxy,
+                watermarkText: viewModel.store.watermark.text,
+                renderRatio: renderRatio,
+                renderSize: renderSize,
+                renderFontSize: renderFontSize,
+                cellSize: renderCellSize,
+                rows: grid.rows,
+                columns: grid.columns
+            )
+            .frame(width: renderSize.width, height: renderSize.height)
+            .position(x: proxy.size.width * 0.5, y: proxy.size.height * 0.5)
+        }
+    }
+}
+
+private struct GridLayer: View {
+    @EnvironmentObject var viewModel: WatermarkViewModel
+    let proxy: GeometryProxy
+    let watermarkText: WatermarkTextModel
+
+    let renderRatio: CGFloat
+    let renderSize: CGSize
+    let renderFontSize: CGFloat
+
+    let cellSize: CGSize
+
+    let rows: Int
+    let columns: Int
+
+    var body: some View {
+        Canvas { context, size in
+            let centerX = size.width * 0.5
+            let centerY = size.height * 0.5
+
+            let stepX = cellSize.width + watermarkText.spacingWidth * renderRatio
+            let stepY = cellSize.height + watermarkText.spacingHeight * renderRatio
+            let renderKerning = -0.25 * renderRatio
+            let radians = watermarkText.rotation * .pi / 180
+            let cosTheta = cos(radians)
+            let sinTheta = sin(radians)
+
+            let u = CGVector(dx: cosTheta * stepX, dy: sinTheta * stepX)
+            let v = CGVector(dx: -sinTheta * stepY, dy: cosTheta * stepY)
+
+            let halfDiagonal = hypot(size.width, size.height) * 0.5
+            let safeStepX = max(stepX, 1)
+            let safeStepY = max(stepY, 1)
+            let columnRadius = max(Int(ceil(halfDiagonal / safeStepX)) + 2, columns / 2 + 2)
+            let rowRadius = max(Int(ceil(halfDiagonal / safeStepY)) + 2, rows / 2 + 2)
+
+            let drawFont = PFont(
+                name: watermarkText.fontName,
+                size: renderFontSize
+            ) ?? .systemFont(ofSize: renderFontSize)
+
+            let attributes: [NSAttributedString.Key: Any] = [
+                .font: drawFont,
+                .kern: renderKerning,
+                .foregroundColor: watermarkText.color.toPColor
+            ]
+
+            let attributedText = NSAttributedString(
+                string: watermarkText.text,
+                attributes: attributes
+            )
+
+            let textSize = attributedText.size()
+            let resolved = context.resolve(
+                Text(watermarkText.text)
+                    .font(.custom(watermarkText.fontName, size: renderFontSize))
+                    .kerning(renderKerning)
+                    .foregroundStyle(watermarkText.color.toColor)
+            )
+
+            for rowOffset in (-rowRadius)...rowRadius {
+                for columnOffset in (-columnRadius)...columnRadius {
+                    let x = centerX
+                        + CGFloat(columnOffset) * u.dx
+                        + CGFloat(rowOffset) * v.dx
+                    let y = centerY
+                        + CGFloat(columnOffset) * u.dy
+                        + CGFloat(rowOffset) * v.dy
+
+                    let drawRect = CGRect(
+                        x: -textSize.width * 0.5,
+                        y: -textSize.height * 0.5,
+                        width: textSize.width,
+                        height: textSize.height
+                    )
+
+                    context.withCGContext { cgContext in
+#if canImport(UIKit)
+                        cgContext.saveGState()
+                        cgContext.translateBy(x: x, y: y)
+                        cgContext.rotate(by: radians)
+                        UIGraphicsPushContext(cgContext)
+                        attributedText.draw(in: drawRect)
+                        UIGraphicsPopContext()
+                        cgContext.restoreGState()
+#else
+                        context.draw(
+                            resolved,
+                            at: CGPoint(x: x, y: y),
+                            anchor: .center
+                        )
+#endif
+                    }
+                }
+            }
+        }
+        .drawingGroup()
+    }
+}

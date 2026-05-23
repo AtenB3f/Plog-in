@@ -11,12 +11,8 @@ import Design
 
 @main
 struct PloginApp: App {
-    @StateObject var manager = AppManager.shared
-    let dataStore = DataStore.shared
-    
     init() {
         FontLoader.loadModuleFont()
-        dataStore.installBasicWatermark()
     }
     
     var body: some Scene {

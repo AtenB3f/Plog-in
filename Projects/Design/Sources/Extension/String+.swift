@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import PlatformCore
 
 public extension String {
     func getSize(font: PFont) -> CGSize {

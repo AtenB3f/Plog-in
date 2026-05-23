@@ -16,8 +16,9 @@ private let project = Project(
             sources: ["Sources/**"],
             scripts: [ManifestShared.swiftLintScript],
             dependencies: [
-                .project(target: "CoreDomain", path: .relativeToRoot("Projects/CoreDomain")),
-                .project(target: "PlatformAdapter", path: .relativeToRoot("Projects/PlatformAdapter"))
+                .project(target: "WatermarkDomain", path: .relativeToRoot("Projects/WatermarkDomain")),
+                .project(target: "PlatformCore", path: .relativeToRoot("Projects/PlatformCore")),
+                .project(target: "PlatformExport", path: .relativeToRoot("Projects/PlatformExport"))
             ],
             settings: ManifestShared.moduleSettings()
         )

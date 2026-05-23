@@ -8,6 +8,7 @@
 
 import SwiftUI
 import Design
+import WatermarkFeature
 
 enum RootStatus {
     case splash
@@ -17,9 +18,6 @@ enum RootStatus {
 
 public final class AppManager: ObservableObject {
     public static var shared = AppManager()
-    
-    // MARK: Popup
-    @Published var rootPopup: PopupType?
     
     // MARK: Toast
     @Published var rootToast: ToastData?
@@ -31,15 +29,6 @@ public final class AppManager: ObservableObject {
     // MARK: Tab
     @Published var currentTab: Tab = .home
     
-    // MARK: Navigation
-    @Published var path = NavigationPath()
-}
-
-// MARK: Popup
-public extension AppManager {
-    func pushPopup(_ type: PopupType? = nil) {
-        rootPopup = type
-    }
 }
 
 // MARK: Toast
@@ -57,23 +46,6 @@ public extension AppManager {
                 try await Task.sleep(for: .seconds(duration))
                 withAnimation { rootToast = nil }
             }
-        }
-    }
-}
-
-// MARK: Navigation
-public extension AppManager {
-    func pushRoot() {
-        path = NavigationPath()
-    }
-
-    func push(_ value: Navigation) {
-        path.append(value)
-    }
-
-    func dismiss() {
-        if !path.isEmpty {
-            path.removeLast()
         }
     }
 }
