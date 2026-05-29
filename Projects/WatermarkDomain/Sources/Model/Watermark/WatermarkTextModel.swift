@@ -17,8 +17,8 @@ public struct WatermarkTextModel {
     public var color: ColorData
     public var spacingWidth: CGFloat
     public var spacingHeight: CGFloat
+    public var date: Date?
     public var isGradient: Bool
-    public var isDate: Bool
     
     public init(
         text: String = "",
@@ -28,8 +28,8 @@ public struct WatermarkTextModel {
         color: ColorData = .init(red: .zero, green: .zero, blue: .zero, opacity: .zero),
         spacingWidth: CGFloat = .zero,
         spacingHeight: CGFloat = .zero,
-        isGradient: Bool = true,
-        isDate: Bool = true
+        date: Date? = nil,
+        isGradient: Bool = true
     ) {
         self.text = text
         self.fontName = fontName
@@ -38,8 +38,8 @@ public struct WatermarkTextModel {
         self.color = color
         self.spacingWidth = spacingWidth
         self.spacingHeight = spacingHeight
+        self.date = date
         self.isGradient = isGradient
-        self.isDate = isDate
     }
 }
 

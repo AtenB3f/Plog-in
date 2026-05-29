@@ -19,18 +19,18 @@ struct WatermarkEditMenuArray: View {
             VStack(spacing: 0) {
                 CategoryContent(title: "배치") {
                     Button {
-//                        viewModel.isShowArrayType.toggle()
+                        viewModel.action(.update(.array(.toggle)))
                     } label: {
                         HStack(spacing: 0) {
-//                            Text(viewModel.arrayType.menuName)
-//                                .font(.bold1)
-//                                .foreground(.Text.light)
+                            Text(viewModel.store.watermark.array.type.menuName)
+                                .font(.bold1)
+                                .foreground(.Text.light)
                             
-//                            (viewModel.isShowArrayType ? Image.iconChevronUpSM : Image.iconChevronDownSM)
-//                                .resizable()
-//                                .renderingMode(.template)
-//                                .frame(width: 24, height: 24)
-//                                .foreground(.Text.light)
+                            (viewModel.isShowArrayType ? Image.iconChevronUpSM : Image.iconChevronDownSM)
+                                .resizable()
+                                .renderingMode(.template)
+                                .frame(width: 24, height: 24)
+                                .foreground(.Text.light)
                         }
                     }
                 }
@@ -39,8 +39,7 @@ struct WatermarkEditMenuArray: View {
                     Spacer()
                     ForEach(WatermarkArrayType.allCases, id: \.self) { type in
                         Button {
-//                            viewModel.setArray(type: type)
-//                            viewModel.setArray(watermark: viewModel.watermark, type: type)
+                            viewModel.action(.update(.array(.type(type))))
                         } label: {
                             Text(type.menuName)
                                 .font(viewModel.store.watermark.array.type == type ? .bold2 : .body2)
@@ -54,30 +53,23 @@ struct WatermarkEditMenuArray: View {
                 .padding(.horizontal, 18)
                 .padding(.vertical, 4)
                 .background(Color.Base.medium)
-//                .foldingHeight(viewModel.isShowArrayType)
+                .foldingHeight(viewModel.isShowArrayType)
                 
                 GridSelector(
                     rows: $viewModel.store.watermark.array.rows,
                     columns: $viewModel.store.watermark.array.columns)
-//                .frame(width: viewModel.isShowGrid ? nil : 0)
+                .frame(width: viewModel.store.watermark.array.type == .grid ? nil : 0)
                 .padding(.vertical, 12)
-//                .foldingHeight(viewModel.isShowGrid)
-//                .onChange(of: viewModel.watermark.array) {
-//                    viewModel.setArray()
-//                    viewModel.setArray(
-//                        watermark: viewModel.watermark,
-//                        rows: viewModel.watermark.arraySetting.rows,
-//                        columns: viewModel.watermark.arraySetting.columns)
-//                }
+                .foldingHeight(viewModel.store.watermark.array.type == .grid)
             }
             
-            if viewModel.origins.count > 1 {
+            if viewModel.array.count > 1 {
                 VStack(spacing: 0) {
                     CategoryTitle("순서 변경")
                     
                     FrameList(
                         mode: .constant(.sort),
-                        list: $viewModel.frame.list,
+                        list: $viewModel.array,
                         select: .constant(nil)
                     )
                 }

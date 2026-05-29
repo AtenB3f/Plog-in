@@ -9,29 +9,6 @@
 import SwiftUI
 import Design
 
-enum WatermarkEditMenuType: String, CaseIterable {
-    case text
-    case sticker
-    case array
-    case export
-    case frame
-    
-    var menuName: String {
-        switch self {
-        case .text:
-            return "텍스트"
-        case .sticker:
-            return "스티커"
-        case .array:
-            return "배열"
-        case .export:
-            return "출력"
-        case .frame:
-            return "프레임"
-        }
-    }
-}
-
 struct WatermarkEditMenu: View {
     @EnvironmentObject var viewModel: WatermarkEditViewModel
     
@@ -70,7 +47,7 @@ struct WatermarkEditMenu: View {
             
             CategoryTabbar(
                 index: $viewModel.indexCategory,
-                list: WatermarkEditMenuType.allCases.map { $0.menuName })
+                list: WatermarkMenuType.allCases.map { $0.menuName })
             .padding(.vertical)
             .padding(.horizontal, 20)
             .background(Color.black)
@@ -85,8 +62,8 @@ extension WatermarkEditMenu {
         ScrollViewReader { proxy in
             ScrollView(.horizontal) {
                 HStack(spacing: 0) {
-                    ForEach(WatermarkEditMenuType.allCases, id: \.self) { type in
-                        if WatermarkEditMenuType.allCases[viewModel.indexCategory] == type {
+                    ForEach(WatermarkMenuType.allCases, id: \.self) { type in
+                        if WatermarkMenuType.allCases[viewModel.indexCategory] == type {
                             menu(type)
                                 .containerRelativeFrame(.horizontal)
                                 .environmentObject(viewModel)
@@ -104,7 +81,7 @@ extension WatermarkEditMenu {
             .scrollIndicators(.hidden)
             .background(Color.Base.dark)
             .onChange(of: viewModel.indexCategory) {
-                let tag = WatermarkEditMenuType.allCases[viewModel.indexCategory]
+                let tag = WatermarkMenuType.allCases[viewModel.indexCategory]
                 withAnimation {
                     proxy.scrollTo(tag.rawValue)
                 }
@@ -115,7 +92,7 @@ extension WatermarkEditMenu {
     }
     
     @ViewBuilder
-    func menu(_ type: WatermarkEditMenuType) -> some View {
+    func menu(_ type: WatermarkMenuType) -> some View {
         switch type {
         case .text:
             WatermarkEditMenuText()

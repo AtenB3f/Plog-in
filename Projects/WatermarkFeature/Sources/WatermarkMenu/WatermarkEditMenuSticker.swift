@@ -96,6 +96,6 @@ extension WatermarkEditMenuSticker {
             )
 //            .foldingHeight(!viewModel.stickers.isEmpty)
         }
-        .foldingHeight(!viewModel.sticker.images.isEmpty)
+        .foldingHeight(!viewModel.sticker.list.isEmpty)
     }
 }

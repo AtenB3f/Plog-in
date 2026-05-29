@@ -41,7 +41,6 @@ public struct TextSlider: View {
                 RoundedRectangle(cornerRadius: 10)
                     .foreground(.Text.light)
                     .frame(width: width, height: isPress ? 15 : 8)
-                    
             }
             .onAppear {
                 width = value * geometry.size.width / (maxValue - minValue)

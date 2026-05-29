@@ -18,12 +18,12 @@ public enum CategoryImageMode {
 public struct CategoryImage: View {
     @Binding var mode: CategoryImageMode?
     let image: Image
-    let callback: (CategoryImageMode)->Void
+    let callback: (CategoryImageMode) -> Void
     
     public init(
         mode: Binding<CategoryImageMode?>,
         image: Image,
-        callback: @escaping (CategoryImageMode)->Void
+        callback: @escaping (CategoryImageMode) -> Void
     ) {
         self._mode = mode
         self.image = image

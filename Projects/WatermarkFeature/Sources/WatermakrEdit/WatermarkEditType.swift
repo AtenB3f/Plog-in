@@ -5,7 +5,7 @@
 //  Created by AtenB on 5/19/26.
 //
 
-import Foundation
+import SwiftUI
 import Design
 import PlatformCore
 
@@ -14,31 +14,29 @@ enum WatermarkEditPickerType {
     case sticker
 }
 
-struct WatermarkEditItem: TitleImagable {
+struct WatermarkItem: ImageItemable {
     let id = UUID()
-    var image: PImage?
+    var image: PImage
     var title: String?
     var size: CGFloat = 76
     
-    init(image: PImage?) {
+    init(image: PImage, title: String? = nil) {
         self.image = image
+        self.title = title
     }
 }
 
-struct WatermarkEditListViewState {
+struct WatermarkListViewState {
     var select: Int?
     var mode: FrameListMode
-    var images: [PImage]
-    var list: [WatermarkEditItem]
+    var list: [WatermarkItem]
     init(
         select: Int? = nil,
         mode: FrameListMode = .none,
-        images: [PImage] = [],
-        list: [WatermarkEditItem] = []
+        list: [WatermarkItem] = []
     ) {
         self.select = select
         self.mode = mode
-        self.images = images
         self.list = list
     }
 }

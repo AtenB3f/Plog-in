@@ -13,23 +13,23 @@ import WatermarkDomain
 public struct WatermarkText: View {
     @EnvironmentObject var viewModel: WatermarkViewModel
     
-    private let image: PImage
+    private let imageSize: CGSize
 
     public init(
-        image: PImage
+        imageSize: CGSize
     ) {
-        self.image = image
+        self.imageSize = imageSize
     }
 
     public var body: some View {
         GeometryReader { proxy in
             let renderSize = viewModel.format.getRenderSize(
-                originSize: image.size,
+                originSize: imageSize,
                 containerSize: proxy.size
             )
             
             let renderRatio = viewModel.format.getRenderRatio(
-                originSize: image.size,
+                originSize: imageSize,
                 renderSize: renderSize
             )
             
@@ -37,7 +37,7 @@ public struct WatermarkText: View {
             let renderKerning = -0.25 * renderRatio
 
             let renderCellSize = viewModel.format.getTextCellSize(
-                text: viewModel.store.watermark.text.text,
+                text: viewModel.store.watermark.text.text + " " + (viewModel.store.watermark.text.date?.now() ?? ""),
                 font: viewModel.store.watermark.text.toPFont,
                 fontSize: renderFontSize,
                 kerning: renderKerning
@@ -62,6 +62,34 @@ public struct WatermarkText: View {
             )
             .frame(width: renderSize.width, height: renderSize.height)
             .position(x: proxy.size.width * 0.5, y: proxy.size.height * 0.5)
+            .overlay(alignment: .center) {
+                if viewModel.isShowEdit {
+                    ZStack(alignment: .topTrailing) {
+                        Rectangle()
+                            .stroke(lineWidth: 2)
+                            .foreground(.white)
+                            .shadow(.light)
+                            .frame(width: renderCellSize.width, height: renderCellSize.height)
+                            .rotationEffect(.degrees(viewModel.store.watermark.text.rotation))
+                            
+                        Image.iconCloseCircle
+                            .frame(width: 16, height: 16)
+                            .background {
+                                Circle()
+                                    .frame(width: 16, height: 16)
+                                    .foreground(.white)
+                            }
+                            .foreground(.Gray.light)
+                            .offset(x: 8, y: -8)
+                            .onTapGesture {
+                                viewModel.action(.mode(isOn: false))
+                            }
+                    }
+                }
+            }
+        }
+        .onTapGesture {
+            viewModel.action(.mode(isOn: true))
         }
     }
 }
@@ -113,13 +141,13 @@ private struct GridLayer: View {
             ]
 
             let attributedText = NSAttributedString(
-                string: watermarkText.text,
+                string: watermarkText.text + " " + (watermarkText.date?.now() ?? ""),
                 attributes: attributes
             )
 
             let textSize = attributedText.size()
             let resolved = context.resolve(
-                Text(watermarkText.text)
+                Text(watermarkText.text + " " + (watermarkText.date?.now() ?? ""))
                     .font(.custom(watermarkText.fontName, size: renderFontSize))
                     .kerning(renderKerning)
                     .foregroundStyle(watermarkText.color.toColor)

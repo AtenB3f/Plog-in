@@ -7,11 +7,10 @@
 
 import SwiftUI
 import UISchema
-//import Design
 
 public class WatermarkPopupCoordinator: ObservableObject {
     @Published public var path: [WatermarkPopupRoute] = []
-    
+    @Published public var history: WatermarkPopupRoute?
     public init() {}
 }
 
@@ -30,12 +29,14 @@ extension WatermarkPopupCoordinator: PopupCoordinator {
     public func pop() {
         guard !path.isEmpty else { return }
         withAnimation {
+            history = path.last
             path.removeLast()
         }
     }
     
     public func popRoot() {
         withAnimation {
+            history = path.last
             path.removeAll()
         }
     }

@@ -34,7 +34,8 @@ public struct WatermarkView: View {
     @ViewBuilder
     func page() -> some View {
         TabView(selection: $viewModel.page) {
-            ForEach(viewModel.origins, id: \.self) { image in
+            ForEach(viewModel.origins.indices, id: \.self) { index in
+                let image = viewModel.origins[index]
                 Image(pImage: image)
                     .resizable()
                     .aspectRatio(contentMode: .fit)
@@ -42,10 +43,11 @@ public struct WatermarkView: View {
                         if viewModel.store.watermark.text.isGradient {
                             LinearGradient(gradient: .plave, startPoint: .topLeading, endPoint: .bottomTrailing)
                         }
-                        WatermarkText(image: image)
+                        WatermarkText(imageSize: image.size)
                             .environmentObject(viewModel)
                     }
                     .drawingGroup()
+                    .tag(index)
             }
         }
         .tabViewStyle(.page)
@@ -53,25 +55,38 @@ public struct WatermarkView: View {
     
     @ViewBuilder
     func cell() -> some View {
-//        WatermarkCellView(
-//            rows: $viewModel.store.watermark.array.rows,
-//            columns: $viewModel.store.watermark.array.columns,
-//            images: $viewModel.images,
-//            ratio: 1//viewModel.editor.getCellSize(images: viewModel.images).ratio
-//        )
+        WatermarkCell(
+            rows: viewModel.store.watermark.array.rows,
+            columns: viewModel.store.watermark.array.columns,
+            images: viewModel.origins,
+            ratio: viewModel.format.getCellRatio(images: viewModel.origins)
+        )
+        .overlay {
+            if viewModel.store.watermark.text.isGradient {
+                LinearGradient(gradient: .plave, startPoint: .topLeading, endPoint: .bottomTrailing)
+            }
+            WatermarkText(imageSize: viewModel.format.getCell(images: viewModel.origins, array: viewModel.store.watermark.array))
+                .environmentObject(viewModel)
+        }
+        .drawingGroup()
     }
 }
 
 struct WatermarkCell: View {
-    @Binding var rows: Int
-    @Binding var columns: Int
-    @Binding var images: [PImage]
+    let rows: Int
+    let columns: Int
+    let images: [PImage]
     let ratio: CGFloat
     
-    init(rows: Binding<Int>, columns: Binding<Int>, images: Binding<[PImage]>, ratio: CGFloat) {
-        self._rows = rows
-        self._columns = columns
-        self._images = images
+    init(
+        rows: Int,
+        columns: Int,
+        images: [PImage],
+        ratio: CGFloat
+    ) {
+        self.rows = rows
+        self.columns = columns
+        self.images = images
         self.ratio = ratio
     }
 

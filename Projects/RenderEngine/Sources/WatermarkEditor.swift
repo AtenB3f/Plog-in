@@ -37,7 +37,7 @@ public class WatermarkEditor {
             return exportImage
         }
         
-        let arr = format.getRowColums(imageCount: images.count, watermark: watermark)
+        let arr = format.getRowColums(imageCount: images.count, array: watermark.array)
         let image = mergeImages(
             images: images,
             rows: arr.0,

@@ -10,13 +10,12 @@ import SwiftUI
 import Design
 import PlatformCore
 
-struct WatermarkFrameItemModel: TitleImagable {
+struct WatermarkFrameItemModel: ImageItemable {
     let id = UUID()
-    var image: PImage?
+    var image: PImage
     var title: String?
-    var size: CGFloat = 76
     
-    init(image: PImage?, title: String? = nil) {
+    init(image: PImage, title: String = "") {
         self.image = image
         self.title = title
     }

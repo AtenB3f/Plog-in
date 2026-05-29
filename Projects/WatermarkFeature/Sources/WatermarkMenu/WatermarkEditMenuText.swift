@@ -42,7 +42,7 @@ extension WatermarkEditMenuText {
                 HStack(spacing: 8) {
                     ForEach(viewModel.words, id: \.self) { word in
                         Button {
-                            viewModel.action(.word(word))
+                            viewModel.action(.update(.text(.word(word))))
                         } label: {
                             HStack(spacing: 0) {
                                 Text(word)
@@ -75,7 +75,7 @@ extension WatermarkEditMenuText {
             HStack(spacing: 6) {
                 ForEach(viewModel.colorPalet, id: \.self) { color in
                     Button {
-                        viewModel.action(.update(.setColor(color: color)))
+                        viewModel.action(.update(.text(.color(color))))
                     } label: {
                         let colorData = ColorData(color, alpha: viewModel.store.watermark.text.color.opacity)
                         RoundedRectangle(cornerRadius: 2)
@@ -97,7 +97,7 @@ extension WatermarkEditMenuText {
                 Text(String(format: "%.0f", viewModel.store.watermark.text.color.opacity * 100) + "%")
                     .font(.body2)
                     .foreground(.Text.light)
-                    .frame(width: 35)
+                    .frame(width: 42, alignment: .leading)
             }
         }
     }
@@ -113,7 +113,7 @@ extension WatermarkEditMenuText {
                 Text(String(format: "%.1f", viewModel.store.watermark.text.spacingWidth))
                     .font(.body2)
                     .foreground(.Text.light)
-                    .frame(width: 35)
+                    .frame(width: 42, alignment: .leading)
             }
         }
     }
@@ -123,16 +123,16 @@ extension WatermarkEditMenuText {
         CategoryContent(title: "옵션") {
             HStack(alignment: .center, spacing: 4) {
                 Button {
-                    viewModel.action(.update(.onDate))
+                    viewModel.action(.update(.text(.date)))
                 } label: {
                     IconLabel(
                         text: "날짜",
                         icon: .iconCheckSM,
-                        color: viewModel.store.watermark.text.isDate ? .Text.light : .Gray.dark,
+                        color: viewModel.store.watermark.text.date != nil ? .Text.light : .Gray.dark,
                         size: 16)
                 }
                 Button {
-                    viewModel.action(.update(.onGradient))
+                    viewModel.action(.update(.text(.gradient)))
                 } label: {
                     IconLabel(
                         text: "그라데이션",

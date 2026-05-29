@@ -19,19 +19,11 @@ public class WatermarkEditViewModel: ObservableObject {
         case open(_ type: WatermarkEditPickerType)
         case picker
         case menu
-        case update(_ update: Update)
+        case update(_ type: WatermarkEditMenuType)
         case preview
         case word(_ text: String)
         case popup(_ route: WatermarkPopupRoute?)
     }
-    
-    enum Update {
-        case onDate
-        case onGradient
-        case setColor(color: Color)
-    }
-    
-    @Published var origins: [PImage] = []
     
     // MARK: - Picker
     @Published var isShowPicker: Bool = false
@@ -47,12 +39,15 @@ public class WatermarkEditViewModel: ObservableObject {
     @Published var menuHeight: CGFloat = .zero
     
     let colorPalet: [Color] = [.white, .Gray.medium, .black, .Yejun.main, .Noah.main, .Bamby.main, .Eunho.main, .Hamin.main]
-    @Published var sticker = WatermarkEditListViewState()
-    @Published var frame = WatermarkEditListViewState()
+    
+    @Published var sticker = WatermarkListViewState()
+    @Published var isShowArrayType = false
+    @Published var array: [WatermarkItem] = []
+    @Published var isShowExportType = false
+    @Published var frame = WatermarkListViewState()
     
     // MARK: - Watermark
     var store: WatermarkStore
-    
     let popup: WatermarkPopupCoordinator
     let usecase: WatermarkUsecase
     let picker: AssetPicker
@@ -75,7 +70,7 @@ public class WatermarkEditViewModel: ObservableObject {
         words = usecase.fetchWords().map { $0.text }
         
         var new = WatermarkModel()
-        new.text.text = (words.first ?? "PLAVE") + (new.text.isDate ? "\(Date.now)" : "")
+        new.text.text = (words.first ?? "PLAVE")
         self.store.setWatermark(new)
         
         bind()
@@ -93,14 +88,28 @@ private extension WatermarkEditViewModel {
         picker.$assets
                 .map { $0.compactMap(\.imageAsset) }
                 .sink { [weak self] assets in
-                    self?.origins = assets
+                    self?.array = assets.compactMap { .init(image: $0) }
                     self?.initialize()
                 }
                 .store(in: &cancellables)
+        
+        popup.$history
+            .sink { [weak self] history in
+                guard let self = self else { return }
+                self.handlePopupComplete(history)
+            }
+            .store(in: &cancellables)
+        
+        $array
+            .sink { [weak self] list in
+                guard let self = self else { return }
+                // TODO: picker에 채워넣기..?
+            }
+            .store(in: &cancellables)
     }
     
     func initialize() {
-        if let asset = origins.first {
+        if let asset = array.first?.image {
             let ratio = asset.size.width / 650
             let fontSize = ratio * 36
             let spacing = ratio * 20
@@ -113,6 +122,7 @@ private extension WatermarkEditViewModel {
         if let color = colorPalet.first {
             store.watermark.text.color = ColorData(color)
         }
+        words = usecase.fetchWords().map { $0.text }
     }
 }
 
@@ -148,11 +158,10 @@ private extension WatermarkEditViewModel {
         switch pickerType {
         case .picture:
             let assets = picker.assets
-            origins = assets.compactMap { $0.imageAsset }
+            array = assets.compactMap { $0.imageAsset }.map { .init(image: $0) }
         case .sticker:
             let assets = stickerPicker.assets
-            sticker.images = assets.compactMap { $0.imageAsset }
-            sticker.list = sticker.images.map { .init(image: $0) }
+            sticker.list = assets.compactMap { $0.imageAsset }.map { .init(image: $0) }
         case .none:
             break
         }
@@ -165,15 +174,27 @@ private extension WatermarkEditViewModel {
         }
     }
     
-    func update(_ update: Update) {
-        switch update {
-        case .onDate:
-            store.watermark.text.isDate.toggle()
-        case .onGradient:
-            store.watermark.text.isGradient.toggle()
-        case .setColor(let color):
-            store.watermark.text.color = ColorData(color)
+    func update(_ type: WatermarkEditMenuType) {
+        switch type {
+        case .text(let menu):
+            setText(menu)
+        case .sticker(let menu):
+            setSticker(menu)
+        case .array(let menu):
+            setArray(menu)
+        case .export(let menu):
+            setExport(menu)
+        case .frame(let menu):
+            setFrame(menu)
         }
+//        switch update {
+//        case .onDate:
+//            store.watermark.text.isDate.toggle()
+//        case .onGradient:
+//            store.watermark.text.isGradient.toggle()
+//        case .setColor(let color):
+//            store.watermark.text.color = ColorData(color)
+//        }
     }
     
     func makePreview() {
@@ -190,6 +211,73 @@ private extension WatermarkEditViewModel {
         } else {
             popup.popRoot()
         }
+    }
+    
+    func handlePopupComplete(_ route: WatermarkPopupRoute?) {
+        guard let route = route else { return }
+        switch route {
+        case .word:
+            words = usecase.fetchWords().map { $0.text }
+        case .title:
+            break
+        case .preview:
+            break
+        }
+    }
+}
+
+private extension WatermarkEditViewModel {
+    func setText(_ menu: WatermarkEditMenuType.TextMenu) {
+        switch menu {
+        case .word(let text):
+            store.watermark.text.text = text
+        case .color(let color):
+            let alpha = store.watermark.text.color.opacity
+            store.watermark.text.color = ColorData(color, alpha: alpha)
+        case .date:
+            store.watermark.text.date = Date()
+        case .gradient:
+            store.watermark.text.isGradient.toggle()
+        }
+    }
+    
+    func setSticker(_ menu: WatermarkEditMenuType.StickerMenu) {
+//        switch menu {
+//        case .load:
+//            
+//        case .edit:
+//            
+//        case .remove:
+//            
+//        }
+    }
+    
+    func setArray(_ menu: WatermarkEditMenuType.ArrayMenu) {
+        switch menu {
+        case .toggle:
+            isShowArrayType.toggle()
+        case .type(let type):
+            store.watermark.array.type = type
+            store.watermark.array.setRowColumn(array.count)
+        case .order:
+            break
+        }
+    }
+    
+    func setExport(_ menu: WatermarkEditMenuType.ExportMenu) {
+        switch menu {
+        case .type(let type):
+            store.watermark.export.type = type
+        }
+    }
+    
+    func setFrame(_ menu: WatermarkEditMenuType.FrameMenu) {
+//        switch menu {
+//        case .save:
+//            
+//        case .title:
+//            
+//        }
     }
 }
 /*

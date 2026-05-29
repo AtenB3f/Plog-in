@@ -41,4 +41,11 @@ public extension Date {
         format.dateFormat = "yyyy-MM-dd"
         return format.string(from: Date())
     }
+    
+    func now() -> String {
+        var calendar = Calendar.current
+        let format = DateFormatter()
+        format.dateFormat = "yyyy-MM-dd"
+        return format.string(from: self)
+    }
 }

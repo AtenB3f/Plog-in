@@ -18,7 +18,7 @@ struct WatermarkEditMenuExport: View {
             VStack(spacing: 0) {
                 CategoryContent(title: "출력 사이즈") {
                     Button {
-//                        viewModel.isShowExport.toggle()
+                        viewModel.isShowExportType.toggle()
                     } label: {
                         HStack(spacing: 0) {
                             if viewModel.store.watermark.export.type == .auto {
@@ -26,18 +26,17 @@ struct WatermarkEditMenuExport: View {
                                     .font(.body1)
                                     .foreground(.Text.dark)
                                     .padding(.horizontal, 6)
-                                
                             }
                             
                             Text(viewModel.store.watermark.export.getSizeStr())
                                 .font(.bold1)
                                 .foreground(.Text.light)
                             
-//                            (viewModel.isShowArrayType ? Image.iconChevronUpSM : Image.iconChevronDownSM)
-//                                .resizable()
-//                                .renderingMode(.template)
-//                                .frame(width: 24, height: 24)
-//                                .foreground(.Text.light)
+                            (viewModel.isShowExportType ? Image.iconChevronUpSM : Image.iconChevronDownSM)
+                                .resizable()
+                                .renderingMode(.template)
+                                .frame(width: 24, height: 24)
+                                .foreground(.Text.light)
                         }
                     }
                 }
@@ -46,10 +45,7 @@ struct WatermarkEditMenuExport: View {
                     Spacer()
                     ForEach(WatermarkExportType.allCases, id: \.self) { type in
                         Button {
-//                            viewModel.setExport(
-//                                watermark: viewModel.watermark,
-//                                type: type,
-//                                size: viewModel.watermark.export.getSize())
+                            viewModel.action(.update(.export(.type(type))))
                         } label: {
                             Text(type.menuName)
                                 .font(viewModel.store.watermark.export.type == type ? .bold2 : .body2)
@@ -63,7 +59,7 @@ struct WatermarkEditMenuExport: View {
                 .padding(.horizontal, 18)
                 .padding(.vertical, 4)
                 .background(Color.Base.medium)
-//                .foldingHeight(viewModel.isShowExport)
+                .foldingHeight(viewModel.isShowExportType)
             }
             
             CategoryContent(title: "배율") {
@@ -72,10 +68,10 @@ struct WatermarkEditMenuExport: View {
                     Text("×" + String(format: "%.2f", viewModel.store.watermark.export.multiple))
                         .font(.body2)
                         .foreground(.Text.light)
-                        .frame(width: 35)
+                        .frame(width: 42, alignment: .leading)
                 }
             }
-//            .foldingHeight(viewModel.isShowExportSlider)
+            .foldingHeight(viewModel.store.watermark.export.type == .multifple)
         }
         .padding(.vertical, 12)
     }

@@ -23,22 +23,35 @@ public extension WatermarkFormat {
         return cellSize
     }
     
-    func getRowColums(imageCount: Int, watermark: WatermarkModel) -> (Int, Int) {
-        let arrayType = watermark.array.type
+    func getCellRatio(images: [PImage]) -> CGFloat {
+        let size = getCellSize(images: images)
+        return size.width / size.height
+    }
+    
+    func getCell(images: [PImage], array: WatermarkArrayModel) -> CGSize {
+        let cell = getCellSize(images: images)
+        return CGSize(
+            width: cell.width * CGFloat(array.rows),
+            height: cell.height * CGFloat(array.columns)
+        )
+    }
+    
+    func getRowColums(imageCount: Int, array: WatermarkArrayModel) -> (Int, Int) {
+        let arrayType = array.type
         var rows = 1
         var columns = 1
         switch arrayType {
         case .none:
             break
         case .horizontal:
-            rows = 1
-            columns = imageCount
-        case .vertical:
             rows = imageCount
             columns = 1
+        case .vertical:
+            rows = 1
+            columns = imageCount
         case .grid:
-            rows = watermark.array.rows
-            columns = watermark.array.columns
+            rows = array.rows
+            columns = array.columns
         }
         return (rows, columns)
     }

@@ -16,13 +16,12 @@ public enum FrameListMode {
     case sort
 }
 
-public protocol TitleImagable: Identifiable, Equatable {
-    var image: PImage? { get }
-    var title: String? { get }
-    var size: CGFloat { get }
+public protocol ImageItemable: Identifiable, Equatable {
+    var image: PImage { get set }
+    var title: String? { get set }
 }
 
-public struct FrameList<T: TitleImagable>: View {
+public struct FrameList<T: ImageItemable>: View {
     @Binding var mode: FrameListMode
     @Binding var list: [T]
     @Binding var select: Int?
@@ -30,6 +29,7 @@ public struct FrameList<T: TitleImagable>: View {
     @State private var draggingItem: T?
     @GestureState private var dragOffset: CGSize = .zero
     private let spacing = 8.0
+    private let size: Double
     
     @State private var sortDelayTimer: DispatchWorkItem?
     @State private var shouldStartSorting = false
@@ -37,11 +37,13 @@ public struct FrameList<T: TitleImagable>: View {
     public init(
         mode: Binding<FrameListMode>,
         list: Binding<[T]>,
-        select: Binding<Int?>
+        select: Binding<Int?>,
+        size: Double = 76
     ) {
         self._mode = mode
         self._list = list
         self._select = select
+        self.size = size
     }
     
     public var body: some View {
@@ -53,6 +55,7 @@ public struct FrameList<T: TitleImagable>: View {
                         index: index,
                         mode: select == index ? .select : .none,
                         isDragging: draggingItem?.id == item.id,
+                        size: size,
                         onTap: {
                             handleTap(at: index)
                         },
@@ -134,7 +137,7 @@ public struct FrameList<T: TitleImagable>: View {
             return
         }
         
-        let itemWidth = item.size + spacing
+        let itemWidth = size + spacing
         let estimatedCenterPosition = (CGFloat(dragIndex) * itemWidth) + (itemWidth / 2) + offset
         let newIndex = Int(round(estimatedCenterPosition / itemWidth)) - 1
         if newIndex >= 0 && newIndex < list.count && newIndex != dragIndex {

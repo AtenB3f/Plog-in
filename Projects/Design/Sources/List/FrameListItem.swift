@@ -8,7 +8,7 @@
 
 import SwiftUI
 
-public struct FrameListItemView<T: TitleImagable>: View {
+public struct FrameListItemView<T: ImageItemable>: View {
     let item: T
     let index: Int
     let mode: FrameListMode
@@ -16,12 +16,14 @@ public struct FrameListItemView<T: TitleImagable>: View {
     let onTap: () -> Void
     let onDelete: () -> Void
     let onLongPress: () -> Void
+    let size: Double
     
     init(
         item: T,
         index: Int,
         mode: FrameListMode,
         isDragging: Bool,
+        size: Double,
         onTap: @escaping () -> Void,
         onDelete: @escaping () -> Void,
         onLongPress: @escaping () -> Void
@@ -30,6 +32,7 @@ public struct FrameListItemView<T: TitleImagable>: View {
         self.index = index
         self.mode = mode
         self.isDragging = isDragging
+        self.size = size
         self.onTap = onTap
         self.onDelete = onDelete
         self.onLongPress = onLongPress
@@ -38,17 +41,16 @@ public struct FrameListItemView<T: TitleImagable>: View {
     public var body: some View {
         VStack(spacing: 2) {
             RoundedCorner(radius: 4, corner: .all)
-                .frame(width: item.size, height: item.size)
+                .frame(width: size, height: size)
                 .foreground(Color.Base.medium)
                 .scaleEffect(isDragging ? 0.7 : 1.0)
                 .overlay(alignment: .topTrailing) {
                     ZStack(alignment: .topTrailing) {
-                        if let image = item.image {
-                            Image(uiImage: image)
-                                .resizable()
-                                .aspectRatio(contentMode: .fit)
-                                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
-                        }
+                        Image(pImage: item.image)
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
+                        
                         LinearGradient(gradient: .shallow, startPoint: .bottom, endPoint: .top)
                             .frame(height: 24)
                             .opacity((mode == .edit || mode == .sort) ? 1.0 : .zero)
@@ -88,7 +90,7 @@ public struct FrameListItemView<T: TitleImagable>: View {
                 Text(title)
                     .font(.body1)
                     .foreground(.Text.light)
-                    .frame(width: item.size)
+                    .frame(width: size)
                     .lineLimit(1)
                     .truncationMode(.tail)
             }
