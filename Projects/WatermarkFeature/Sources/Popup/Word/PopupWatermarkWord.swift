@@ -1,5 +1,5 @@
 //
-//  PopupWatermarkText.swift
+//  PopupWatermarkWord.swift
 //  Plogin
 //
 //  Created by AtenB on 10/20/25.
@@ -10,11 +10,11 @@ import SwiftUI
 import UISchema
 import Design
 
-struct PopupWatermarkText: View {
-    @StateObject var viewModel: PopupWatermarkTextVM
+struct PopupWatermarkWord: View {
+    @StateObject var viewModel: PopupWatermarkWordVM
     
     init(
-        viewModel: PopupWatermarkTextVM
+        viewModel: PopupWatermarkWordVM
     ) {
         self._viewModel = StateObject(wrappedValue: viewModel)
     }
@@ -72,7 +72,7 @@ struct PopupWatermarkText: View {
 
 //#Preview {
 //    @State var text: String = ""
-//    PopupWatermarkTextView(text: $text, callback: { isNext in
+//    PopupWatermarkWord(text: $text, callback: { isNext in
 //        
 //    })
 //}

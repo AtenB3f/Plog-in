@@ -37,7 +37,7 @@ public struct WatermarkPopup: View {
         case .title:
             PopupWatermarkTitle(viewModel: .init(coordinator: coordinator))
         case .word:
-            PopupWatermarkText(viewModel: .init(coordinator: coordinator))
+            PopupWatermarkWord(viewModel: .init(coordinator: coordinator))
         case .preview:
             PopupWatermarkPreview(viewModel: .init(coordinator: coordinator))
         }

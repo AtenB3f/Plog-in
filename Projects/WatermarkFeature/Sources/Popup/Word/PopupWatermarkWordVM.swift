@@ -1,5 +1,5 @@
 //
-//  PopupWatermarkTextVM.swift
+//  PopupWatermarkWordVM.swift
 //  WatermarkFeature
 //
 //  Created by AtenB on 5/4/26.
@@ -8,7 +8,7 @@
 import Foundation
 import UISchema
 
-class PopupWatermarkTextVM: PopupViewModel {
+class PopupWatermarkWordVM: PopupViewModel {
     @Published var text: String = ""
     
     var coordinator: WatermarkPopupCoordinator
@@ -27,7 +27,7 @@ class PopupWatermarkTextVM: PopupViewModel {
 }
 
 @MainActor
-extension PopupWatermarkTextVM {
+extension PopupWatermarkWordVM {
     func action(_ action: Action) {
         switch action {
         case .input:
@@ -43,7 +43,7 @@ extension PopupWatermarkTextVM {
 }
 
 @MainActor
-extension PopupWatermarkTextVM {
+extension PopupWatermarkWordVM {
     func input() {
         
     }
