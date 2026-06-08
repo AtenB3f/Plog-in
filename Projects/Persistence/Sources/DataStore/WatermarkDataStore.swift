@@ -21,7 +21,7 @@ public class WatermarkDataStore {
             ])
             let configuration = ModelConfiguration(
                 schema: schema,
-                isStoredInMemoryOnly: true
+                isStoredInMemoryOnly: false
             )
             let container = try ModelContainer(
                 for: schema,
