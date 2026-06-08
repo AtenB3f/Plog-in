@@ -53,9 +53,43 @@ extension DIContainer {
 
 // MARK: - Popup
 extension DIContainer {
+    func makeWatermarkPopupUsecase() -> WatermarkUsecase {
+        let watermarkStore = WatermarkDataStore()
+        return WatermarkUsecase(
+            wordDataStore: watermarkStore,
+            watermarkDataStore: watermarkStore
+        )
+    }
+    
     func makeWatermarkPopupCoordinator() -> WatermarkPopupCoordinator {
         return popupWatermark
     }
+    
+//    func makePopupWatermarkTitle() -> PopupWatermarkTitle {
+//        return PopupWatermarkTitle(viewModel: makePopupWatermarkTitleVM())
+//    }
+//    
+//    func makePopupWatermarkTitleVM() -> PopupWatermarkTitleVM {
+//        return .init(
+//            coordinator: popupWatermark
+//        )
+//    }
+//    
+//    func makePopupWatermarkWord() -> PopupWatermarkWord {
+//        return PopupWatermarkWord(viewModel: makePopupWatermarkWordVM())
+//    }
+//    
+//    func makePopupWatermarkWordVM() -> PopupWatermarkWordVM {
+//        let watermarkStore = WatermarkDataStore()
+//        let usecase = WatermarkUsecase(
+//            wordDataStore: watermarkStore,
+//            watermarkDataStore: watermarkStore
+//        )
+//        return .init(
+//            coordinator: popupWatermark,
+//            usecase: usecase
+//        )
+//    }
 }
 
 // MARK: - Home

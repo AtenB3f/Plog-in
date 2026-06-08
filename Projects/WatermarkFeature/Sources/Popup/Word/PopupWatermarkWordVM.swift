@@ -7,19 +7,26 @@
 
 import Foundation
 import UISchema
+import WatermarkDomain
 
-class PopupWatermarkWordVM: PopupViewModel {
+public class PopupWatermarkWordVM: PopupViewModel {
     @Published var text: String = ""
+    @Published var isFocusField: Bool = false
     
     var coordinator: WatermarkPopupCoordinator
-    init(
-        coordinator: WatermarkPopupCoordinator
+    var usecase: WatermarkUsecase
+    
+    public init(
+        coordinator: WatermarkPopupCoordinator,
+        usecase: WatermarkUsecase
     ) {
         self.coordinator = coordinator
+        self.usecase = usecase
     }
     
-    enum Action {
-        case input
+    public enum Action {
+        case appear
+        case focus(_ isFocus: Bool)
         case clear
         case cancel
         case confirm
@@ -27,25 +34,34 @@ class PopupWatermarkWordVM: PopupViewModel {
 }
 
 @MainActor
-extension PopupWatermarkWordVM {
+public extension PopupWatermarkWordVM {
     func action(_ action: Action) {
-        switch action {
-        case .input:
-            input()
-        case .clear:
-            clear()
-        case .cancel:
-            cancel()
-        case .confirm:
-            confirm()
+        Task {
+            switch action {
+            case .appear:
+                await appear()
+            case .focus(let isFocus):
+                focus(isFocus)
+            case .clear:
+                clear()
+            case .cancel:
+                cancel()
+            case .confirm:
+                confirm()
+            }
         }
     }
 }
 
 @MainActor
 extension PopupWatermarkWordVM {
-    func input() {
-        
+    func appear() async {
+        try? await Task.sleep(for: .microseconds(300))
+        focus(true)
+    }
+    
+    func focus(_ isFocus: Bool) {
+        isFocusField = isFocus
     }
     
     func clear() {
@@ -53,13 +69,13 @@ extension PopupWatermarkWordVM {
     }
     
     func cancel() {
-        // popup dismiss
+        isFocusField = false
         coordinator.pop()
     }
     
     func confirm() {
-        // data save
-        // popup dismiss
+        isFocusField = false
+        usecase.saveWord(text)
         coordinator.popRoot()
     }
 }

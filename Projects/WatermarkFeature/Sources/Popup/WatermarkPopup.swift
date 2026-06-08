@@ -6,17 +6,21 @@
 //
 
 import SwiftUI
+import WatermarkDomain
 
 public struct WatermarkPopup: View {
     let type: WatermarkPopupRoute
     let coordinator: WatermarkPopupCoordinator
+    let usecase: WatermarkUsecase
     
     public init(
         type: WatermarkPopupRoute,
-        coordinator: WatermarkPopupCoordinator
+        coordinator: WatermarkPopupCoordinator,
+        usecase: WatermarkUsecase
     ) {
         self.type = type
         self.coordinator = coordinator
+        self.usecase = usecase
     }
     
     public var body: some View {
@@ -37,7 +41,7 @@ public struct WatermarkPopup: View {
         case .title:
             PopupWatermarkTitle(viewModel: .init(coordinator: coordinator))
         case .word:
-            PopupWatermarkWord(viewModel: .init(coordinator: coordinator))
+            PopupWatermarkWord(viewModel: .init(coordinator: coordinator, usecase: usecase))
         case .preview:
             PopupWatermarkPreview(viewModel: .init(coordinator: coordinator))
         }

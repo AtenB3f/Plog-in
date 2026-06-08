@@ -10,15 +10,15 @@ import SwiftUI
 import UISchema
 import Design
 
-struct PopupWatermarkTitle: View {
+public struct PopupWatermarkTitle: View {
     @StateObject var viewModel: PopupWatermarkTitleVM
     
-    init(
+    public init(
         viewModel: PopupWatermarkTitleVM
     ) {
         self._viewModel = StateObject(wrappedValue: viewModel)
     }
-    var body: some View {
+    public var body: some View {
         Popup(layout: viewModel)
             .task {
                 viewModel.setHeader(type: .title, header: PopupHeaderTitle(title: "제목 변경"))

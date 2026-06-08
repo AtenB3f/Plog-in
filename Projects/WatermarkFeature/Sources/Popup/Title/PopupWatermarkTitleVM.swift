@@ -8,17 +8,17 @@
 import SwiftUI
 import UISchema
 
-class PopupWatermarkTitleVM: PopupViewModel {
+public class PopupWatermarkTitleVM: PopupViewModel {
     @Published var text: String = ""
     
     var coordinator: WatermarkPopupCoordinator
-    init(
+    public init(
         coordinator: WatermarkPopupCoordinator
     ) {
         self.coordinator = coordinator
     }
     
-    enum Action {
+    public enum Action {
         case input
         case clear
         case cancel
@@ -27,7 +27,7 @@ class PopupWatermarkTitleVM: PopupViewModel {
 }
 
 @MainActor
-extension PopupWatermarkTitleVM {
+public extension PopupWatermarkTitleVM {
     func action(_ action: Action) {
         switch action {
         case .input:

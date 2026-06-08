@@ -10,16 +10,17 @@ import SwiftUI
 import UISchema
 import Design
 
-struct PopupWatermarkWord: View {
+public struct PopupWatermarkWord: View {
     @StateObject var viewModel: PopupWatermarkWordVM
+    @FocusState var isFocusField: Bool
     
-    init(
+    public init(
         viewModel: PopupWatermarkWordVM
     ) {
         self._viewModel = StateObject(wrappedValue: viewModel)
     }
     
-    var body: some View {
+    public var body: some View {
         Popup(layout: viewModel)
             .task {
                 viewModel.setHeader(type: .title, header: PopupHeaderTitle(title: "문구등록"))
@@ -33,6 +34,18 @@ struct PopupWatermarkWord: View {
                     )
                 )
             }
+            .onAppear {
+                viewModel.action(.appear)
+            }
+            .onChange(of: isFocusField) {
+                viewModel.isFocusField = isFocusField
+            }
+            .onChange(of: viewModel.isFocusField) {
+                isFocusField = viewModel.isFocusField
+            }
+            .onTapGesture {
+                viewModel.action(.focus(false))
+            }
     }
     
     @ViewBuilder
@@ -43,10 +56,12 @@ struct PopupWatermarkWord: View {
                 .foreground(.Gray.light)
                 .multilineTextAlignment(.center)
             
-            BasicTextField(text: $viewModel.text, placeholder: "워터마크 문구를 입력하세요.")
-                .onChange(of: viewModel.text) { _ in
-                    viewModel.input()
-                }
+            BasicTextField(
+                text: $viewModel.text,
+                placeholder: "워터마크 문구를 입력하세요."
+            )
+            .focused($isFocusField, equals: true)
+            .onSubmit { viewModel.action(.confirm) }
         }
         .padding(.vertical)
     }

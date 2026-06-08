@@ -30,7 +30,11 @@ struct RootView: View {
             }
             
             if let watermarkPopup = diContainer.popupWatermark.path.last {
-                WatermarkPopup(type: watermarkPopup, coordinator: diContainer.makeWatermarkPopupCoordinator())
+                WatermarkPopup(
+                    type: watermarkPopup,
+                    coordinator: diContainer.popupWatermark,
+                    usecase: diContainer.makeWatermarkPopupUsecase()
+                )
                     .transition(.opacity)
             }
         }
