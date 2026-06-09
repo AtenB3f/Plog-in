@@ -12,7 +12,8 @@ import SwiftUI
 public struct BasicTextField: View {
     @Binding var text: String
     let placeholder: String
-    
+    @FocusState private var isFocused: Bool
+
     public init(text: Binding<String>, placeholder: String) {
         self._text = text
         self.placeholder = placeholder
@@ -31,11 +32,13 @@ public struct BasicTextField: View {
             .body2()
             .foreground(.Text.light)
             .textFieldStyle(.plain)
+            .focused($isFocused)
             .lineLimit(1)
             .frame(height: 20)
-            
+
             Button {
-                text.removeAll()
+                isFocused = false
+                text = ""
             } label: {
                 Image.iconCloseSM
                     .resizable()
