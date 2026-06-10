@@ -53,7 +53,7 @@ public struct FrameList<T: ImageItemable>: View {
                     FrameListItemView(
                         item: item,
                         index: index,
-                        mode: select == index ? .select : .none,
+                        mode: mode == .select ? (select == index ? .select : .none) : mode,
                         isDragging: draggingItem?.id == item.id,
                         size: size,
                         onTap: {

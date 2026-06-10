@@ -65,14 +65,54 @@ struct WatermarkEditMenuArray: View {
             
             if viewModel.array.count > 1 {
                 VStack(spacing: 0) {
-                    CategoryTitle("순서 변경")
+                    switch viewModel.arrayMode {
+                    case .edit:
+                        CategoryContent(title: "편집") {
+                            HStack {
+                                Button {
+                                    viewModel.action(.remove)
+                                } label: {
+                                    Text("모두 삭제")
+                                        .font(.bold1)
+                                        .foreground(.Text.light)
+                                }
+                                Button {
+                                    viewModel.arrayMode = .none
+                                } label: {
+                                    Text("편집 종료")
+                                        .font(.bold1)
+                                        .foreground(.Text.light)
+                                }
+                            }
+                        }
+                    case .sort:
+                        CategoryTitle("순서 변경")
+                    default:
+                        CategoryContent(title: "편집") {
+                            Button {
+                                viewModel.arrayMode = .edit
+                            } label: {
+                                Text("편집 모드")
+                                    .font(.bold1)
+                                    .foreground(.Text.light)
+                            }
+                        }
+                    }
                     
                     FrameList(
-                        mode: .constant(.sort),
+                        mode: $viewModel.arrayMode,
                         list: $viewModel.array,
-                        select: .constant(nil)
+                        select: $viewModel.arraySelect
                     )
                 }
+            } else {
+                CategoryButton(
+                    title: "이미지",
+                    button: "불러오기",
+                    onClick: {
+                        viewModel.action(.open(.picture))
+                    }
+                )
             }
         }
         .padding(.vertical, 12)

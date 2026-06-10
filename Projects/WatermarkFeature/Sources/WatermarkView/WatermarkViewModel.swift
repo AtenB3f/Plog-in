@@ -51,11 +51,11 @@ private extension WatermarkViewModel {
             }
             .store(in: &cancellables)
         
-        picker.objectWillChange
-            .sink { [weak self] _ in
+        picker.$assets
+            .sink { [weak self] assets in
                 guard let self = self else { return }
                 self.objectWillChange.send()
-                self.origins = self.picker.assets.compactMap { $0.imageAsset }
+                self.origins = assets.compactMap { $0.imageAsset }
             }
             .store(in: &cancellables)
     }

@@ -23,6 +23,7 @@ public class WatermarkEditViewModel: ObservableObject {
         case preview
         case word(_ text: String)
         case popup(_ route: WatermarkPopupRoute?)
+        case remove
     }
     
     // MARK: - Picker
@@ -42,6 +43,8 @@ public class WatermarkEditViewModel: ObservableObject {
     
     @Published var sticker = WatermarkListViewState()
     @Published var isShowArrayType = false
+    @Published var arrayMode: FrameListMode = .none
+    @Published var arraySelect: Int?
     @Published var array: [WatermarkItem] = []
     @Published var isShowExportType = false
     @Published var frame = WatermarkListViewState()
@@ -144,6 +147,8 @@ extension WatermarkEditViewModel {
             word(text)
         case .popup(let route):
             popup(route)
+        case .remove:
+            remove()
         }
     }
 }
@@ -211,6 +216,13 @@ private extension WatermarkEditViewModel {
         } else {
             popup.popRoot()
         }
+    }
+    
+    func remove() {
+        
+        arraySelect = nil
+        arrayMode = .none
+        picker.assets = []
     }
     
     func handlePopupComplete(_ route: WatermarkPopupRoute?) {
