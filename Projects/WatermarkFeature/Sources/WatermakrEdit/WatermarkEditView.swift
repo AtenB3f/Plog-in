@@ -50,7 +50,7 @@ public struct WatermarkEditView: View {
         .frame(maxHeight: .infinity)
         .background(Color.black)
         .task {
-            if viewModel.array.isEmpty {
+            if viewModel.picker.images.isEmpty {
                 viewModel.action(.open(.picture))
             }
         }

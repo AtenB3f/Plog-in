@@ -6,10 +6,12 @@
 //
 
 import Foundation
+import AVFoundation
 import PlatformCore
 
 public class AssetPicker: ObservableObject {
-    @Published public var assets: [AssetData] = []
+    @Published public var videos: [AVAsset] = []
+    @Published public var images: [PImage] = []
     var mediaType: MediaType
     var limit: Int
     

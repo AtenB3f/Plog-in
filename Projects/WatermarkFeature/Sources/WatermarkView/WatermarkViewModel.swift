@@ -18,11 +18,8 @@ public class WatermarkViewModel: ObservableObject {
         case mode(isOn: Bool)
     }
     
-//    @Published var render: WatermarkTextModel = WatermarkTextModel()
-    
     @Published var isShowEdit: Bool = false
     @Published var page: Int = 0
-    @Published var origins: [PImage] = []
     
     let format = WatermarkFormat()
     let picker: AssetPicker
@@ -50,12 +47,10 @@ private extension WatermarkViewModel {
                 self?.objectWillChange.send()
             }
             .store(in: &cancellables)
-        
-        picker.$assets
-            .sink { [weak self] assets in
-                guard let self = self else { return }
-                self.objectWillChange.send()
-                self.origins = assets.compactMap { $0.imageAsset }
+
+        picker.objectWillChange
+            .sink { [weak self] _ in
+                self?.objectWillChange.send()
             }
             .store(in: &cancellables)
     }

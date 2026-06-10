@@ -91,7 +91,7 @@ extension WatermarkEditMenuSticker {
             })
             FrameList(
                 mode: $viewModel.sticker.mode,
-                list: $viewModel.sticker.list,
+                list: viewModel.sticker.list.map { $0.image },
                 select: $viewModel.sticker.select
             )
 //            .foldingHeight(!viewModel.stickers.isEmpty)

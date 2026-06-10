@@ -24,6 +24,8 @@ public class WatermarkEditViewModel: ObservableObject {
         case word(_ text: String)
         case popup(_ route: WatermarkPopupRoute?)
         case remove
+        case removeAt(_ index: Int)
+        case move(_ from: IndexSet, _ to: Int)
     }
     
     // MARK: - Picker
@@ -45,7 +47,6 @@ public class WatermarkEditViewModel: ObservableObject {
     @Published var isShowArrayType = false
     @Published var arrayMode: FrameListMode = .none
     @Published var arraySelect: Int?
-    @Published var array: [WatermarkItem] = []
     @Published var isShowExportType = false
     @Published var frame = WatermarkListViewState()
     
@@ -87,32 +88,23 @@ private extension WatermarkEditViewModel {
                 self?.objectWillChange.send()
             }
             .store(in: &cancellables)
-        
-        picker.$assets
-                .map { $0.compactMap(\.imageAsset) }
-                .sink { [weak self] assets in
-                    self?.array = assets.compactMap { .init(image: $0) }
-                    self?.initialize()
-                }
-                .store(in: &cancellables)
-        
+
+        picker.objectWillChange
+            .sink { [weak self] _ in
+                self?.objectWillChange.send()
+            }
+            .store(in: &cancellables)
+
         popup.$history
             .sink { [weak self] history in
                 guard let self = self else { return }
                 self.handlePopupComplete(history)
             }
             .store(in: &cancellables)
-        
-        $array
-            .sink { [weak self] list in
-                guard let self = self else { return }
-                // TODO: picker에 채워넣기..?
-            }
-            .store(in: &cancellables)
     }
     
     func initialize() {
-        if let asset = array.first?.image {
+        if let asset = picker.images.first {
             let ratio = asset.size.width / 650
             let fontSize = ratio * 36
             let spacing = ratio * 20
@@ -149,6 +141,10 @@ extension WatermarkEditViewModel {
             popup(route)
         case .remove:
             remove()
+        case .removeAt(let index):
+            removeAt(index)
+        case .move(let from, let to):
+            picker.images.move(fromOffsets: from, toOffset: to)
         }
     }
 }
@@ -160,16 +156,7 @@ private extension WatermarkEditViewModel {
     }
     
     func actionPicker() {
-        switch pickerType {
-        case .picture:
-            let assets = picker.assets
-            array = assets.compactMap { $0.imageAsset }.map { .init(image: $0) }
-        case .sticker:
-            let assets = stickerPicker.assets
-            sticker.list = assets.compactMap { $0.imageAsset }.map { .init(image: $0) }
-        case .none:
-            break
-        }
+        initialize()
         pickerType = nil
     }
     
@@ -219,10 +206,19 @@ private extension WatermarkEditViewModel {
     }
     
     func remove() {
-        
         arraySelect = nil
         arrayMode = .none
-        picker.assets = []
+        picker.images = []
+    }
+
+    func removeAt(_ index: Int) {
+        guard index < picker.images.count else { return }
+        if arraySelect == index {
+            arraySelect = nil
+        } else if let selected = arraySelect, selected > index {
+            arraySelect = selected - 1
+        }
+        picker.images.remove(at: index)
     }
     
     func handlePopupComplete(_ route: WatermarkPopupRoute?) {
@@ -270,7 +266,7 @@ private extension WatermarkEditViewModel {
             isShowArrayType.toggle()
         case .type(let type):
             store.watermark.array.type = type
-            store.watermark.array.setRowColumn(array.count)
+            store.watermark.array.setRowColumn(picker.images.count)
         case .order:
             break
         }

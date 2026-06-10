@@ -63,7 +63,7 @@ struct WatermarkEditMenuArray: View {
                 .foldingHeight(viewModel.store.watermark.array.type == .grid)
             }
             
-            if viewModel.array.count > 1 {
+            if viewModel.picker.images.count >= 1 {
                 VStack(spacing: 0) {
                     switch viewModel.arrayMode {
                     case .edit:
@@ -101,8 +101,10 @@ struct WatermarkEditMenuArray: View {
                     
                     FrameList(
                         mode: $viewModel.arrayMode,
-                        list: $viewModel.array,
-                        select: $viewModel.arraySelect
+                        list: viewModel.picker.images,
+                        select: $viewModel.arraySelect,
+                        onDelete: { viewModel.action(.removeAt($0)) },
+                        onMove: { viewModel.action(.move($0, $1)) }
                     )
                 }
             } else {

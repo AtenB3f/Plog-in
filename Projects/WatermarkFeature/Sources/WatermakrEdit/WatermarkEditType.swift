@@ -14,7 +14,7 @@ enum WatermarkEditPickerType {
     case sticker
 }
 
-struct WatermarkItem: ImageItemable {
+struct WatermarkItem {
     let id = UUID()
     var image: PImage
     var title: String?

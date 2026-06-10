@@ -34,8 +34,8 @@ public struct WatermarkView: View {
     @ViewBuilder
     func page() -> some View {
         TabView(selection: $viewModel.page) {
-            ForEach(viewModel.origins.indices, id: \.self) { index in
-                let image = viewModel.origins[index]
+            ForEach(viewModel.picker.images.indices, id: \.self) { index in
+                let image = viewModel.picker.images[index]
                 Image(pImage: image)
                     .resizable()
                     .aspectRatio(contentMode: .fit)
@@ -58,14 +58,14 @@ public struct WatermarkView: View {
         WatermarkCell(
             rows: viewModel.store.watermark.array.rows,
             columns: viewModel.store.watermark.array.columns,
-            images: viewModel.origins,
-            ratio: viewModel.format.getCellRatio(images: viewModel.origins)
+            images: viewModel.picker.images,
+            ratio: viewModel.format.getCellRatio(images: viewModel.picker.images)
         )
         .overlay {
             if viewModel.store.watermark.text.isGradient {
                 LinearGradient(gradient: .plave, startPoint: .topLeading, endPoint: .bottomTrailing)
             }
-            WatermarkText(imageSize: viewModel.format.getCell(images: viewModel.origins, array: viewModel.store.watermark.array))
+            WatermarkText(imageSize: viewModel.format.getCell(images: viewModel.picker.images, array: viewModel.store.watermark.array))
                 .environmentObject(viewModel)
         }
         .drawingGroup()
