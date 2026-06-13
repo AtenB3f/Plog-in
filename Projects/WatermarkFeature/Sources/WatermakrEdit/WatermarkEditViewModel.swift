@@ -24,8 +24,8 @@ public class WatermarkEditViewModel: ObservableObject {
         case word(_ text: String)
         case popup(_ route: WatermarkPopupRoute?)
         case remove(_ type: WatermarkMenuType)
-        case removeAt(_ index: Int)
-        case move(_ from: IndexSet, _ to: Int)
+        case removeAt(_ type: WatermarkMenuType, _ index: Int)
+        case move(_ type: WatermarkMenuType, _ from: IndexSet, _ to: Int)
         case replicate(_ type: WatermarkMenuType)
     }
     
@@ -97,6 +97,12 @@ private extension WatermarkEditViewModel {
             }
             .store(in: &cancellables)
 
+        sticker.objectWillChange
+            .sink { [weak self] _ in
+                self?.objectWillChange.send()
+            }
+            .store(in: &cancellables)
+
         popup.$history
             .sink { [weak self] history in
                 guard let self = self else { return }
@@ -143,10 +149,10 @@ extension WatermarkEditViewModel {
             popup(route)
         case .remove(let type):
             remove(type)
-        case .removeAt(let index):
-            removeAt(index)
-        case .move(let from, let to):
-            picker.images.move(fromOffsets: from, toOffset: to)
+        case .removeAt(let type, let index):
+            removeAt(type, index)
+        case .move(let type, let from, let to):
+            move(type, from, to)
         case .replicate(let type):
             replicate(type)
         }
@@ -224,14 +230,38 @@ private extension WatermarkEditViewModel {
         }
     }
 
-    func removeAt(_ index: Int) {
-        guard index < picker.images.count else { return }
-        if arraySelect == index {
-            arraySelect = nil
-        } else if let selected = arraySelect, selected > index {
-            arraySelect = selected - 1
+    func removeAt(_ type: WatermarkMenuType, _ index: Int) {
+        switch type {
+        case .array:
+            guard index < picker.images.count else { return }
+            if arraySelect == index {
+                arraySelect = nil
+            } else if let selected = arraySelect, selected > index {
+                arraySelect = selected - 1
+            }
+            picker.images.remove(at: index)
+        case .sticker:
+            guard index < sticker.images.count else { return }
+            if stickerSelect == index {
+                stickerSelect = nil
+            } else if let selected = stickerSelect, selected > index {
+                stickerSelect = selected - 1
+            }
+            sticker.images.remove(at: index)
+        default:
+            break
         }
-        picker.images.remove(at: index)
+    }
+    
+    func move(_ type: WatermarkMenuType, _ from: IndexSet, _ to: Int) {
+        switch type {
+        case .array:
+            picker.images.move(fromOffsets: from, toOffset: to)
+        case .sticker:
+            sticker.images.move(fromOffsets: from, toOffset: to)
+        default:
+            break
+        }
     }
     
     func replicate(_ type: WatermarkMenuType) {

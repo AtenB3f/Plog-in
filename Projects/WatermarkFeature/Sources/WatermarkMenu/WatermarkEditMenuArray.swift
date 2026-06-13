@@ -103,8 +103,8 @@ struct WatermarkEditMenuArray: View {
                         mode: $viewModel.arrayMode,
                         list: viewModel.picker.images,
                         select: $viewModel.arraySelect,
-                        onDelete: { viewModel.action(.removeAt($0)) },
-                        onMove: { viewModel.action(.move($0, $1)) }
+                        onDelete: { viewModel.action(.removeAt(.array, $0)) },
+                        onMove: { viewModel.action(.move(.array, $0, $1)) }
                     )
                 }
             } else {
