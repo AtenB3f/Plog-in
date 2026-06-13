@@ -20,8 +20,8 @@ struct WatermarkEditMenuSticker: View {
         }
         .padding(.vertical, 12)
         .onTapGesture {
-            if viewModel.sticker.mode != .edit {
-                viewModel.sticker.mode = .none
+            if viewModel.stickerMode != .edit {
+                viewModel.stickerMode = .none
             }
         }
     }
@@ -32,14 +32,10 @@ extension WatermarkEditMenuSticker {
     func stickers() -> some View {
         CategoryContent(title: "스티커") {
             HStack {
-                if let index = viewModel.sticker.select,
-                   viewModel.sticker.mode == .select {
+                if let index = viewModel.stickerSelect,
+                   viewModel.stickerMode == .select {
                     Button {
-                        // TODO: 10 대신 enum
-//                        guard viewModel.sticker.images.count < 10 else { return }
-//                        let asset = viewModel.sticker.images[index]
-//                        viewModel.sticker.images.append(asset)
-//                        viewModel.sticker.select = nil
+                        viewModel.action(.replicate(.sticker))
                     } label: {
                         Text("복제하기")
                             .font(.bold2)
@@ -61,10 +57,9 @@ extension WatermarkEditMenuSticker {
         VStack(spacing: 0) {
             CategoryContent(title: "편집", content: {
                 HStack {
-                    if viewModel.sticker.mode == .edit {
+                    if viewModel.stickerMode == .edit {
                         Button {
-//                            viewModel.originSticker.removeAll()
-//                            viewModel.stickerListMode = .none
+                            viewModel.action(.remove(.sticker))
                         } label: {
                             Text("모두 삭제")
                                 .font(.bold2)
@@ -75,13 +70,13 @@ extension WatermarkEditMenuSticker {
                     }
                     
                     Button {
-//                        if viewModel.sticker.mode == .edit {
-//                            viewModel.sticker.mode = .none
-//                        } else {
-//                            viewModel.sticker.mode = .edit
-//                        }
+                        if viewModel.stickerMode == .edit {
+                            viewModel.stickerMode = .none
+                        } else {
+                            viewModel.stickerMode = .edit
+                        }
                     } label: {
-                        Text(viewModel.sticker.mode == .edit ? "편집 종료" : "편집모드")
+                        Text(viewModel.stickerMode == .edit ? "편집 종료" : "편집모드")
                             .font(.bold2)
                             .foreground(.Text.light)
                             .padding(.vertical, 4)
@@ -90,12 +85,12 @@ extension WatermarkEditMenuSticker {
                 }
             })
             FrameList(
-                mode: $viewModel.sticker.mode,
-                list: viewModel.sticker.list.map { $0.image },
-                select: $viewModel.sticker.select
+                mode: $viewModel.stickerMode,
+                list: viewModel.sticker.images,
+                select: $viewModel.stickerSelect
             )
-//            .foldingHeight(!viewModel.stickers.isEmpty)
+            .foldingHeight(!viewModel.sticker.images.isEmpty)
         }
-        .foldingHeight(!viewModel.sticker.list.isEmpty)
+        .foldingHeight(!viewModel.sticker.images.isEmpty)
     }
 }

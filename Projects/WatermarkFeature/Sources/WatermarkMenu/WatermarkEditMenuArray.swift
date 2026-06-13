@@ -70,7 +70,7 @@ struct WatermarkEditMenuArray: View {
                         CategoryContent(title: "편집") {
                             HStack {
                                 Button {
-                                    viewModel.action(.remove)
+                                    viewModel.action(.remove(.array))
                                 } label: {
                                     Text("모두 삭제")
                                         .font(.bold1)

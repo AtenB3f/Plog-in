@@ -23,9 +23,10 @@ public class WatermarkEditViewModel: ObservableObject {
         case preview
         case word(_ text: String)
         case popup(_ route: WatermarkPopupRoute?)
-        case remove
+        case remove(_ type: WatermarkMenuType)
         case removeAt(_ index: Int)
         case move(_ from: IndexSet, _ to: Int)
+        case replicate(_ type: WatermarkMenuType)
     }
     
     // MARK: - Picker
@@ -43,10 +44,11 @@ public class WatermarkEditViewModel: ObservableObject {
     
     let colorPalet: [Color] = [.white, .Gray.medium, .black, .Yejun.main, .Noah.main, .Bamby.main, .Eunho.main, .Hamin.main]
     
-    @Published var sticker = WatermarkListViewState()
     @Published var isShowArrayType = false
     @Published var arrayMode: FrameListMode = .none
     @Published var arraySelect: Int?
+    @Published var stickerMode: FrameListMode = .none
+    @Published var stickerSelect: Int?
     @Published var isShowExportType = false
     @Published var frame = WatermarkListViewState()
     
@@ -55,7 +57,7 @@ public class WatermarkEditViewModel: ObservableObject {
     let popup: WatermarkPopupCoordinator
     let usecase: WatermarkUsecase
     let picker: AssetPicker
-    let stickerPicker: AssetPicker
+    let sticker: AssetPicker
     
     private var cancellables = Set<AnyCancellable>()
     
@@ -69,7 +71,7 @@ public class WatermarkEditViewModel: ObservableObject {
         self.popup = popup
         self.usecase = usecase
         self.picker = picker
-        self.stickerPicker = stickerPicker
+        self.sticker = stickerPicker
         self.store = store
         words = usecase.fetchWords().map { $0.text }
         
@@ -139,12 +141,14 @@ extension WatermarkEditViewModel {
             word(text)
         case .popup(let route):
             popup(route)
-        case .remove:
-            remove()
+        case .remove(let type):
+            remove(type)
         case .removeAt(let index):
             removeAt(index)
         case .move(let from, let to):
             picker.images.move(fromOffsets: from, toOffset: to)
+        case .replicate(let type):
+            replicate(type)
         }
     }
 }
@@ -205,10 +209,19 @@ private extension WatermarkEditViewModel {
         }
     }
     
-    func remove() {
-        arraySelect = nil
-        arrayMode = .none
-        picker.images = []
+    func remove(_ type: WatermarkMenuType) {
+        switch type {
+        case .array:
+            arraySelect = nil
+            arrayMode = .none
+            picker.images = []
+        case .sticker:
+            stickerSelect = nil
+            stickerMode = .none
+            sticker.images.removeAll()
+        default:
+            break
+        }
     }
 
     func removeAt(_ index: Int) {
@@ -219,6 +232,20 @@ private extension WatermarkEditViewModel {
             arraySelect = selected - 1
         }
         picker.images.remove(at: index)
+    }
+    
+    func replicate(_ type: WatermarkMenuType) {
+        switch type {
+        case .sticker:
+            guard let index = stickerSelect else { return }
+            guard sticker.images.count <= 10 else { return }
+            let image = sticker.images[index]
+            sticker.images.append(image)
+        case .frame:
+            break
+        default:
+            break
+        }
     }
     
     func handlePopupComplete(_ route: WatermarkPopupRoute?) {
@@ -252,11 +279,11 @@ private extension WatermarkEditViewModel {
     func setSticker(_ menu: WatermarkEditMenuType.StickerMenu) {
 //        switch menu {
 //        case .load:
-//            
+//
 //        case .edit:
-//            
+//
 //        case .remove:
-//            
+//
 //        }
     }
     
@@ -288,41 +315,4 @@ private extension WatermarkEditViewModel {
 //        }
     }
 }
-/*
 
-extension WatermarkEditViewModel {
-    func saveWatermarkWord(watermark: WatermarkModel) {
-        setText(watermark: watermark, text: self.newWord)
-        dataManager.saveWatermarkWord(self.newWord)
-        words = dataManager.loadWatermarkWord().map { $0.text }
-    }
-}
-
-extension WatermarkEditViewModel {
-    func loadImages() {
-        images = assets.compactMap { $0.imageAsset }
-        arrayItems = images.map { .init(image: $0) }
-    }
-    
-//    func makePreview() {
-//        previews = editor.generateWatermarks(images, watermark: watermark)
-//    }
-    
-    func saveWatermarkImage() {
-        Task.detached {
-            for image in self.previews {
-                do {
-                    try await self.editor.saveImageToPhotoLibrary(image: image)
-                } catch {
-                    print("에러: \(error)")
-                }
-            }
-        }
-    }
-    
-//    func saveWatermarkFrame() {
-//        dataManager.saveWatermark(watermark)
-//        frames = dataManager.loadWatermark()
-//    }
-}
-*/
