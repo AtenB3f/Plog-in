@@ -29,6 +29,9 @@ public struct WatermarkView: View {
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .onTapGesture {
+            viewModel.action(.textMode(isOn: false))
+        }
     }
     
     @ViewBuilder
@@ -47,6 +50,11 @@ public struct WatermarkView: View {
                             .environmentObject(viewModel)
                     }
                     .drawingGroup()
+                    .overlay {
+                        WatermarkSticker(imageSize: image.size)
+                            .environmentObject(viewModel)
+                    }
+                    .clipped()
                     .tag(index)
             }
         }
@@ -66,6 +74,11 @@ public struct WatermarkView: View {
                 LinearGradient(gradient: .plave, startPoint: .topLeading, endPoint: .bottomTrailing)
             }
             WatermarkText(imageSize: viewModel.format.getCell(images: viewModel.picker.images, array: viewModel.store.watermark.array))
+                .environmentObject(viewModel)
+        }
+        .drawingGroup()
+        .overlay {
+            WatermarkSticker(imageSize: viewModel.format.getCell(images: viewModel.picker.images, array: viewModel.store.watermark.array))
                 .environmentObject(viewModel)
         }
         .drawingGroup()

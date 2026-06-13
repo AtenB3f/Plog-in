@@ -15,10 +15,12 @@ import WatermarkDomain
 public class WatermarkViewModel: ObservableObject {
     public enum Action {
         case zoom
-        case mode(isOn: Bool)
+        case textMode(isOn: Bool)
+        case stickerMode(index: Int?)
     }
-    
+
     @Published var isShowEdit: Bool = false
+    @Published var selectedStickerIndex: Int?
     @Published var page: Int = 0
     
     let format = WatermarkFormat()
@@ -61,8 +63,19 @@ public extension WatermarkViewModel {
         switch action {
         case .zoom:
             break
-        case .mode(let isOn):
-            isShowEdit = isOn
+        case .textMode(let isOn):
+            guard !isOn else {
+                isShowEdit = false
+                return
+            }
+            if selectedStickerIndex != nil {
+                selectedStickerIndex = nil
+            } else {
+                isShowEdit.toggle()
+            }
+        case .stickerMode(let index):
+            selectedStickerIndex = index
+            if index != nil { isShowEdit = false }
         }
     }
 }
