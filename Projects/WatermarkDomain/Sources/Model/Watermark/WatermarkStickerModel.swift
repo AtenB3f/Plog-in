@@ -7,24 +7,25 @@
 //
 
 import Foundation
+import PlatformCore
 
 public struct WatermarkStickerModel {
-    public var imageData: Data
+    public var image: PImage
     public var alpha: CGFloat
     public var position: CGPoint
     public var rotation: CGFloat
     public var scale: CGFloat
     public var layer: Int
-    
+
     public init(
-        image: Data,
+        image: PImage,
         alpha: CGFloat,
         position: CGPoint,
         rotation: CGFloat,
         scale: CGFloat,
         layer: Int
     ) {
-        self.imageData = image
+        self.image = image
         self.alpha = alpha
         self.position = position
         self.rotation = rotation

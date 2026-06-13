@@ -111,7 +111,7 @@ private extension WatermarkEditViewModel {
             .store(in: &cancellables)
     }
     
-    func initialize() {
+    func originInit() {
         if let asset = picker.images.first {
             let ratio = asset.size.width / 650
             let fontSize = ratio * 36
@@ -126,6 +126,16 @@ private extension WatermarkEditViewModel {
             store.watermark.text.color = ColorData(color)
         }
         words = usecase.fetchWords().map { $0.text }
+    }
+
+    func stickerInit() {
+        guard let origin = picker.images.first else { return }
+        let models = usecase.makeStickerModels(
+            stickers: sticker.images,
+            origin: origin
+        )
+        store.setSticker(models)
+        sticker.images = []
     }
 }
 
@@ -166,7 +176,14 @@ private extension WatermarkEditViewModel {
     }
     
     func actionPicker() {
-        initialize()
+        switch pickerType {
+        case .picture:
+            originInit()
+        case .sticker:
+            stickerInit()
+        case .none:
+            break
+        }
         pickerType = nil
     }
     
@@ -224,7 +241,7 @@ private extension WatermarkEditViewModel {
         case .sticker:
             stickerSelect = nil
             stickerMode = .none
-            sticker.images.removeAll()
+            store.watermark.stickers = []
         default:
             break
         }
@@ -241,13 +258,13 @@ private extension WatermarkEditViewModel {
             }
             picker.images.remove(at: index)
         case .sticker:
-            guard index < sticker.images.count else { return }
+            guard index < store.watermark.stickers.count else { return }
             if stickerSelect == index {
                 stickerSelect = nil
             } else if let selected = stickerSelect, selected > index {
                 stickerSelect = selected - 1
             }
-            sticker.images.remove(at: index)
+            store.watermark.stickers.remove(at: index)
         default:
             break
         }
@@ -258,7 +275,7 @@ private extension WatermarkEditViewModel {
         case .array:
             picker.images.move(fromOffsets: from, toOffset: to)
         case .sticker:
-            sticker.images.move(fromOffsets: from, toOffset: to)
+            store.watermark.stickers.move(fromOffsets: from, toOffset: to)
         default:
             break
         }
@@ -268,9 +285,10 @@ private extension WatermarkEditViewModel {
         switch type {
         case .sticker:
             guard let index = stickerSelect else { return }
-            guard sticker.images.count <= 10 else { return }
-            let image = sticker.images[index]
-            sticker.images.append(image)
+            guard store.watermark.stickers.count <= 10 else { return }
+            var model = store.watermark.stickers[index]
+            model.layer = store.watermark.stickers.count
+            store.watermark.stickers.append(model)
         case .frame:
             break
         default:

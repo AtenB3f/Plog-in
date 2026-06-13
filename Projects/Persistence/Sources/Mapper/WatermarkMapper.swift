@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import PlatformCore
 import WatermarkDomain
 
 // MARK: - Word Entity -> Model
@@ -39,7 +40,7 @@ public extension WatermarkEntity {
         return .init(
 //            id: self.id,
             text: self.textSetting.toModel,
-            stickers: self.stickers.map { $0.toModel },
+            stickers: self.stickers.compactMap { $0.toModel },
             array: self.arraySetting.toModel,
             export: self.exportSetting.toModel,
             frame: self.frameSetting.toModel
@@ -80,7 +81,7 @@ public extension WatermarkTextEntity {
 public extension WatermarkStickerModel {
     var toEntity: WatermarkStickerEntity {
         return .init(
-            image: self.imageData,
+            image: self.image.toData() ?? Data(),
             alpha: self.alpha,
             position: self.position,
             rotation: self.rotation,
@@ -91,9 +92,10 @@ public extension WatermarkStickerModel {
 }
 
 public extension WatermarkStickerEntity {
-    var toModel: WatermarkStickerModel {
+    var toModel: WatermarkStickerModel? {
+        guard let image = PImage(data: self.imageData) else { return nil }
         return .init(
-            image: self.imageData,
+            image: image,
             alpha: self.alpha,
             position: self.position,
             rotation: self.rotation,

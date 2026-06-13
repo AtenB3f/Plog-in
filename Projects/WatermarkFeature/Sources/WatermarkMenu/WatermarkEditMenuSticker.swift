@@ -86,13 +86,13 @@ extension WatermarkEditMenuSticker {
             })
             FrameList(
                 mode: $viewModel.stickerMode,
-                list: viewModel.sticker.images,
+                list: viewModel.store.watermark.stickers.map(\.image),
                 select: $viewModel.stickerSelect,
                 onDelete: { viewModel.action(.removeAt(.sticker, $0)) },
                 onMove: { viewModel.action(.move(.sticker, $0, $1)) }
             )
-            .foldingHeight(!viewModel.sticker.images.isEmpty)
+            .foldingHeight(!viewModel.store.watermark.stickers.isEmpty)
         }
-        .foldingHeight(!viewModel.sticker.images.isEmpty)
+        .foldingHeight(!viewModel.store.watermark.stickers.isEmpty)
     }
 }

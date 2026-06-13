@@ -87,7 +87,7 @@ public class WatermarkEditor {
         let orders = stickers.sorted(by: { $0.layer < $1.layer })
         
         for sticker in orders {
-            guard let image = sticker.imageData.image else { continue }
+            let image = sticker.image
             let rotation = sticker.rotation
             let alpha = sticker.alpha
             let position = sticker.position
