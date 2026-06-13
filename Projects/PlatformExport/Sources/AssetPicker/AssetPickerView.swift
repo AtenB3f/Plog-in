@@ -64,10 +64,10 @@ extension AssetPickerView {
                 guard let phAsset = fetchResult.firstObject else { return }
                 if phAsset.mediaType == .video {
                     PHImageManager.default().requestAVAsset(forVideo: phAsset, options: nil) { avAsset, _, _ in
-                        guard let avAsset = avAsset else { return }
+                        guard let avAsset = avAsset,
+                                let data = AssetData(type: .video, data: avAsset).videoAsset else { return }
                         DispatchQueue.main.async {
-                            let data = AssetData(type: .video, data: avAsset)
-                            self.parent.picker.assets.append(data)
+                            self.parent.picker.videos.append(data)
                         }
                     }
                 } else if phAsset.mediaType == .image {
@@ -79,9 +79,9 @@ extension AssetPickerView {
                         targetSize: CGSize(width: phAsset.pixelWidth, height: phAsset.pixelHeight),
                         contentMode: .aspectFit,
                         options: options) { image, _ in
-                        guard let image = image else { return }
-                        let data = AssetData(type: .image, data: image)
-                            self.parent.picker.assets.append(data)
+                            guard let image = image,
+                                    let data = AssetData(type: .image, data: image).imageAsset else { return }
+                            self.parent.picker.images.append(data)
                     }
                 }
             }

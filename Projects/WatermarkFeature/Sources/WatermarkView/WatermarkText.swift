@@ -27,7 +27,9 @@ public struct WatermarkText: View {
                 originSize: imageSize,
                 containerSize: proxy.size
             )
-            
+
+            if renderSize != .zero, viewModel.store.watermark.text.fontSize > 0 {
+
             let renderRatio = viewModel.format.getRenderRatio(
                 originSize: imageSize,
                 renderSize: renderSize
@@ -71,7 +73,7 @@ public struct WatermarkText: View {
                             .shadow(.light)
                             .frame(width: renderCellSize.width, height: renderCellSize.height)
                             .rotationEffect(.degrees(viewModel.store.watermark.text.rotation))
-                            
+
                         Image.iconCloseCircle
                             .frame(width: 16, height: 16)
                             .background {
@@ -87,6 +89,7 @@ public struct WatermarkText: View {
                     }
                 }
             }
+            } // if renderSize != .zero
         }
         .onTapGesture {
             viewModel.action(.mode(isOn: true))

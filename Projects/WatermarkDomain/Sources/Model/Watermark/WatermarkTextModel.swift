@@ -45,6 +45,6 @@ public struct WatermarkTextModel {
 
 public extension WatermarkTextModel {
     var toPFont: PFont {
-        return PFont(name: fontName, size: fontSize)!
+        return PFont(name: fontName, size: fontSize)! //?? .systemFont(ofSize: fontSize)
     }
 }

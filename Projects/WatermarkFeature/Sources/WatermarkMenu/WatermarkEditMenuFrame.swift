@@ -10,7 +10,7 @@ import SwiftUI
 import Design
 import PlatformCore
 
-struct WatermarkFrameItemModel: ImageItemable {
+struct WatermarkFrameItemModel {
     let id = UUID()
     var image: PImage
     var title: String?
@@ -29,7 +29,7 @@ struct WatermarkEditMenuFrame: View {
             VStack(spacing: 0) {
                 CategoryTitle("설정 가져오기")
                 FrameList(mode: $viewModel.frame.mode,
-                          list: $viewModel.frame.list,
+                          list: viewModel.frame.list.map { $0.image },
                           select: $viewModel.frame.select)
                 .padding(.vertical, 6)
                 .background(Color.Base.medium)

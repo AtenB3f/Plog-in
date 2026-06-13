@@ -7,9 +7,10 @@
 //
 
 import SwiftUI
+import PlatformCore
 
-public struct FrameListItemView<T: ImageItemable>: View {
-    let item: T
+public struct FrameListItemView: View {
+    let image: PImage
     let index: Int
     let mode: FrameListMode
     let isDragging: Bool
@@ -17,9 +18,9 @@ public struct FrameListItemView<T: ImageItemable>: View {
     let onDelete: () -> Void
     let onLongPress: () -> Void
     let size: Double
-    
+
     init(
-        item: T,
+        image: PImage,
         index: Int,
         mode: FrameListMode,
         isDragging: Bool,
@@ -28,7 +29,7 @@ public struct FrameListItemView<T: ImageItemable>: View {
         onDelete: @escaping () -> Void,
         onLongPress: @escaping () -> Void
     ) {
-        self.item = item
+        self.image = image
         self.index = index
         self.mode = mode
         self.isDragging = isDragging
@@ -37,64 +38,51 @@ public struct FrameListItemView<T: ImageItemable>: View {
         self.onDelete = onDelete
         self.onLongPress = onLongPress
     }
-    
+
     public var body: some View {
-        VStack(spacing: 2) {
-            RoundedCorner(radius: 4, corner: .all)
-                .frame(width: size, height: size)
-                .foreground(Color.Base.medium)
-                .scaleEffect(isDragging ? 0.7 : 1.0)
-                .overlay(alignment: .topTrailing) {
-                    ZStack(alignment: .topTrailing) {
-                        Image(pImage: item.image)
-                            .resizable()
-                            .aspectRatio(contentMode: .fit)
-                            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
-                        
-                        LinearGradient(gradient: .shallow, startPoint: .bottom, endPoint: .top)
-                            .frame(height: 24)
-                            .opacity((mode == .edit || mode == .sort) ? 1.0 : .zero)
-                        
-                        if mode == .edit {
-                            Button(action: onDelete) {
-                                Image.iconCloseSM
-                                    .resizable()
-                                    .renderingMode(.template)
-                                    .frame(width: 18, height: 18)
-//                                    .padding(6)
-                                    .foreground(.Text.light)
-                            }
-                        }
-                        if mode == .sort {
-                            Image.iconMenuDuo
+        RoundedCorner(radius: 4, corner: .all)
+            .frame(width: size, height: size)
+            .foreground(Color.Base.medium)
+            .scaleEffect(isDragging ? 0.7 : 1.0)
+            .overlay(alignment: .topTrailing) {
+                ZStack(alignment: .topTrailing) {
+                    Image(pImage: image)
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
+
+                    LinearGradient(gradient: .shallow, startPoint: .bottom, endPoint: .top)
+                        .frame(height: 24)
+                        .opacity((mode == .edit || mode == .sort) ? 1.0 : .zero)
+
+                    if mode == .edit {
+                        Button(action: onDelete) {
+                            Image.iconCloseSM
                                 .resizable()
                                 .renderingMode(.template)
                                 .frame(width: 18, height: 18)
-//                                .padding(6)
-                                .foreground(.Text.light)
-                            
-                            if isDragging { Color.Shadow.disable }
-                        }
-                        if mode == .select {
-                            RoundedCorner(radius: 4, corner: .all)
-                                .stroke()
                                 .foreground(.Text.light)
                         }
                     }
-                    .cornerRadius(4, corner: .all)
-                    .scaleEffect(isDragging ? 0.7 : 1.0)
-                    .transition(.opacity)
+                    if mode == .sort {
+                        Image.iconMenuDuo
+                            .resizable()
+                            .renderingMode(.template)
+                            .frame(width: 18, height: 18)
+                            .foreground(.Text.light)
+
+                        if isDragging { Color.Shadow.disable }
+                    }
+                    if mode == .select {
+                        RoundedCorner(radius: 4, corner: .all)
+                            .stroke()
+                            .foreground(.Text.light)
+                    }
                 }
-            
-            if let title = item.title {
-                Text(title)
-                    .font(.body1)
-                    .foreground(.Text.light)
-                    .frame(width: size)
-                    .lineLimit(1)
-                    .truncationMode(.tail)
+                .cornerRadius(4, corner: .all)
+                .scaleEffect(isDragging ? 0.7 : 1.0)
+                .transition(.opacity)
             }
-        }
         .onTapGesture {
             onTap()
         }
