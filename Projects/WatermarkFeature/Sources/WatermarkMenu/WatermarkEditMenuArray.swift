@@ -70,7 +70,7 @@ struct WatermarkEditMenuArray: View {
                         CategoryContent(title: "편집") {
                             HStack {
                                 Button {
-                                    viewModel.action(.remove)
+                                    viewModel.action(.remove(.array))
                                 } label: {
                                     Text("모두 삭제")
                                         .font(.bold1)
@@ -103,8 +103,8 @@ struct WatermarkEditMenuArray: View {
                         mode: $viewModel.arrayMode,
                         list: viewModel.picker.images,
                         select: $viewModel.arraySelect,
-                        onDelete: { viewModel.action(.removeAt($0)) },
-                        onMove: { viewModel.action(.move($0, $1)) }
+                        onDelete: { viewModel.action(.removeAt(.array, $0)) },
+                        onMove: { viewModel.action(.move(.array, $0, $1)) }
                     )
                 }
             } else {

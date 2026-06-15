@@ -84,15 +84,12 @@ public struct WatermarkText: View {
                             .foreground(.Gray.light)
                             .offset(x: 8, y: -8)
                             .onTapGesture {
-                                viewModel.action(.mode(isOn: false))
+                                viewModel.action(.textMode(isOn: false))
                             }
+                        }
                     }
                 }
             }
-            } // if renderSize != .zero
-        }
-        .onTapGesture {
-            viewModel.action(.mode(isOn: true))
         }
     }
 }

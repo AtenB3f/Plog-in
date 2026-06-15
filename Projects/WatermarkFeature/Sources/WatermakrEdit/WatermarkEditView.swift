@@ -61,7 +61,7 @@ public struct WatermarkEditView: View {
             case .picture:
                 AssetPickerView(picker: viewModel.picker)
             case .sticker:
-                AssetPickerView(picker: viewModel.stickerPicker)
+                AssetPickerView(picker: viewModel.sticker)
             case .none:
                 EmptyView()
             }

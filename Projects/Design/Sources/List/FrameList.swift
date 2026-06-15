@@ -54,7 +54,7 @@ public struct FrameList: View {
     public var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: spacing) {
-                ForEach(Array(displayList.enumerated()), id: \.element) { index, item in
+                ForEach(Array(displayList.enumerated()), id: \.offset) { index, item in
                     FrameListItemView(
                         image: item,
                         index: index,

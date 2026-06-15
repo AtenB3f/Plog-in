@@ -23,9 +23,10 @@ public class WatermarkEditViewModel: ObservableObject {
         case preview
         case word(_ text: String)
         case popup(_ route: WatermarkPopupRoute?)
-        case remove
-        case removeAt(_ index: Int)
-        case move(_ from: IndexSet, _ to: Int)
+        case remove(_ type: WatermarkMenuType)
+        case removeAt(_ type: WatermarkMenuType, _ index: Int)
+        case move(_ type: WatermarkMenuType, _ from: IndexSet, _ to: Int)
+        case replicate(_ type: WatermarkMenuType)
     }
     
     // MARK: - Picker
@@ -43,10 +44,11 @@ public class WatermarkEditViewModel: ObservableObject {
     
     let colorPalet: [Color] = [.white, .Gray.medium, .black, .Yejun.main, .Noah.main, .Bamby.main, .Eunho.main, .Hamin.main]
     
-    @Published var sticker = WatermarkListViewState()
     @Published var isShowArrayType = false
     @Published var arrayMode: FrameListMode = .none
     @Published var arraySelect: Int?
+    @Published var stickerMode: FrameListMode = .none
+    @Published var stickerSelect: Int?
     @Published var isShowExportType = false
     @Published var frame = WatermarkListViewState()
     
@@ -55,7 +57,7 @@ public class WatermarkEditViewModel: ObservableObject {
     let popup: WatermarkPopupCoordinator
     let usecase: WatermarkUsecase
     let picker: AssetPicker
-    let stickerPicker: AssetPicker
+    let sticker: AssetPicker
     
     private var cancellables = Set<AnyCancellable>()
     
@@ -69,7 +71,7 @@ public class WatermarkEditViewModel: ObservableObject {
         self.popup = popup
         self.usecase = usecase
         self.picker = picker
-        self.stickerPicker = stickerPicker
+        self.sticker = stickerPicker
         self.store = store
         words = usecase.fetchWords().map { $0.text }
         
@@ -95,6 +97,12 @@ private extension WatermarkEditViewModel {
             }
             .store(in: &cancellables)
 
+        sticker.objectWillChange
+            .sink { [weak self] _ in
+                self?.objectWillChange.send()
+            }
+            .store(in: &cancellables)
+
         popup.$history
             .sink { [weak self] history in
                 guard let self = self else { return }
@@ -103,7 +111,7 @@ private extension WatermarkEditViewModel {
             .store(in: &cancellables)
     }
     
-    func initialize() {
+    func originInit() {
         if let asset = picker.images.first {
             let ratio = asset.size.width / 650
             let fontSize = ratio * 36
@@ -118,6 +126,16 @@ private extension WatermarkEditViewModel {
             store.watermark.text.color = ColorData(color)
         }
         words = usecase.fetchWords().map { $0.text }
+    }
+
+    func stickerInit() {
+        guard let origin = picker.images.first else { return }
+        let models = usecase.makeStickerModels(
+            stickers: sticker.images,
+            origin: origin
+        )
+        store.setSticker(models)
+        sticker.images = []
     }
 }
 
@@ -139,12 +157,14 @@ extension WatermarkEditViewModel {
             word(text)
         case .popup(let route):
             popup(route)
-        case .remove:
-            remove()
-        case .removeAt(let index):
-            removeAt(index)
-        case .move(let from, let to):
-            picker.images.move(fromOffsets: from, toOffset: to)
+        case .remove(let type):
+            remove(type)
+        case .removeAt(let type, let index):
+            removeAt(type, index)
+        case .move(let type, let from, let to):
+            move(type, from, to)
+        case .replicate(let type):
+            replicate(type)
         }
     }
 }
@@ -156,7 +176,14 @@ private extension WatermarkEditViewModel {
     }
     
     func actionPicker() {
-        initialize()
+        switch pickerType {
+        case .picture:
+            originInit()
+        case .sticker:
+            stickerInit()
+        case .none:
+            break
+        }
         pickerType = nil
     }
     
@@ -205,20 +232,68 @@ private extension WatermarkEditViewModel {
         }
     }
     
-    func remove() {
-        arraySelect = nil
-        arrayMode = .none
-        picker.images = []
+    func remove(_ type: WatermarkMenuType) {
+        switch type {
+        case .array:
+            arraySelect = nil
+            arrayMode = .none
+            picker.images = []
+        case .sticker:
+            stickerSelect = nil
+            stickerMode = .none
+            store.watermark.stickers = []
+        default:
+            break
+        }
     }
 
-    func removeAt(_ index: Int) {
-        guard index < picker.images.count else { return }
-        if arraySelect == index {
-            arraySelect = nil
-        } else if let selected = arraySelect, selected > index {
-            arraySelect = selected - 1
+    func removeAt(_ type: WatermarkMenuType, _ index: Int) {
+        switch type {
+        case .array:
+            guard index < picker.images.count else { return }
+            if arraySelect == index {
+                arraySelect = nil
+            } else if let selected = arraySelect, selected > index {
+                arraySelect = selected - 1
+            }
+            picker.images.remove(at: index)
+        case .sticker:
+            guard index < store.watermark.stickers.count else { return }
+            if stickerSelect == index {
+                stickerSelect = nil
+            } else if let selected = stickerSelect, selected > index {
+                stickerSelect = selected - 1
+            }
+            store.watermark.stickers.remove(at: index)
+        default:
+            break
         }
-        picker.images.remove(at: index)
+    }
+    
+    func move(_ type: WatermarkMenuType, _ from: IndexSet, _ to: Int) {
+        switch type {
+        case .array:
+            picker.images.move(fromOffsets: from, toOffset: to)
+        case .sticker:
+            store.watermark.stickers.move(fromOffsets: from, toOffset: to)
+        default:
+            break
+        }
+    }
+    
+    func replicate(_ type: WatermarkMenuType) {
+        switch type {
+        case .sticker:
+            guard let index = stickerSelect else { return }
+            guard store.watermark.stickers.count <= 10 else { return }
+            var model = store.watermark.stickers[index]
+            model.layer = store.watermark.stickers.count
+            store.watermark.stickers.append(model)
+        case .frame:
+            break
+        default:
+            break
+        }
     }
     
     func handlePopupComplete(_ route: WatermarkPopupRoute?) {
@@ -252,11 +327,11 @@ private extension WatermarkEditViewModel {
     func setSticker(_ menu: WatermarkEditMenuType.StickerMenu) {
 //        switch menu {
 //        case .load:
-//            
+//
 //        case .edit:
-//            
+//
 //        case .remove:
-//            
+//
 //        }
     }
     
@@ -288,41 +363,4 @@ private extension WatermarkEditViewModel {
 //        }
     }
 }
-/*
 
-extension WatermarkEditViewModel {
-    func saveWatermarkWord(watermark: WatermarkModel) {
-        setText(watermark: watermark, text: self.newWord)
-        dataManager.saveWatermarkWord(self.newWord)
-        words = dataManager.loadWatermarkWord().map { $0.text }
-    }
-}
-
-extension WatermarkEditViewModel {
-    func loadImages() {
-        images = assets.compactMap { $0.imageAsset }
-        arrayItems = images.map { .init(image: $0) }
-    }
-    
-//    func makePreview() {
-//        previews = editor.generateWatermarks(images, watermark: watermark)
-//    }
-    
-    func saveWatermarkImage() {
-        Task.detached {
-            for image in self.previews {
-                do {
-                    try await self.editor.saveImageToPhotoLibrary(image: image)
-                } catch {
-                    print("에러: \(error)")
-                }
-            }
-        }
-    }
-    
-//    func saveWatermarkFrame() {
-//        dataManager.saveWatermark(watermark)
-//        frames = dataManager.loadWatermark()
-//    }
-}
-*/
