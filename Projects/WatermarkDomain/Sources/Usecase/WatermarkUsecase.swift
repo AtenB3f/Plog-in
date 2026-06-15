@@ -82,4 +82,131 @@ public extension WatermarkUsecase {
             )
         }
     }
+    
+    /// max 너비 1500px로 제한
+    /// auto 타입인 경우 사용
+    func makeExportModel(
+        origins: [PImage],
+        array: WatermarkArrayModel
+    ) -> WatermarkExportModel {
+        let max: CGFloat = 1500
+        var width: CGFloat = origins.first?.size.width ?? 0
+        var height: CGFloat = origins.first?.size.height ?? 0
+        var ratio: CGFloat = 1.0
+
+        let totalW = width * CGFloat(array.rows)
+        let totalH = height * CGFloat(array.columns)
+        
+        switch array.type {
+        case .none:
+            break
+        case .horizontal:
+            if totalW >= max {
+                ratio = max / totalW
+                width = max
+                height *= ratio
+            } else {
+                width *= CGFloat(array.rows)
+            }
+        case .vertical:
+            if totalH >= max {
+                ratio = max / totalH
+                height = max
+                width *= ratio
+            } else {
+                height *= CGFloat(array.columns)
+            }
+        case .grid:
+            if width > height {
+                if totalW >= max {
+                    ratio = max / totalW
+                    width = max
+                    height = totalH * ratio
+                } else {
+                    width = totalW
+                    height = totalH
+                }
+            } else {
+                if totalH >= max {
+                    ratio = max / totalH
+                    height = max
+                    width = totalW * ratio
+                } else {
+                    width = totalW
+                    height = totalH
+                }
+            }
+        }
+        return .init(
+            type: .auto,
+            width: width,
+            height: height,
+            multiple: 1.0
+        )
+    }
+    
+    /// max 너비 3000px로 제한
+    /// multiple 타입인 경우 사용
+    func makeExportModel(
+        origins: [PImage],
+        array: WatermarkArrayModel,
+        multiple: CGFloat
+    ) -> WatermarkExportModel {
+        let max: CGFloat = 3000
+        var width: CGFloat = origins.first?.size.width ?? 0
+        var height: CGFloat = origins.first?.size.height ?? 0
+        var ratio: CGFloat = 1.0
+        
+        switch array.type {
+        case .none:
+            width *= multiple
+            height *= multiple
+        case .horizontal:
+            if width * CGFloat(array.rows) * multiple >= max {
+                ratio = max / (width * CGFloat(array.rows) * multiple)
+                width = max
+                height *= ratio
+            } else {
+                width = width * CGFloat(array.rows) * multiple
+                height *= multiple
+            }
+        case .vertical:
+            if height * CGFloat(array.columns) * multiple >= max {
+                ratio = max / (height * CGFloat(array.columns) * multiple)
+                height = max
+                width *= ratio
+            } else {
+                width *= multiple
+                height *= CGFloat(array.columns) * multiple
+            }
+        case .grid:
+            let totalW = width * CGFloat(array.rows) * multiple
+            let totalH = height * CGFloat(array.columns) * multiple
+            if width > height {
+                if totalW >= max {
+                    ratio = max / totalW
+                    width = max
+                    height = totalH * ratio
+                } else {
+                    width = totalW
+                    height = totalH
+                }
+            } else {
+                if totalH >= max {
+                    ratio = max / totalH
+                    height = max
+                    width = totalW * ratio
+                } else {
+                    width = totalW
+                    height = totalH
+                }
+            }
+        }
+        return .init(
+            type: .multifple,
+            width: width,
+            height: height,
+            multiple: multiple
+        )
+    }
 }

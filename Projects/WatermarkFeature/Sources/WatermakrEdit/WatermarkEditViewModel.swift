@@ -121,6 +121,10 @@ private extension WatermarkEditViewModel {
             store.watermark.text.fontSize = fontSize
             store.watermark.text.spacingWidth = spacing
             store.watermark.text.spacingHeight = spacing
+            store.watermark.export = usecase.makeExportModel(
+                origins: picker.images,
+                array: store.watermark.array
+            )
         }
         if let color = colorPalet.first {
             store.watermark.text.color = ColorData(color)
@@ -342,6 +346,12 @@ private extension WatermarkEditViewModel {
         case .type(let type):
             store.watermark.array.type = type
             store.watermark.array.setRowColumn(picker.images.count)
+            let exportType = store.watermark.export.type
+            store.watermark.export = usecase.makeExportModel(
+                origins: picker.images,
+                array: store.watermark.array
+            )
+            store.watermark.export.type = exportType
         case .order:
             break
         }
@@ -350,7 +360,20 @@ private extension WatermarkEditViewModel {
     func setExport(_ menu: WatermarkEditMenuType.ExportMenu) {
         switch menu {
         case .type(let type):
-            store.watermark.export.type = type
+            switch type {
+            case .auto:
+                store.watermark.export = usecase.makeExportModel(
+                    origins: picker.images,
+                    array: store.watermark.array
+                )
+            case .multifple:
+                let multiple = store.watermark.export.multiple
+                store.watermark.export = usecase.makeExportModel(
+                    origins: picker.images,
+                    array: store.watermark.array,
+                    multiple: multiple
+                )
+            }
         }
     }
     
