@@ -24,8 +24,8 @@ public enum WatermarkExportType: String, Codable, CaseIterable {
 
 public struct WatermarkExportModel {
     public var type: WatermarkExportType
-    public var width: CGFloat
-    public var height: CGFloat
+    public var width: CGFloat   // multiple값이 적용된 최종 width
+    public var height: CGFloat  // multiple값이 적용된 최종 height
     public var multiple: CGFloat
     
     public init(
@@ -43,11 +43,11 @@ public struct WatermarkExportModel {
 
 public extension WatermarkExportModel {
     func getSize() -> CGSize {
-        return .init(width: self.width*multiple, height: self.height*multiple)
+        return .init(width: self.width, height: self.height)
     }
-    
+
     // View 출력 용
     func getSizeStr() -> String {
-        return "\(Int(width*multiple)) × \(Int(height*multiple))"
+        return "\(Int(width)) × \(Int(height))"
     }
 }

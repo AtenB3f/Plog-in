@@ -59,6 +59,7 @@ public enum WatermarkEditMenuType {
     
     public enum ExportMenu {
         case type(_ type: WatermarkExportType)
+        case multiple
     }
     
     public enum FrameMenu {

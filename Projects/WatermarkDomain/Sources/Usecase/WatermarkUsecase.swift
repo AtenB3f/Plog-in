@@ -65,6 +65,18 @@ public extension WatermarkUsecase {
 }
 
 public extension WatermarkUsecase {
+    /// export width 기준으로 fontSize/spacing을 재계산하고 나머지 값은 기존 모델 유지 (650px 기준 비율 적용)
+    func makeTextModel(export: WatermarkExportModel, current: WatermarkTextModel) -> WatermarkTextModel {
+        let ratio = export.width / 650
+        var updated = current
+        updated.fontSize = ratio * 36
+        updated.spacingWidth = ratio * 20
+        updated.spacingHeight = ratio * 20
+        return updated
+    }
+}
+
+public extension WatermarkUsecase {
     /// - Parameters:
     ///   - stickers: 스티커 이미지 배열
     ///   - origin: 기준 이미지 (picker의 첫 번째 이미지) — 너비 1/3 기준으로 scale 계산
