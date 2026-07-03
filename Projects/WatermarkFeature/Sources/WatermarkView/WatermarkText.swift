@@ -34,13 +34,11 @@ public struct WatermarkText: View {
             let renderRatio = exportWidth > 0 ? renderSize.width / exportWidth : renderSize.width / imageSize.width
             
             let renderFontSize = viewModel.store.watermark.text.fontSize * renderRatio
-            let renderKerning = -0.25 * renderFontSize / 36
 
             let renderCellSize = viewModel.format.getTextCellSize(
                 text: viewModel.store.watermark.text.text + " " + (viewModel.store.watermark.text.date?.now() ?? ""),
                 font: viewModel.store.watermark.text.toPFont,
-                fontSize: renderFontSize,
-                kerning: renderKerning
+                fontSize: renderFontSize
             )
             
             let grid = viewModel.format.getGrid(
