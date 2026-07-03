@@ -30,19 +30,15 @@ public struct WatermarkText: View {
 
             if renderSize != .zero, viewModel.store.watermark.text.fontSize > 0 {
 
-            let renderRatio = viewModel.format.getRenderRatio(
-                originSize: imageSize,
-                renderSize: renderSize
-            )
+            let exportWidth = viewModel.store.watermark.export.width
+            let renderRatio = exportWidth > 0 ? renderSize.width / exportWidth : renderSize.width / imageSize.width
             
             let renderFontSize = viewModel.store.watermark.text.fontSize * renderRatio
-            let renderKerning = -0.25 * renderRatio
 
             let renderCellSize = viewModel.format.getTextCellSize(
                 text: viewModel.store.watermark.text.text + " " + (viewModel.store.watermark.text.date?.now() ?? ""),
                 font: viewModel.store.watermark.text.toPFont,
-                fontSize: renderFontSize,
-                kerning: renderKerning
+                fontSize: renderFontSize
             )
             
             let grid = viewModel.format.getGrid(

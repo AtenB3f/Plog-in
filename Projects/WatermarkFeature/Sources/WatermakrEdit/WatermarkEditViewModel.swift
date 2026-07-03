@@ -112,18 +112,16 @@ private extension WatermarkEditViewModel {
     }
     
     func originInit() {
-        if let asset = picker.images.first {
-            let ratio = asset.size.width / 650
-            let fontSize = ratio * 36
-            let spacing = ratio * 20
-            store.watermark.text.rotation = -30
-            store.watermark.text.fontName = FontType.body1.fontName
-            store.watermark.text.fontSize = fontSize
-            store.watermark.text.spacingWidth = spacing
-            store.watermark.text.spacingHeight = spacing
+        if !picker.images.isEmpty {
             store.watermark.export = usecase.makeExportModel(
                 origins: picker.images,
                 array: store.watermark.array
+            )
+            store.watermark.text.fontName = FontType.body1.fontName
+            store.watermark.text.rotation = -30
+            store.watermark.text = usecase.makeTextModel(
+                export: store.watermark.export,
+                current: store.watermark.text
             )
         }
         if let color = colorPalet.first {
@@ -352,29 +350,47 @@ private extension WatermarkEditViewModel {
                 array: store.watermark.array
             )
             store.watermark.export.type = exportType
+            updateTextForExport()
         case .order:
             break
         }
     }
-    
+
     func setExport(_ menu: WatermarkEditMenuType.ExportMenu) {
         switch menu {
-        case .type(let type):
+        case .type(let type): // 타입 전환
             switch type {
             case .auto:
-                store.watermark.export = usecase.makeExportModel(
+                var export = usecase.makeExportModel(
                     origins: picker.images,
                     array: store.watermark.array
                 )
+                export.multiple = store.watermark.export.multiple
+                store.watermark.export = export
             case .multifple:
-                let multiple = store.watermark.export.multiple
                 store.watermark.export = usecase.makeExportModel(
                     origins: picker.images,
                     array: store.watermark.array,
-                    multiple: multiple
+                    multiple: store.watermark.export.multiple
                 )
             }
+            updateTextForExport()
+        case .multiple: // 배율 조정
+            guard store.watermark.export.type == .multifple else { return }
+            store.watermark.export = usecase.makeExportModel(
+                origins: picker.images,
+                array: store.watermark.array,
+                multiple: store.watermark.export.multiple
+            )
+            updateTextForExport()
         }
+    }
+
+    func updateTextForExport() {
+        store.watermark.text = usecase.makeTextModel(
+            export: store.watermark.export,
+            current: store.watermark.text
+        )
     }
     
     func setFrame(_ menu: WatermarkEditMenuType.FrameMenu) {

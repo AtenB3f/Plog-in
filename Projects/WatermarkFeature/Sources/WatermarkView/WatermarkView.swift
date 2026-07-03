@@ -81,7 +81,7 @@ public struct WatermarkView: View {
             WatermarkSticker(imageSize: viewModel.format.getCell(images: viewModel.picker.images, array: viewModel.store.watermark.array))
                 .environmentObject(viewModel)
         }
-        .drawingGroup()
+        .clipped()
     }
 }
 

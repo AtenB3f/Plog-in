@@ -83,16 +83,13 @@ public extension WatermarkFormat {
     func getTextCellSize(
         text: String,
         font: PFont,
-        fontSize: CGFloat,
-        kerning: CGFloat
+        fontSize: CGFloat
     ) -> CGSize {
         let renderFont = font.withSize(fontSize)
-
         let attributes: [NSAttributedString.Key: Any] = [
-            .font: renderFont,
-            .kern: kerning
+            .font: renderFont
         ]
-
+        
         let textSize = (text as NSString)
             .size(withAttributes: attributes)
         return textSize
