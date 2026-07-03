@@ -12,7 +12,8 @@ import WatermarkDomain
 
 @Model
 public final class WatermarkFrameEntity {
-    public var thumnailData: Data?
+    public var id: UUID
+    public var thumbnailData: Data?
     public var title: String
     public var date: Date
     public var lastDate: Date
@@ -22,11 +23,13 @@ public final class WatermarkFrameEntity {
     var watermark: WatermarkEntity?
     
     public init(
+        id: UUID,
         thumnail: Data? = nil,
         title: String = "",
         type: WatermarkFrameType = .custom
     ) {
-        self.thumnailData = thumnail
+        self.id = id
+        self.thumbnailData = thumnail
         self.title = title
         let current = Date()
         self.date = current

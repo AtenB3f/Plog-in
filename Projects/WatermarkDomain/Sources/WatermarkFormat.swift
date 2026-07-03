@@ -31,11 +31,11 @@ public extension WatermarkFormat {
     func getCell(images: [PImage], array: WatermarkArrayModel) -> CGSize {
         let cell = getCellSize(images: images)
         return CGSize(
-            width: cell.width * CGFloat(array.rows),
-            height: cell.height * CGFloat(array.columns)
+            width: cell.width * CGFloat(array.columns),
+            height: cell.height * CGFloat(array.rows)
         )
     }
-    
+
     func getRowColums(imageCount: Int, array: WatermarkArrayModel) -> (Int, Int) {
         let arrayType = array.type
         var rows = 1
@@ -44,11 +44,11 @@ public extension WatermarkFormat {
         case .none:
             break
         case .horizontal:
+            columns = imageCount
+            rows = 1
+        case .vertical:
             rows = imageCount
             columns = 1
-        case .vertical:
-            rows = 1
-            columns = imageCount
         case .grid:
             rows = array.rows
             columns = array.columns

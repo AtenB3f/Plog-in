@@ -218,8 +218,8 @@ public extension WatermarkEditor {
     func mergeImages(images: [PImage], rows: Int, columns: Int, exportSize: CGSize) -> PImage {
         let cellSize = format.getCellSize(images: images)
         // 최종 이미지 크기 계산
-        let finalWidth = cellSize.width * CGFloat(rows)
-        let finalHeight = cellSize.height * CGFloat(columns)
+        let finalWidth = cellSize.width * CGFloat(columns)
+        let finalHeight = cellSize.height * CGFloat(rows)
         let finalSize = CGSize(width: finalWidth, height: finalHeight)
         
         let format = UIGraphicsImageRendererFormat.default()

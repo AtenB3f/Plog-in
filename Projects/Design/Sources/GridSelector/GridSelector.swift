@@ -44,9 +44,9 @@ public struct GridSelector: View {
     
     public var body: some View {
         Grid(horizontalSpacing: spacing, verticalSpacing: 4) {
-            ForEach(0..<maxColumn, id:\.self) { col in
+            ForEach(0..<maxRow, id: \.self) { row in
                 GridRow {
-                    ForEach(0..<maxRow, id:\.self) { row in
+                    ForEach(0..<maxColumn, id: \.self) { col in
                         RoundedRectangle(cornerRadius: 4)
                             .frame(width: 20, height: 20)
                             .foreground((selectRow > row && selectColumn > col) ? .Gray.light : .Gray.disable)
@@ -69,16 +69,18 @@ public struct GridSelector: View {
     
     func handleDrag(x: CGFloat, y: CGFloat) {
         if x < 0 {
-            selectRow = 1
+            selectColumn = 1
+            
         } else {
-            let row = Int(x/(cellSize+(spacing/2))) + 1
-            selectRow = min(row, maxRow)
+            let column = Int(x/(cellSize+(spacing/2))) + 1
+            selectColumn = min(column, maxColumn)
         }
         if y < 0 {
-            selectColumn = 1
+            selectRow = 1
         } else {
-            let column = Int(y/(cellSize+(spacing/2))) + 1
-            selectColumn = min(column, maxColumn)
+            let row = Int(y/(cellSize+(spacing/2))) + 1
+            selectRow = min(row, maxRow)
+            
         }
     }
 }

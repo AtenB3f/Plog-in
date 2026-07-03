@@ -45,6 +45,7 @@ public struct WatermarkTextModel {
 
 public extension WatermarkTextModel {
     var toPFont: PFont {
+        // TODO: font name에 맞는 폰트가 없을 경우의 정책 필요
         return PFont(name: fontName, size: fontSize)! //?? .systemFont(ofSize: fontSize)
     }
 }

@@ -106,9 +106,9 @@ public extension WatermarkUsecase {
         var height: CGFloat = origins.first?.size.height ?? 0
         var ratio: CGFloat = 1.0
 
-        let totalW = width * CGFloat(array.rows)
-        let totalH = height * CGFloat(array.columns)
-        
+        let totalW = width * CGFloat(array.columns)
+        let totalH = height * CGFloat(array.rows)
+
         switch array.type {
         case .none:
             break
@@ -118,7 +118,7 @@ public extension WatermarkUsecase {
                 width = max
                 height *= ratio
             } else {
-                width *= CGFloat(array.rows)
+                width *= CGFloat(array.columns)
             }
         case .vertical:
             if totalH >= max {
@@ -126,7 +126,7 @@ public extension WatermarkUsecase {
                 height = max
                 width *= ratio
             } else {
-                height *= CGFloat(array.columns)
+                height *= CGFloat(array.rows)
             }
         case .grid:
             if width > height {
@@ -174,26 +174,26 @@ public extension WatermarkUsecase {
             width *= multiple
             height *= multiple
         case .horizontal:
-            if width * CGFloat(array.rows) * multiple >= max {
-                ratio = max / (width * CGFloat(array.rows) * multiple)
+            if width * CGFloat(array.columns) * multiple >= max {
+                ratio = max / (width * CGFloat(array.columns) * multiple)
                 width = max
                 height *= ratio
             } else {
-                width = width * CGFloat(array.rows) * multiple
+                width = width * CGFloat(array.columns) * multiple
                 height *= multiple
             }
         case .vertical:
-            if height * CGFloat(array.columns) * multiple >= max {
-                ratio = max / (height * CGFloat(array.columns) * multiple)
+            if height * CGFloat(array.rows) * multiple >= max {
+                ratio = max / (height * CGFloat(array.rows) * multiple)
                 height = max
                 width *= ratio
             } else {
                 width *= multiple
-                height *= CGFloat(array.columns) * multiple
+                height *= CGFloat(array.rows) * multiple
             }
         case .grid:
-            let totalW = width * CGFloat(array.rows) * multiple
-            let totalH = height * CGFloat(array.columns) * multiple
+            let totalW = width * CGFloat(array.columns) * multiple
+            let totalH = height * CGFloat(array.rows) * multiple
             if width > height {
                 if totalW >= max {
                     ratio = max / totalW
@@ -215,7 +215,7 @@ public extension WatermarkUsecase {
             }
         }
         return .init(
-            type: .multifple,
+            type: .multiple,
             width: width,
             height: height,
             multiple: multiple

@@ -367,7 +367,7 @@ private extension WatermarkEditViewModel {
                 )
                 export.multiple = store.watermark.export.multiple
                 store.watermark.export = export
-            case .multifple:
+            case .multiple:
                 store.watermark.export = usecase.makeExportModel(
                     origins: picker.images,
                     array: store.watermark.array,
@@ -376,7 +376,7 @@ private extension WatermarkEditViewModel {
             }
             updateTextForExport()
         case .multiple: // 배율 조정
-            guard store.watermark.export.type == .multifple else { return }
+            guard store.watermark.export.type == .multiple else { return }
             store.watermark.export = usecase.makeExportModel(
                 origins: picker.images,
                 array: store.watermark.array,

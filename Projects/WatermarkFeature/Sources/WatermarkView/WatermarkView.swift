@@ -105,10 +105,10 @@ struct WatermarkCell: View {
 
     var body: some View {
         Grid {
-            ForEach(0..<columns, id: \.self) { column in
+            ForEach(0..<rows, id: \.self) { row in
                 GridRow(alignment: .center) {
-                    ForEach(0..<rows, id: \.self) { row in
-                        let index = (rows * column + row)
+                    ForEach(0..<columns, id: \.self) { column in
+                        let index = (columns * row + column)
                         if index < images.count {
                             Image(uiImage: images[index])
                                 .resizable()
