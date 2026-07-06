@@ -119,9 +119,10 @@ private extension WatermarkEditViewModel {
             )
             store.watermark.text.fontName = FontType.body1.fontName
             store.watermark.text.rotation = -30
-            store.watermark.text = usecase.makeTextModel(
-                export: store.watermark.export,
-                current: store.watermark.text
+            usecase.makeTextModel(
+                origins: picker.images,
+                array: store.watermark.array,
+                current: &store.watermark.text
             )
         }
         if let color = colorPalet.first {
@@ -350,7 +351,11 @@ private extension WatermarkEditViewModel {
                 array: store.watermark.array
             )
             store.watermark.export.type = exportType
-            updateTextForExport()
+            usecase.makeTextModel(
+                origins: picker.images,
+                array: store.watermark.array,
+                current: &store.watermark.text
+            )
         case .order:
             break
         }
@@ -374,7 +379,6 @@ private extension WatermarkEditViewModel {
                     multiple: store.watermark.export.multiple
                 )
             }
-            updateTextForExport()
         case .multiple: // 배율 조정
             guard store.watermark.export.type == .multiple else { return }
             store.watermark.export = usecase.makeExportModel(
@@ -382,15 +386,7 @@ private extension WatermarkEditViewModel {
                 array: store.watermark.array,
                 multiple: store.watermark.export.multiple
             )
-            updateTextForExport()
         }
-    }
-
-    func updateTextForExport() {
-        store.watermark.text = usecase.makeTextModel(
-            export: store.watermark.export,
-            current: store.watermark.text
-        )
     }
     
     func setFrame(_ menu: WatermarkEditMenuType.FrameMenu) {
