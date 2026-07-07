@@ -56,6 +56,7 @@ public class WatermarkEditViewModel: ObservableObject {
     var store: WatermarkStore
     let popup: WatermarkPopupCoordinator
     let usecase: WatermarkUsecase
+    let format: WatermarkFormat
     let picker: AssetPicker
     let sticker: AssetPicker
     
@@ -66,10 +67,12 @@ public class WatermarkEditViewModel: ObservableObject {
         usecase: WatermarkUsecase,
         picker: AssetPicker,
         stickerPicker: AssetPicker,
-        store: WatermarkStore
+        store: WatermarkStore,
+        format: WatermarkFormat = WatermarkFormat()
     ) {
         self.popup = popup
         self.usecase = usecase
+        self.format = format
         self.picker = picker
         self.sticker = stickerPicker
         self.store = store
@@ -113,13 +116,13 @@ private extension WatermarkEditViewModel {
     
     func originInit() {
         if !picker.images.isEmpty {
-            store.watermark.export = usecase.makeExportModel(
+            store.watermark.export = format.makeExportModel(
                 origins: picker.images,
                 array: store.watermark.array
             )
             store.watermark.text.fontName = FontType.body1.fontName
             store.watermark.text.rotation = -30
-            usecase.makeTextModel(
+            format.makeTextModel(
                 origins: picker.images,
                 array: store.watermark.array,
                 current: &store.watermark.text
@@ -133,7 +136,7 @@ private extension WatermarkEditViewModel {
 
     func stickerInit() {
         guard let origin = picker.images.first else { return }
-        let models = usecase.makeStickerModels(
+        let models = format.makeStickerModels(
             stickers: sticker.images,
             origin: origin
         )
@@ -346,12 +349,12 @@ private extension WatermarkEditViewModel {
             store.watermark.array.type = type
             store.watermark.array.setRowColumn(picker.images.count)
             let exportType = store.watermark.export.type
-            store.watermark.export = usecase.makeExportModel(
+            store.watermark.export = format.makeExportModel(
                 origins: picker.images,
                 array: store.watermark.array
             )
             store.watermark.export.type = exportType
-            usecase.makeTextModel(
+            format.makeTextModel(
                 origins: picker.images,
                 array: store.watermark.array,
                 current: &store.watermark.text
@@ -366,14 +369,14 @@ private extension WatermarkEditViewModel {
         case .type(let type): // 타입 전환
             switch type {
             case .auto:
-                var export = usecase.makeExportModel(
+                var export = format.makeExportModel(
                     origins: picker.images,
                     array: store.watermark.array
                 )
                 export.multiple = store.watermark.export.multiple
                 store.watermark.export = export
             case .multiple:
-                store.watermark.export = usecase.makeExportModel(
+                store.watermark.export = format.makeExportModel(
                     origins: picker.images,
                     array: store.watermark.array,
                     multiple: store.watermark.export.multiple
@@ -381,7 +384,7 @@ private extension WatermarkEditViewModel {
             }
         case .multiple: // 배율 조정
             guard store.watermark.export.type == .multiple else { return }
-            store.watermark.export = usecase.makeExportModel(
+            store.watermark.export = format.makeExportModel(
                 origins: picker.images,
                 array: store.watermark.array,
                 multiple: store.watermark.export.multiple

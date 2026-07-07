@@ -23,7 +23,7 @@ public class WatermarkViewModel: ObservableObject {
     @Published var selectedStickerIndex: Int?
     @Published var page: Int = 0
     
-    let format = WatermarkFormat()
+    let format: WatermarkFormat
     let picker: AssetPicker
     let stickerPicker: AssetPicker
     let store: WatermarkStore
@@ -33,11 +33,13 @@ public class WatermarkViewModel: ObservableObject {
     public init(
         picker: AssetPicker,
         stickerPicker: AssetPicker,
-        store: WatermarkStore
+        store: WatermarkStore,
+        format: WatermarkFormat = WatermarkFormat()
     ) {
         self.picker = picker
         self.stickerPicker = stickerPicker
         self.store = store
+        self.format = format
         self.bind()
     }
 }
@@ -79,38 +81,3 @@ public extension WatermarkViewModel {
         }
     }
 }
-//public extension WatermarkViewModel {
-//    func calculateSetting() {
-//        switch watermark.arraySetting.type {
-//        case .none:
-//            guard let size = images.first?.size else { break }
-//            watermark.exportSetting.width = size.width
-//            watermark.exportSetting.height = size.height
-//        default:
-//            let size = editor.getCellSize(images: images)
-//            let multiple = watermark.exportSetting.multiple
-//            watermark.exportSetting.width = size.width * multiple
-//            watermark.exportSetting.height = size.height * multiple
-//        }
-//    }
-    
-//    func generateResults() {
-//        let editor = WatermarkEditor(watermark: watermark, images: images)
-//        results = editor.generateWatermarks()
-//    }
-//}
-
-//public extension WatermarkViewModel {
-//    func setArray(
-//        type: WatermarkArrayType? = nil,
-//        rows: Int? = nil,
-//        columns: Int? = nil
-//    ) {
-//        if let type = type {
-//            watermark.array.type = type
-////            watermark.arraySetting.setRowColumn(originImages.count)
-//        }
-//        if let rows = rows { watermark.array.rows = rows }
-//        if let columns = columns { watermark.array.columns = columns }
-//    }
-//}
