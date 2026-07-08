@@ -69,8 +69,8 @@ public struct WatermarkView: View {
                 LinearGradient(gradient: .plave, startPoint: .topLeading, endPoint: .bottomTrailing)
             }
             WatermarkText(
-                imageSize: viewModel.format.getCell(
-                    images: viewModel.picker.images,
+                imageSize: viewModel.format.getWatermarkImageSize(
+                    origins: viewModel.picker.images,
                     array: viewModel.store.watermark.array
                 )
             )
@@ -78,7 +78,10 @@ public struct WatermarkView: View {
         }
         .drawingGroup()
         .overlay {
-            WatermarkSticker(imageSize: viewModel.format.getCell(images: viewModel.picker.images, array: viewModel.store.watermark.array))
+            WatermarkSticker(imageSize: viewModel.format.getWatermarkImageSize(
+                origins: viewModel.picker.images,
+                array: viewModel.store.watermark.array)
+            )
                 .environmentObject(viewModel)
         }
         .clipped()
@@ -101,12 +104,18 @@ struct WatermarkCells: View {
                     ForEach(0..<viewModel.store.watermark.array.columns, id: \.self) { column in
                         let index = (viewModel.store.watermark.array.columns * row + column)
                         if index < viewModel.picker.images.count {
-                            Image(uiImage: viewModel.picker.images[index])
-                                .resizable()
-                                .aspectRatio(viewModel.format.getCellRatio(images: viewModel.picker.images), contentMode: .fit)
+                            Color.clear
+                                .aspectRatio(viewModel.format.getCellRatio(origins: viewModel.picker.images), contentMode: .fit)
+                                .overlay(alignment: .center) {
+                                    Image(uiImage: viewModel.picker.images[index])
+                                        .resizable()
+                                        .aspectRatio(contentMode: .fit)
+                                }
+                                .clipped()
+//                                .aspectRatio(viewModel.format.getCellRatio(origins: viewModel.picker.images), contentMode: .fit)
                         } else {
                             Color.clear
-                                .aspectRatio(viewModel.format.getCellRatio(images: viewModel.picker.images), contentMode: .fit)
+                                .aspectRatio(viewModel.format.getCellRatio(origins: viewModel.picker.images), contentMode: .fit)
                         }
                     }
                 }
