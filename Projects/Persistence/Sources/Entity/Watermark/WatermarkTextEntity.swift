@@ -17,8 +17,8 @@ public final class WatermarkTextEntity {
     var fontSize: CGFloat
     var rotation: CGFloat
     var color: ColorData
-    var spacingWidth: CGFloat
-    var spacingHeight: CGFloat
+    var spacingWidthRatio: CGFloat
+    var spacingHeightRatio: CGFloat
     var date: Date?
     var isGradient: Bool
     
@@ -30,8 +30,8 @@ public final class WatermarkTextEntity {
         fontSize: CGFloat = .zero,
         rotation: CGFloat = .zero,
         color: ColorData = .init(red: .zero, green: .zero, blue: .zero, opacity: 1.0),
-        spacingWidth: CGFloat = .zero,
-        spacingHeight: CGFloat = .zero,
+        spacingWidthRatio: CGFloat = .zero,
+        spacingHeightRatio: CGFloat = .zero,
         date: Date? = nil,
         isGradient: Bool = true
     ) {
@@ -40,8 +40,8 @@ public final class WatermarkTextEntity {
         self.fontSize = fontSize
         self.rotation = rotation
         self.color = color
-        self.spacingWidth = spacingWidth
-        self.spacingHeight = spacingHeight
+        self.spacingWidthRatio = spacingWidthRatio
+        self.spacingHeightRatio = spacingHeightRatio
         self.date = date
         self.isGradient = isGradient
     }

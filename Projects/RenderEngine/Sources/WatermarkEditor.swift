@@ -136,7 +136,10 @@ public class WatermarkEditor {
         exportSize: CGSize
     ) {
         guard let font =  PFont(name: textSetting.fontName, size: textSetting.fontSize) else { return }//textSetting.getPFont() else { return }
-        var spacing: CGSize = .init(width: textSetting.spacingWidth, height: textSetting.spacingHeight)//textSetting.getSpacing()
+        var spacing: CGSize = .init(
+            width: textSetting.spacingWidthRatio * textSetting.fontSize,
+            height: textSetting.spacingHeightRatio * textSetting.fontSize
+        ) //textSetting.getSpacing()
         spacing.height = spacing.width
         let attributes: [NSAttributedString.Key: Any] = [
             .font: font,

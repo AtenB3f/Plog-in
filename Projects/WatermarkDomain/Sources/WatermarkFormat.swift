@@ -19,7 +19,7 @@ public extension WatermarkFormat {
         return max
     }
     
-    /// 셀 기준: 첫 이미지 width × cellRatio(최대 세로/가로 비율)
+    /// Cell Size에서 행렬을 곱한 값
     func getGridSize(origins: [PImage], rows: Int, columns: Int) -> CGSize {
         guard let referenceImage = origins.first else { return .zero }
         let cellWidth = referenceImage.size.width
@@ -111,8 +111,6 @@ public extension WatermarkFormat {
         }
         let ratio = imageSize.width / 650
         current.fontSize = ratio * 36
-        current.spacingWidth = ratio * 20
-        current.spacingHeight = ratio * 20
     }
     
     /// - Parameters:

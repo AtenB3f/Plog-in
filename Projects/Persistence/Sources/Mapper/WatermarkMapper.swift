@@ -55,8 +55,8 @@ public extension WatermarkTextModel {
             fontSize: self.fontSize,
             rotation: self.rotation,
             color: self.color,
-            spacingWidth: self.spacingWidth,
-            spacingHeight: self.spacingHeight,
+            spacingWidthRatio: self.spacingWidthRatio,
+            spacingHeightRatio: self.spacingHeightRatio,
             date: self.date,
             isGradient: self.isGradient
         )
@@ -71,8 +71,8 @@ public extension WatermarkTextEntity {
             fontSize: self.fontSize,
             rotation: self.rotation,
             color: self.color,
-            spacingWidth: self.spacingWidth,
-            spacingHeight: self.spacingHeight,
+            spacingWidthRatio: self.spacingWidthRatio,
+            spacingHeightRatio: self.spacingHeightRatio,
             date: self.date,
             isGradient: self.isGradient
         )

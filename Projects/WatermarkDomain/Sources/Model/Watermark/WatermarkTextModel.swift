@@ -15,8 +15,8 @@ public struct WatermarkTextModel {
     public var fontSize: CGFloat
     public var rotation: CGFloat
     public var color: ColorData
-    public var spacingWidth: CGFloat
-    public var spacingHeight: CGFloat
+    public var spacingWidthRatio: CGFloat
+    public var spacingHeightRatio: CGFloat
     public var date: Date?
     public var isGradient: Bool
     
@@ -26,8 +26,8 @@ public struct WatermarkTextModel {
         fontSize: CGFloat = .zero,
         rotation: CGFloat = .zero,
         color: ColorData = .init(red: .zero, green: .zero, blue: .zero, opacity: .zero),
-        spacingWidth: CGFloat = .zero,
-        spacingHeight: CGFloat = .zero,
+        spacingWidthRatio: CGFloat = .zero,
+        spacingHeightRatio: CGFloat = .zero,
         date: Date? = nil,
         isGradient: Bool = true
     ) {
@@ -36,8 +36,8 @@ public struct WatermarkTextModel {
         self.fontSize = fontSize
         self.rotation = rotation
         self.color = color
-        self.spacingWidth = spacingWidth
-        self.spacingHeight = spacingHeight
+        self.spacingWidthRatio = spacingWidthRatio
+        self.spacingHeightRatio = spacingHeightRatio
         self.date = date
         self.isGradient = isGradient
     }

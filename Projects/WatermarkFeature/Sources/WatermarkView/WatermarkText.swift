@@ -44,8 +44,8 @@ public struct WatermarkText: View {
             let grid = viewModel.format.getGrid(
                 renderSize: renderSize,
                 cellSize: renderCellSize,
-                spacingHorizontal: viewModel.store.watermark.text.spacingWidth * renderRatio,
-                spacingVertical: viewModel.store.watermark.text.spacingHeight * renderRatio
+                spacingHorizontal: viewModel.store.watermark.text.spacingWidthRatio * renderRatio,
+                spacingVertical: viewModel.store.watermark.text.spacingHeightRatio * renderRatio
             )
 
             GridLayer(
@@ -109,8 +109,8 @@ private struct GridLayer: View {
             let centerX = size.width * 0.5
             let centerY = size.height * 0.5
 
-            let stepX = cellSize.width + watermarkText.spacingWidth * renderRatio
-            let stepY = cellSize.height + watermarkText.spacingHeight * renderRatio
+            let stepX = cellSize.width + watermarkText.spacingWidthRatio * renderRatio
+            let stepY = cellSize.height + watermarkText.spacingHeightRatio * renderRatio
             let renderKerning = -0.25 * renderRatio
             let radians = watermarkText.rotation * .pi / 180
             let cosTheta = cos(radians)
