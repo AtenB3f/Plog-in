@@ -13,23 +13,24 @@ public class WatermarkFormat {
 }
 
 public extension WatermarkFormat {
-    /// origins 중 height / width 가 가장 큰 값
+    /// origins 중 width / height 가 가장 작은 값
     func getCellRatio(origins: [PImage]) -> CGFloat {
         guard let max = origins.map({ $0.size.height / $0.size.width }).sorted(by: <).last else { return 1 }
-        return max
+        return 1/max
     }
     
     /// Cell Size에서 행렬을 곱한 값
     func getGridSize(origins: [PImage], rows: Int, columns: Int) -> CGSize {
         guard let referenceImage = origins.first else { return .zero }
         let cellWidth = referenceImage.size.width
-        let cellHeight = cellWidth * getCellRatio(origins: origins)
+        let cellHeight = cellWidth / getCellRatio(origins: origins)
         return .init(
             width: cellWidth * CGFloat(columns),
             height: cellHeight * CGFloat(rows)
         )
     }
     
+    // 워터마크 이미지 내의 셀의 사이즈
     func getCellSize(origins: [PImage], array: WatermarkArrayModel) -> CGSize {
         let rows = array.rows
         let columns = array.columns
@@ -80,6 +81,7 @@ public extension WatermarkFormat {
         }
     }
     
+    // 워터마크 이미지 사이즈
     func getWatermarkImageSize(origins: [PImage], array: WatermarkArrayModel) -> CGSize {
         let cell = getCellSize(origins: origins, array: array)
         switch array.type {
@@ -305,17 +307,17 @@ public extension WatermarkFormat {
         return (rows, columns)
     }
     
-    func getRenderSize(originSize: CGSize, containerSize: CGSize) -> CGSize {
-        guard originSize.width > 0, originSize.height > 0 else { return .zero }
+    func getRenderSize(watermarkSize: CGSize, containerSize: CGSize) -> CGSize {
+        guard watermarkSize.width > 0, watermarkSize.height > 0 else { return .zero }
 
-        let widthRatio = containerSize.width / originSize.width
-        let heightRatio = containerSize.height / originSize.height
+        let widthRatio = containerSize.width / watermarkSize.width
+        let heightRatio = containerSize.height / watermarkSize.height
 
         let scale = min(widthRatio, heightRatio)
 
         return CGSize(
-            width: originSize.width * scale,
-            height: originSize.height * scale
+            width: watermarkSize.width * scale,
+            height: watermarkSize.height * scale
         )
     }
     
@@ -327,7 +329,8 @@ public extension WatermarkFormat {
         return renderSize.width / originSize.width
     }
     
-    func getTextCellSize(
+    // spacing을 제외하고 Text를 그릴 때의 텍스트 너비
+    func getTextArea(
         text: String,
         font: PFont,
         fontSize: CGFloat
@@ -342,15 +345,15 @@ public extension WatermarkFormat {
         return textSize
     }
     
-    func getGrid(
+    func getTextGrid(
         renderSize: CGSize,
-        cellSize: CGSize,
-        spacingHorizontal: CGFloat,
-        spacingVertical: CGFloat
+        renderTextAreaSize: CGSize,
+        spacingRatioW: CGFloat,
+        spacingRatioH: CGFloat
     ) -> (rows: Int, columns: Int) {
 
-        let stepX = cellSize.width + spacingHorizontal
-        let stepY = cellSize.height + spacingVertical
+        let stepX = renderTextAreaSize.width + renderTextAreaSize.width * spacingRatioW
+        let stepY = renderTextAreaSize.height + renderTextAreaSize.height * spacingRatioH
 
         let columns = Int(ceil(renderSize.width / stepX)) + 2
         let rows = Int(ceil(renderSize.height / stepY)) + 2

@@ -46,7 +46,7 @@ public struct WatermarkView: View {
                         if viewModel.store.watermark.text.isGradient {
                             LinearGradient(gradient: .plave, startPoint: .topLeading, endPoint: .bottomTrailing)
                         }
-                        WatermarkText(imageSize: image.size)
+                        WatermarkText(watermarkImageSize: image.size)
                             .environmentObject(viewModel)
                     }
                     .drawingGroup()
@@ -68,8 +68,7 @@ public struct WatermarkView: View {
             if viewModel.store.watermark.text.isGradient {
                 LinearGradient(gradient: .plave, startPoint: .topLeading, endPoint: .bottomTrailing)
             }
-            WatermarkText(
-                imageSize: viewModel.format.getWatermarkImageSize(
+            WatermarkText(watermarkImageSize: viewModel.format.getWatermarkImageSize(
                     origins: viewModel.picker.images,
                     array: viewModel.store.watermark.array
                 )
