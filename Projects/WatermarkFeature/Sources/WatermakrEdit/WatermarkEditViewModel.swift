@@ -135,10 +135,11 @@ private extension WatermarkEditViewModel {
     }
 
     func stickerInit() {
-        guard let origin = picker.images.first else { return }
+        guard !picker.images.isEmpty else { return }
         let models = format.makeStickerModels(
             stickers: sticker.images,
-            origin: origin
+            origins: picker.images,
+            array: store.watermark.array
         )
         store.setSticker(models)
         sticker.images = []
@@ -346,6 +347,11 @@ private extension WatermarkEditViewModel {
         case .toggle:
             isShowArrayType.toggle()
         case .type(let type):
+            let oldWidth = format.getWatermarkImageSize(
+                origins: picker.images,
+                array: store.watermark.array
+            ).width
+
             store.watermark.array.type = type
             store.watermark.array.setRowColumn(picker.images.count)
             let exportType = store.watermark.export.type
@@ -359,6 +365,20 @@ private extension WatermarkEditViewModel {
                 array: store.watermark.array,
                 current: &store.watermark.text
             )
+
+            let newWidth = format.getWatermarkImageSize(
+                origins: picker.images,
+                array: store.watermark.array
+            ).width
+            if !store.watermark.stickers.isEmpty {
+                store.setSticker(
+                    format.rescaleStickers(
+                        store.watermark.stickers,
+                        oldWidth: oldWidth,
+                        newWidth: newWidth
+                    )
+                )
+            }
         case .order:
             break
         }

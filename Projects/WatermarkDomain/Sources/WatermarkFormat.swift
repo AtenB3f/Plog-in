@@ -82,10 +82,15 @@ public extension WatermarkFormat {
     
     func getWatermarkImageSize(origins: [PImage], array: WatermarkArrayModel) -> CGSize {
         let cell = getCellSize(origins: origins, array: array)
-        return CGSize(
-            width: cell.width * CGFloat(array.columns),
-            height: cell.height * CGFloat(array.rows)
-        )
+        switch array.type {
+        case .none:
+            return cell
+        case .horizontal, .vertical, .grid:
+            return CGSize(
+                width: cell.width * CGFloat(array.columns),
+                height: cell.height * CGFloat(array.rows)
+            )
+        }
     }
 }
 
@@ -115,11 +120,16 @@ public extension WatermarkFormat {
     
     /// - Parameters:
     ///   - stickers: 스티커 이미지 배열
-    ///   - origin: 기준 이미지 (picker의 첫 번째 이미지) — 너비 1/3 기준으로 scale 계산
-    func makeStickerModels(stickers: [PImage], origin: PImage) -> [WatermarkStickerModel] {
-        let width = origin.size.width
+    ///   - origins: 원본 이미지 배열
+    ///   - array: 배열 모델
+    func makeStickerModels(
+        stickers: [PImage],
+        origins: [PImage],
+        array: WatermarkArrayModel
+    ) -> [WatermarkStickerModel] {
+        let watermarkImageWidth = getWatermarkImageSize(origins: origins, array: array).width
         return stickers.enumerated().map { index, image in
-            let scale = (width / 3) / image.size.width
+            let scale = (watermarkImageWidth / 3) / image.size.width
             return WatermarkStickerModel(
                 image: image,
                 alpha: 1.0,
@@ -130,7 +140,22 @@ public extension WatermarkFormat {
             )
         }
     }
-    
+
+    /// 워터마크 이미지 크기 변화 비율만큼 기존 스티커의 scale을 재조정
+    func rescaleStickers(
+        _ stickers: [WatermarkStickerModel],
+        oldWidth: CGFloat,
+        newWidth: CGFloat
+    ) -> [WatermarkStickerModel] {
+        guard oldWidth > 0, oldWidth != newWidth else { return stickers }
+        let ratio = newWidth / oldWidth
+        return stickers.map { sticker in
+            var updated = sticker
+            updated.scale *= ratio
+            return updated
+        }
+    }
+
     /// max 너비 1500px로 제한
     /// auto 타입인 경우 사용
     func makeExportModel(
