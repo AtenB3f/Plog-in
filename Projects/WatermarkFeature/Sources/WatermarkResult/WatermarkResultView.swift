@@ -12,8 +12,6 @@ import PlatformCore
 
 struct WatermarkResultView: View {
     @Environment(\.dismiss) var dismiss
-//    private let manager = AppManager.shared
-//    private let editor = WatermarkManager()
     
     let results: [PImage]
     

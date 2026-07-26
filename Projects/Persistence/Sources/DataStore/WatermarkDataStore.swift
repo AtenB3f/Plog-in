@@ -12,25 +12,9 @@ import WatermarkDomain
 
 public class WatermarkDataStore {
     var store: DataStore
-    
-    public init() {
-        do {
-            let schema = Schema([
-                WatermarkEntity.self,
-                WatermarkWordEntity.self
-            ])
-            let configuration = ModelConfiguration(
-                schema: schema,
-                isStoredInMemoryOnly: false
-            )
-            let container = try ModelContainer(
-                for: schema,
-                configurations: [configuration]
-            )
-            self.store = DataStore(modelContainer: container)
-        } catch {
-            fatalError("DataStore(Debug): in-memory ModelContainer 생성 실패: \(error)")
-        }
+
+    public init(store: DataStore) {
+        self.store = store
     }
 }
 

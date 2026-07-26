@@ -73,3 +73,18 @@ public final class DataStore {
         }
     }
 }
+
+extension DataStore {
+    public static func makePersistent() throws -> DataStore {
+        let schema = Schema([
+            WatermarkEntity.self,
+            WatermarkWordEntity.self
+        ])
+        let configuration = ModelConfiguration(
+            schema: schema,
+            isStoredInMemoryOnly: false
+        )
+        let container = try ModelContainer(for: schema, configurations: [configuration])
+        return DataStore(modelContainer: container)
+    }
+}

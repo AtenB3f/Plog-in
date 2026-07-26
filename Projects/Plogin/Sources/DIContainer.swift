@@ -16,23 +16,44 @@ import RenderEngine
 
 public class DIContainer: ObservableObject {
     private var cancellables = Set<AnyCancellable>()
-    
-    public init() {
+    private let watermarkStore: WatermarkDataStore
+
+    public init(
+        watermarkStore: WatermarkDataStore = DIContainer.makeDefaultWatermarkStore()
+    ) {
+        self.watermarkStore = watermarkStore
+
         popupWatermark.objectWillChange
             .sink { [weak self] _ in
                 self?.objectWillChange.send()
             }
             .store(in: &cancellables)
-        
+
         navigation.objectWillChange
             .sink { [weak self] _ in
                 self?.objectWillChange.send()
             }
             .store(in: &cancellables)
+
+        rootUI.objectWillChange
+            .sink { [weak self] _ in
+                self?.objectWillChange.send()
+            }
+            .store(in: &cancellables)
     }
-    
+
+    public static func makeDefaultWatermarkStore() -> WatermarkDataStore {
+        do {
+            let dataStore = try DataStore.makePersistent()
+            return WatermarkDataStore(store: dataStore)
+        } catch {
+            fatalError("영구 저장소 초기화 실패: \(error)")
+        }
+    }
+
     @Published public var navigation = TabNavigaionCoordinator()
     @Published public var popupWatermark = WatermarkPopupCoordinator()
+    @Published public var rootUI = RootUIManager()
 }
 
 // MARK: - Tab
@@ -54,7 +75,6 @@ extension DIContainer {
 // MARK: - Popup
 extension DIContainer {
     func makeWatermarkPopupUsecase() -> WatermarkUsecase {
-        let watermarkStore = WatermarkDataStore()
         return WatermarkUsecase(
             wordDataStore: watermarkStore,
             watermarkDataStore: watermarkStore
@@ -142,7 +162,6 @@ extension DIContainer {
         stickerPicker: AssetPicker,
         store: WatermarkStore
     ) -> WatermarkEditViewModel {
-        let watermarkStore = WatermarkDataStore()
         let usecase = WatermarkUsecase(
             wordDataStore: watermarkStore,
             watermarkDataStore: watermarkStore
