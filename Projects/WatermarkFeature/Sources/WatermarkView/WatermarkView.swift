@@ -25,7 +25,7 @@ public struct WatermarkView: View {
             if viewModel.store.watermark.array.type == .none {
                 page()
             } else {
-                cell()
+                cells()
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -46,7 +46,7 @@ public struct WatermarkView: View {
                         if viewModel.store.watermark.text.isGradient {
                             LinearGradient(gradient: .plave, startPoint: .topLeading, endPoint: .bottomTrailing)
                         }
-                        WatermarkText(imageSize: image.size)
+                        WatermarkText(watermarkImageSize: image.size)
                             .environmentObject(viewModel)
                     }
                     .drawingGroup()
@@ -62,60 +62,59 @@ public struct WatermarkView: View {
     }
     
     @ViewBuilder
-    func cell() -> some View {
-        WatermarkCell(
-            rows: viewModel.store.watermark.array.rows,
-            columns: viewModel.store.watermark.array.columns,
-            images: viewModel.picker.images,
-            ratio: viewModel.format.getCellRatio(images: viewModel.picker.images)
-        )
+    func cells() -> some View {
+        WatermarkCells(viewModel: viewModel)
         .overlay {
             if viewModel.store.watermark.text.isGradient {
                 LinearGradient(gradient: .plave, startPoint: .topLeading, endPoint: .bottomTrailing)
             }
-            WatermarkText(imageSize: viewModel.format.getCell(images: viewModel.picker.images, array: viewModel.store.watermark.array))
+            WatermarkText(watermarkImageSize: viewModel.format.getWatermarkImageSize(
+                    origins: viewModel.picker.images,
+                    array: viewModel.store.watermark.array
+                )
+            )
                 .environmentObject(viewModel)
         }
         .drawingGroup()
         .overlay {
-            WatermarkSticker(imageSize: viewModel.format.getCell(images: viewModel.picker.images, array: viewModel.store.watermark.array))
+            WatermarkSticker(imageSize: viewModel.format.getWatermarkImageSize(
+                origins: viewModel.picker.images,
+                array: viewModel.store.watermark.array)
+            )
                 .environmentObject(viewModel)
         }
         .clipped()
     }
 }
 
-struct WatermarkCell: View {
-    let rows: Int
-    let columns: Int
-    let images: [PImage]
-    let ratio: CGFloat
+struct WatermarkCells: View {
+    @StateObject var viewModel: WatermarkViewModel
     
-    init(
-        rows: Int,
-        columns: Int,
-        images: [PImage],
-        ratio: CGFloat
+    public init(
+        viewModel: WatermarkViewModel
     ) {
-        self.rows = rows
-        self.columns = columns
-        self.images = images
-        self.ratio = ratio
+        self._viewModel = StateObject(wrappedValue: viewModel)
     }
-
+    
     var body: some View {
-        Grid {
-            ForEach(0..<columns, id: \.self) { column in
+        Grid(horizontalSpacing: 0, verticalSpacing: 0) {
+            ForEach(0..<viewModel.store.watermark.array.rows, id: \.self) { row in
                 GridRow(alignment: .center) {
-                    ForEach(0..<rows, id: \.self) { row in
-                        let index = (rows * column + row)
-                        if index < images.count {
-                            Image(uiImage: images[index])
-                                .resizable()
-                                .aspectRatio(ratio, contentMode: .fit)
+                    ForEach(0..<viewModel.store.watermark.array.columns, id: \.self) { column in
+                        let index = (viewModel.store.watermark.array.columns * row + column)
+                        if index < viewModel.picker.images.count {
+                            Color.clear
+                                .aspectRatio(viewModel.format.getCellRatio(origins: viewModel.picker.images), contentMode: .fit)
+                                .overlay(alignment: .center) {
+                                    Image(uiImage: viewModel.picker.images[index])
+                                        .resizable()
+                                        .aspectRatio(contentMode: .fit)
+                                }
+                                .clipped()
+//                                .aspectRatio(viewModel.format.getCellRatio(origins: viewModel.picker.images), contentMode: .fit)
                         } else {
                             Color.clear
-                                .aspectRatio(ratio, contentMode: .fit)
+                                .aspectRatio(viewModel.format.getCellRatio(origins: viewModel.picker.images), contentMode: .fit)
                         }
                     }
                 }

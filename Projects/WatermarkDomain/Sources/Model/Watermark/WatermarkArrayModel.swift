@@ -51,11 +51,11 @@ public extension WatermarkArrayModel {
             rows = 1
             columns = 1
         case .horizontal:
-            rows = imageCount
-            columns = 1
-        case .vertical:
             rows = 1
             columns = imageCount
+        case .vertical:
+            rows = imageCount
+            columns = 1
         case .grid:
             break
         }

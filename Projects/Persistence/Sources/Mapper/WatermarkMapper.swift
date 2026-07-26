@@ -55,8 +55,8 @@ public extension WatermarkTextModel {
             fontSize: self.fontSize,
             rotation: self.rotation,
             color: self.color,
-            spacingWidth: self.spacingWidth,
-            spacingHeight: self.spacingHeight,
+            spacingWidthRatio: self.spacingWidthRatio,
+            spacingHeightRatio: self.spacingHeightRatio,
             date: self.date,
             isGradient: self.isGradient
         )
@@ -71,8 +71,8 @@ public extension WatermarkTextEntity {
             fontSize: self.fontSize,
             rotation: self.rotation,
             color: self.color,
-            spacingWidth: self.spacingWidth,
-            spacingHeight: self.spacingHeight,
+            spacingWidthRatio: self.spacingWidthRatio,
+            spacingHeightRatio: self.spacingHeightRatio,
             date: self.date,
             isGradient: self.isGradient
         )
@@ -149,7 +149,8 @@ public extension WatermarkExportEntity {
 public extension WatermarkFrameModel {
     var toEntity: WatermarkFrameEntity {
         return .init(
-            thumnail: self.thumnailData,
+            id: self.id,
+            thumnail: self.thumbnailData,
             title: self.title,
             type: self.type
         )
@@ -159,7 +160,7 @@ public extension WatermarkFrameModel {
 public extension WatermarkFrameEntity {
     var toModel: WatermarkFrameModel {
         return .init(
-            thumnail: self.thumnailData,
+            thumbnailData: self.thumbnailData,
             title: self.title,
             type: self.type
         )

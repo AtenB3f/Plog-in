@@ -19,29 +19,28 @@ import AppKit
 public class WatermarkEditor {
     var format = WatermarkFormat()
     
-    var images: [PImage]
+    var origins: [PImage]
     var watermark: WatermarkModel
     var gradient: [PColor] = []
     
-    public init(watermark: WatermarkModel, images: [PImage]) {
+    public init(watermark: WatermarkModel, origins: [PImage]) {
         self.watermark = watermark
-        self.images = images
+        self.origins = origins
     }
     
     public func generateWatermarks() -> [PImage] {
         var exportImage: [PImage] = []
         guard watermark.array.type != .none else {
-            for image in images {
+            for image in origins {
                 exportImage.append(drawWatermark(image: image))
             }
             return exportImage
         }
         
-        let arr = format.getRowColums(imageCount: images.count, array: watermark.array)
+        let arr = format.getRowColums(imageCount: origins.count, array: watermark.array)
         let image = mergeImages(
-            images: images,
-            rows: arr.0,
-            columns: arr.1,
+            origins: origins,
+            array: watermark.array,
             exportSize: watermark.export.getSize())
         exportImage.append(drawWatermark(image: image))
         return exportImage
@@ -137,7 +136,10 @@ public class WatermarkEditor {
         exportSize: CGSize
     ) {
         guard let font =  PFont(name: textSetting.fontName, size: textSetting.fontSize) else { return }//textSetting.getPFont() else { return }
-        var spacing: CGSize = .init(width: textSetting.spacingWidth, height: textSetting.spacingHeight)//textSetting.getSpacing()
+        var spacing: CGSize = .init(
+            width: textSetting.spacingWidthRatio * textSetting.fontSize,
+            height: textSetting.spacingHeightRatio * textSetting.fontSize
+        ) //textSetting.getSpacing()
         spacing.height = spacing.width
         let attributes: [NSAttributedString.Key: Any] = [
             .font: font,
@@ -215,11 +217,11 @@ public class WatermarkEditor {
 }
 
 public extension WatermarkEditor {
-    func mergeImages(images: [PImage], rows: Int, columns: Int, exportSize: CGSize) -> PImage {
-        let cellSize = format.getCellSize(images: images)
+    func mergeImages(origins: [PImage], array: WatermarkArrayModel, exportSize: CGSize) -> PImage {
+        let cellSize = format.getCellSize(origins: origins, array: array)
         // 최종 이미지 크기 계산
-        let finalWidth = cellSize.width * CGFloat(rows)
-        let finalHeight = cellSize.height * CGFloat(columns)
+        let finalWidth = cellSize.width * CGFloat(array.columns)
+        let finalHeight = cellSize.height * CGFloat(array.rows)
         let finalSize = CGSize(width: finalWidth, height: finalHeight)
         
         let format = UIGraphicsImageRendererFormat.default()
@@ -230,9 +232,9 @@ public extension WatermarkEditor {
         return renderer.image { context in
             placeGrid(
                 context: context.cgContext,
-                images: images,
-                rows: rows,
-                columns: columns,
+                images: origins,
+                rows: array.rows,
+                columns: array.columns,
                 cellSize: .init(width: cellSize.width, height: cellSize.height)
             )
         }

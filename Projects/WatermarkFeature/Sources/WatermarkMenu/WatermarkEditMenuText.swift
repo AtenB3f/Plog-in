@@ -106,11 +106,11 @@ extension WatermarkEditMenuText {
     func spacing() -> some View {
         CategoryContent(title: "간격") {
             HStack(alignment: .center, spacing: 8) {
-                TextSlider(value: $viewModel.store.watermark.text.spacingWidth, min: 0, max: 100, distance: 1)
-                    .onChange(of: viewModel.store.watermark.text.spacingWidth) {
-                        viewModel.store.watermark.text.spacingHeight = viewModel.store.watermark.text.spacingWidth
+                TextSlider(value: $viewModel.store.watermark.text.spacingWidthRatio, min: 0, max: 2, distance: 0.1)
+                    .onChange(of: viewModel.store.watermark.text.spacingWidthRatio) {
+                        viewModel.store.watermark.text.spacingHeightRatio = viewModel.store.watermark.text.spacingWidthRatio
                     }
-                Text(String(format: "%.1f", viewModel.store.watermark.text.spacingWidth))
+                Text(String(format: "%.1f%", viewModel.store.watermark.text.spacingWidthRatio * 100))
                     .font(.body2)
                     .foreground(.Text.light)
                     .frame(width: 42, alignment: .leading)

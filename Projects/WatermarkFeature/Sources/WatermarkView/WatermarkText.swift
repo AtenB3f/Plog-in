@@ -13,106 +13,138 @@ import WatermarkDomain
 public struct WatermarkText: View {
     @EnvironmentObject var viewModel: WatermarkViewModel
     
-    private let imageSize: CGSize
+    private let watermarkSize: CGSize
 
     public init(
-        imageSize: CGSize
+        watermarkImageSize: CGSize
     ) {
-        self.imageSize = imageSize
+        self.watermarkSize = watermarkImageSize
     }
 
     public var body: some View {
         GeometryReader { proxy in
             let renderSize = viewModel.format.getRenderSize(
-                originSize: imageSize,
+                watermarkSize: watermarkSize,
                 containerSize: proxy.size
             )
-
-            if renderSize != .zero, viewModel.store.watermark.text.fontSize > 0 {
-
-            let exportWidth = viewModel.store.watermark.export.width
-            let renderRatio = exportWidth > 0 ? renderSize.width / exportWidth : renderSize.width / imageSize.width
+            let watermarkSize = viewModel.format.getWatermarkImageSize(
+                origins: viewModel.picker.images,
+                array: viewModel.store.watermark.array
+            )
+            let renderRatio = renderSize.width / watermarkSize.width
             
-            let renderFontSize = viewModel.store.watermark.text.fontSize * renderRatio
-
-            let renderCellSize = viewModel.format.getTextCellSize(
+            let renderTextAreaSize = viewModel.format.getTextArea(
                 text: viewModel.store.watermark.text.text + " " + (viewModel.store.watermark.text.date?.now() ?? ""),
                 font: viewModel.store.watermark.text.toPFont,
-                fontSize: renderFontSize
+                fontSize: viewModel.store.watermark.text.fontSize * renderRatio
             )
-            
-            let grid = viewModel.format.getGrid(
+            let grid = viewModel.format.getTextGrid(
                 renderSize: renderSize,
-                cellSize: renderCellSize,
-                spacingHorizontal: viewModel.store.watermark.text.spacingWidth * renderRatio,
-                spacingVertical: viewModel.store.watermark.text.spacingHeight * renderRatio
+                renderTextAreaSize: renderTextAreaSize,
+                spacingRatioW: viewModel.store.watermark.text.spacingWidthRatio,
+                spacingRatioH: viewModel.store.watermark.text.spacingHeightRatio
             )
-
-            GridLayer(
-                proxy: proxy,
-                watermarkText: viewModel.store.watermark.text,
+            WatermarkTextGridLayer(renderData: .init(
+                watermark: viewModel.store.watermark.text,
                 renderRatio: renderRatio,
-                renderSize: renderSize,
-                renderFontSize: renderFontSize,
-                cellSize: renderCellSize,
-                rows: grid.rows,
-                columns: grid.columns
-            )
+                renderTextAreaSize: renderTextAreaSize,
+                renderRows: grid.rows,
+                renderColumns: grid.columns
+            ))
             .frame(width: renderSize.width, height: renderSize.height)
             .position(x: proxy.size.width * 0.5, y: proxy.size.height * 0.5)
             .overlay(alignment: .center) {
                 if viewModel.isShowEdit {
-                    ZStack(alignment: .topTrailing) {
-                        Rectangle()
-                            .stroke(lineWidth: 2)
-                            .foreground(.white)
-                            .shadow(.light)
-                            .frame(width: renderCellSize.width, height: renderCellSize.height)
-                            .rotationEffect(.degrees(viewModel.store.watermark.text.rotation))
-
-                        Image.iconCloseCircle
-                            .frame(width: 16, height: 16)
-                            .background {
-                                Circle()
-                                    .frame(width: 16, height: 16)
-                                    .foreground(.white)
-                            }
-                            .foreground(.Gray.light)
-                            .offset(x: 8, y: -8)
-                            .onTapGesture {
-                                viewModel.action(.textMode(isOn: false))
-                            }
-                        }
-                    }
+                    editGuide(renderTextAreaSize: renderTextAreaSize)
                 }
             }
         }
     }
+    
+    @ViewBuilder
+    func editGuide(renderTextAreaSize size: CGSize) -> some View {
+        ZStack(alignment: .topTrailing) {
+            Rectangle()
+                .stroke(lineWidth: 2)
+                .foreground(.white)
+                .shadow(.light)
+                .frame(width: size.width, height: size.height)
+                .rotationEffect(.degrees(viewModel.store.watermark.text.rotation))
+
+            Image.iconCloseCircle
+                .frame(width: 16, height: 16)
+                .background {
+                    Circle()
+                        .frame(width: 16, height: 16)
+                        .foreground(.white)
+                }
+                .foreground(.Gray.light)
+                .offset(x: 8, y: -8)
+                .onTapGesture {
+                    viewModel.action(.textMode(isOn: false))
+                }
+            }
+    }
 }
 
-private struct GridLayer: View {
-    @EnvironmentObject var viewModel: WatermarkViewModel
-    let proxy: GeometryProxy
-    let watermarkText: WatermarkTextModel
-
-    let renderRatio: CGFloat
-    let renderSize: CGSize
-    let renderFontSize: CGFloat
-
-    let cellSize: CGSize
-
+private struct WatermarkTextGridViewState {
+    let text: String
+    let font: PFont
+    let color: ColorData
+    let spacing: CGSize
+    let rotation: CGFloat
+    let textArea: CGSize
     let rows: Int
     let columns: Int
+    
+    init(
+        watermark: WatermarkTextModel,
+        renderRatio: CGFloat,
+        renderTextAreaSize: CGSize,
+        renderRows: Int,
+        renderColumns: Int
+    ) {
+        if let date = watermark.date {
+            self.text = watermark.text + " " + date.now()
+        } else {
+            self.text = watermark.text
+        }
+        let fontSize = watermark.fontSize * renderRatio
+        self.font = .init(name: watermark.fontName, size: fontSize) ?? PFont.systemFont(ofSize: fontSize)
+        self.color = watermark.color
+        self.rotation = watermark.rotation
+        self.spacing = .init(
+            width: watermark.spacingWidthRatio * renderTextAreaSize.width,
+            height: watermark.spacingHeightRatio * renderTextAreaSize.height
+        )
+        self.textArea = renderTextAreaSize
+        self.rows = renderRows
+        self.columns = renderColumns
+    }
+}
+
+private struct WatermarkTextGridLayer: View {
+    @EnvironmentObject var viewModel: WatermarkViewModel
+
+    var data: WatermarkTextGridViewState
+    
+    init(
+        renderData data: WatermarkTextGridViewState
+    ) {
+        self.data = data
+    }
 
     var body: some View {
         Canvas { context, size in
+            
+            // 이미지 중심을 기준으로 텍스트 그리기
             let centerX = size.width * 0.5
             let centerY = size.height * 0.5
 
-            let stepX = cellSize.width + watermarkText.spacingWidth * renderRatio
-            let stepY = cellSize.height + watermarkText.spacingHeight * renderRatio
-            let renderKerning = -0.25 * renderRatio
-            let radians = watermarkText.rotation * .pi / 180
+            //
+            let stepX = data.textArea.width + data.spacing.width
+            let stepY = data.textArea.height + data.spacing.height
+            let radians = data.rotation * .pi / 180
             let cosTheta = cos(radians)
             let sinTheta = sin(radians)
 
@@ -122,31 +154,24 @@ private struct GridLayer: View {
             let halfDiagonal = hypot(size.width, size.height) * 0.5
             let safeStepX = max(stepX, 1)
             let safeStepY = max(stepY, 1)
-            let columnRadius = max(Int(ceil(halfDiagonal / safeStepX)) + 2, columns / 2 + 2)
-            let rowRadius = max(Int(ceil(halfDiagonal / safeStepY)) + 2, rows / 2 + 2)
-
-            let drawFont = PFont(
-                name: watermarkText.fontName,
-                size: renderFontSize
-            ) ?? .systemFont(ofSize: renderFontSize)
+            let columnRadius = max(Int(ceil(halfDiagonal / safeStepX)) + 2, data.columns / 2 + 2)
+            let rowRadius = max(Int(ceil(halfDiagonal / safeStepY)) + 2, data.rows / 2 + 2)
 
             let attributes: [NSAttributedString.Key: Any] = [
-                .font: drawFont,
-                .kern: renderKerning,
-                .foregroundColor: watermarkText.color.toPColor
+                .font: data.font,
+                .foregroundColor: data.color.toPColor
             ]
 
             let attributedText = NSAttributedString(
-                string: watermarkText.text + " " + (watermarkText.date?.now() ?? ""),
+                string: data.text,
                 attributes: attributes
             )
 
             let textSize = attributedText.size()
             let resolved = context.resolve(
-                Text(watermarkText.text + " " + (watermarkText.date?.now() ?? ""))
-                    .font(.custom(watermarkText.fontName, size: renderFontSize))
-                    .kerning(renderKerning)
-                    .foregroundStyle(watermarkText.color.toColor)
+                Text(data.text)
+                    .font(.custom(data.font.fontName, size: data.font.pointSize))
+                    .foregroundStyle(data.color.toColor)
             )
 
             for rowOffset in (-rowRadius)...rowRadius {

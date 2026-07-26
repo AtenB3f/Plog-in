@@ -74,7 +74,7 @@ struct WatermarkEditMenuExport: View {
                         .frame(width: 42, alignment: .leading)
                 }
             }
-            .foldingHeight(viewModel.store.watermark.export.type == .multifple)
+            .foldingHeight(viewModel.store.watermark.export.type == .multiple)
         }
         .padding(.vertical, 12)
     }

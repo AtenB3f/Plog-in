@@ -10,13 +10,13 @@ import Foundation
 
 public enum WatermarkExportType: String, Codable, CaseIterable {
     case auto
-    case multifple
+    case multiple
     
     public var menuName: String {
         switch self {
         case .auto:
             return "auto"
-        case .multifple:
+        case .multiple:
             return "배수"
         }
     }

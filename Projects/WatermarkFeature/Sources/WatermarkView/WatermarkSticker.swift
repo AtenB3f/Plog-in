@@ -27,7 +27,7 @@ struct WatermarkSticker: View {
             let renderRatio = viewModel.format.getRenderRatio(
                 originSize: imageSize,
                 renderSize: viewModel.format.getRenderSize(
-                    originSize: imageSize,
+                    watermarkSize: imageSize,
                     containerSize: proxy.size
                 )
             )
