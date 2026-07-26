@@ -213,14 +213,6 @@ private extension WatermarkEditViewModel {
         case .frame(let menu):
             setFrame(menu)
         }
-//        switch update {
-//        case .onDate:
-//            store.watermark.text.isDate.toggle()
-//        case .onGradient:
-//            store.watermark.text.isGradient.toggle()
-//        case .setColor(let color):
-//            store.watermark.text.color = ColorData(color)
-//        }
     }
     
     func makePreview() {
@@ -332,14 +324,7 @@ private extension WatermarkEditViewModel {
     }
     
     func setSticker(_ menu: WatermarkEditMenuType.StickerMenu) {
-//        switch menu {
-//        case .load:
-//
-//        case .edit:
-//
-//        case .remove:
-//
-//        }
+
     }
     
     func setArray(_ menu: WatermarkEditMenuType.ArrayMenu) {
@@ -352,8 +337,12 @@ private extension WatermarkEditViewModel {
                 array: store.watermark.array
             ).width
 
-            store.watermark.array.type = type
-            store.watermark.array.setRowColumn(picker.images.count)
+            store.watermark.array = format.makeArrayModel(
+                origins: picker.images,
+                type: type,
+                current: store.watermark.array
+            )
+            
             let exportType = store.watermark.export.type
             store.watermark.export = format.makeExportModel(
                 origins: picker.images,
@@ -413,12 +402,6 @@ private extension WatermarkEditViewModel {
     }
     
     func setFrame(_ menu: WatermarkEditMenuType.FrameMenu) {
-//        switch menu {
-//        case .save:
-//            
-//        case .title:
-//            
-//        }
+
     }
 }
-

@@ -45,15 +45,15 @@ public extension WatermarkFormat {
         case .horizontal:
             if gridSize.width > 1500 {
                 let width = 1500 / CGFloat(origins.count)
-                let height = width * cellRatio
+                let height = width / cellRatio
                 return .init(width: width, height: height)
             } else {
-                return .init(width: first.size.width, height: first.size.width * cellRatio)
+                return .init(width: first.size.width, height: first.size.width / cellRatio)
             }
         case .vertical:
             if gridSize.height > 1500 {
                 let height = 1500 / CGFloat(origins.count)
-                let width = height / cellRatio
+                let width = height * cellRatio
                 return .init(width: width, height: height)
             } else {
                 return .init(width: first.size.height / cellRatio, height: first.size.height)
@@ -156,6 +156,30 @@ public extension WatermarkFormat {
             updated.scale *= ratio
             return updated
         }
+    }
+    
+    func makeArrayModel(
+        origins: [PImage],
+        type: WatermarkArrayType,
+        current: WatermarkArrayModel
+    ) -> WatermarkArrayModel {
+        var model = current
+        model.type = type
+        switch type {
+        case .none:
+            model.rows = 1
+            model.columns = 1
+        case .horizontal:
+            model.rows = 1
+            model.columns = origins.count
+        case .vertical:
+            model.rows = origins.count
+            model.columns = 1
+        case .grid:
+            model.rows = 1
+            model.columns = 1
+        }
+        return model
     }
 
     /// max 너비 1500px로 제한
@@ -314,7 +338,6 @@ public extension WatermarkFormat {
         let heightRatio = containerSize.height / watermarkSize.height
 
         let scale = min(widthRatio, heightRatio)
-
         return CGSize(
             width: watermarkSize.width * scale,
             height: watermarkSize.height * scale

@@ -41,7 +41,6 @@ public struct WatermarkEditView: View {
                 Text("Picker")
             }
             WatermarkView(viewModel: watermarkViewModel)
-                .environmentObject(viewModel)
                 .padding(10)
             
             WatermarkEditMenu()
