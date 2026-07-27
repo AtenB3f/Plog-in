@@ -21,6 +21,7 @@ let workspace = Workspace(
         .relativeToRoot("Projects/PlatformExport"),
         .relativeToRoot("Projects/RenderEngine"),
         .relativeToRoot("Projects/WatermarkFeature"),
+        .relativeToRoot("Projects/WatermarkPreviewSupport"),
         .relativeToRoot("Projects/ImageFeature"),
         .relativeToRoot("Projects/VideoFeature"),
 //        .relativeToRoot("Projects/API")

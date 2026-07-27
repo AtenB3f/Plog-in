@@ -67,3 +67,9 @@ public struct WatermarkEditView: View {
         }
     }
 }
+
+#if DEBUG
+#Preview {
+    makePreviewWatermarkEditView()
+}
+#endif
