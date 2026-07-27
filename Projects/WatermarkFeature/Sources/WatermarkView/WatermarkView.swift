@@ -7,7 +7,6 @@
 //
 
 import SwiftUI
-import Design
 import PlatformCore
 import WatermarkDomain
 
@@ -43,9 +42,7 @@ public struct WatermarkView: View {
                     .resizable()
                     .aspectRatio(contentMode: .fit)
                     .overlay {
-                        if viewModel.store.watermark.text.isGradient {
-                            LinearGradient(gradient: .plave, startPoint: .topLeading, endPoint: .bottomTrailing)
-                        }
+                        gradientOverlay()
                         WatermarkText(watermarkImageSize: image.size)
                             .environmentObject(viewModel)
                     }
@@ -65,9 +62,7 @@ public struct WatermarkView: View {
     func cells() -> some View {
         WatermarkCells(viewModel: viewModel)
         .overlay {
-            if viewModel.store.watermark.text.isGradient {
-                LinearGradient(gradient: .plave, startPoint: .topLeading, endPoint: .bottomTrailing)
-            }
+            gradientOverlay()
             WatermarkText(watermarkImageSize: viewModel.format.getWatermarkImageSize(
                     origins: viewModel.picker.images,
                     array: viewModel.store.watermark.array
@@ -84,6 +79,17 @@ public struct WatermarkView: View {
                 .environmentObject(viewModel)
         }
         .clipped()
+    }
+
+    @ViewBuilder
+    func gradientOverlay() -> some View {
+        if !viewModel.store.watermark.text.gradientColors.isEmpty {
+            LinearGradient(
+                gradient: Gradient(colors: viewModel.store.watermark.text.gradientColors.map { $0.toColor }),
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+        }
     }
 }
 

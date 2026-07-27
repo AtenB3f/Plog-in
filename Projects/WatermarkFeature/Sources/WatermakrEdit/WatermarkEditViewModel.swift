@@ -319,7 +319,11 @@ private extension WatermarkEditViewModel {
         case .date:
             store.watermark.text.date = Date()
         case .gradient:
-            store.watermark.text.isGradient.toggle()
+            if store.watermark.text.gradientColors.isEmpty {
+                store.watermark.text.gradientColors = Color.disablePrimarys.map { ColorData($0, alpha: 0.3) }
+            } else {
+                store.watermark.text.gradientColors = []
+            }
         }
     }
     

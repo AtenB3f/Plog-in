@@ -55,9 +55,9 @@ public class WatermarkEditor {
         return renderer.image { context in
             image.draw(in: CGRect(origin: .zero, size: canvasSize))
 
-            if watermark.text.isGradient {
+            if !watermark.text.gradientColors.isEmpty {
                 let colorSpace = CGColorSpaceCreateDeviceRGB()
-                let cgColors = [PColor.clear.cgColor, PColor.black.withAlphaComponent(0.4).cgColor] as CFArray
+                let cgColors = watermark.text.gradientColors.map { $0.toPColor.cgColor } as CFArray
                 if let gradient = CGGradient(colorsSpace: colorSpace, colors: cgColors, locations: nil) {
                     context.cgContext.drawLinearGradient(
                         gradient,
