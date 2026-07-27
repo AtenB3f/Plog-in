@@ -352,6 +352,13 @@ public extension WatermarkFormat {
         return renderSize.width / originSize.width
     }
     
+    func getDisplayText(for text: WatermarkTextModel) -> String {
+        guard let date = text.date else { return text.text }
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        return text.text + " " + formatter.string(from: date)
+    }
+
     // spacing을 제외하고 Text를 그릴 때의 텍스트 너비
     func getTextArea(
         text: String,

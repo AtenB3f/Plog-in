@@ -117,7 +117,7 @@ public class WatermarkEditor {
     ) {
         let fontSize = textSetting.fontSize * renderRatio
         let font = PFont(name: textSetting.fontName, size: fontSize) ?? PFont.systemFont(ofSize: fontSize)
-        let text = textSetting.date.map { _ in textSetting.text + " " + Self.formattedTodayDate() } ?? textSetting.text
+        let text = format.getDisplayText(for: textSetting)
 
         let textArea = format.getTextArea(text: text, font: font, fontSize: fontSize)
         let spacing = CGSize(
@@ -183,12 +183,6 @@ public class WatermarkEditor {
         }
 #elseif os(macOS)
 #endif
-    }
-
-    static func formattedTodayDate() -> String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy-MM-dd"
-        return formatter.string(from: Date())
     }
 
     func saveImageToPhotoLibrary(image: PImage) async throws -> Bool {
