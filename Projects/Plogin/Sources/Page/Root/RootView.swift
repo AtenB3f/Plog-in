@@ -12,20 +12,19 @@ import WatermarkFeature
 
 struct RootView: View {
     @StateObject var diContainer = DIContainer()
-    @StateObject var manager = AppManager.shared
-    
+
     var body: some View {
         ZStack {
-            switch manager.rootView {
+            switch diContainer.rootUI.rootView {
             case .splash:
-                SplashView()
+                SplashView(rootUI: diContainer.rootUI)
             case .login:
                 LoginView()
             case .navigation:
                 TabNavigationView(diContainer: diContainer, viewModel: diContainer.makeTabNavigationVM())
             }
-            if let data = manager.rootToast {
-                Toast(data, callback: manager.toastAction)
+            if let data = diContainer.rootUI.rootToast {
+                Toast(data, callback: diContainer.rootUI.toastAction)
                     .transition(.move(edge: .top))
             }
             

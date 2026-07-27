@@ -12,8 +12,6 @@ import UISchema
 import Design
 
 struct PopupWatermarkPreview: View {
-//    @StateObject private var manager = AppManager.shared
-//    private let dataManager = DataStore.shared
 //    @StateObject var viewModel = PopupWatermarkPreviewViewModel()
 //    @FocusState var isFocus: Bool
 //    let watermark: WatermarkModel

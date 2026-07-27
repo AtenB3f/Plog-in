@@ -67,4 +67,22 @@ public enum ManifestShared {
             ]
         )
     }
+
+    public static func unitTestTarget(
+        for moduleName: String,
+        destinations: Destinations = [.iPhone],
+        deploymentTargets: DeploymentTargets = .iOS(iOSVersion)
+    ) -> Target {
+        .target(
+            name: "\(moduleName)Tests",
+            destinations: destinations,
+            product: .unitTests,
+            bundleId: moduleBundleID("\(moduleName)Tests"),
+            deploymentTargets: deploymentTargets,
+            infoPlist: .default,
+            sources: ["Tests/**"],
+            dependencies: [.target(name: moduleName)],
+            settings: moduleSettings()
+        )
+    }
 }

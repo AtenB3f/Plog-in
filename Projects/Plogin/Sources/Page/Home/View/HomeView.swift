@@ -11,7 +11,6 @@ import Design
 import WatermarkDomain
 
 struct HomeView: View {
-    @StateObject var manager = AppManager.shared
     @StateObject var viewModel: HomeViewModel
     
     init(

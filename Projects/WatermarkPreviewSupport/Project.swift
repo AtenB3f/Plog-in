@@ -1,7 +1,7 @@
 import ProjectDescription
 import ProjectDescriptionHelpers
 
-private let name = "WatermarkDomain"
+private let name = "WatermarkPreviewSupport"
 
 private let project = Project(
     name: name,
@@ -16,10 +16,12 @@ private let project = Project(
             sources: ["Sources/**"],
             scripts: [ManifestShared.swiftLintScript],
             dependencies: [
-                .project(target: "PlatformCore", path: .relativeToRoot("Projects/PlatformCore"))
+                .project(target: "PlatformCore", path: .relativeToRoot("Projects/PlatformCore")),
+                .project(target: "PlatformExport", path: .relativeToRoot("Projects/PlatformExport")),
+                .project(target: "Design", path: .relativeToRoot("Projects/Design")),
+                .project(target: "WatermarkDomain", path: .relativeToRoot("Projects/WatermarkDomain")),
             ],
             settings: ManifestShared.moduleSettings()
-        ),
-        ManifestShared.unitTestTarget(for: name)
+        )
     ]
 )

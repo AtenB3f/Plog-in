@@ -23,6 +23,7 @@ private let project = Project(
                 .project(target: "UISchema", path: .relativeToRoot("Projects/UISchema")),
                 .project(target: "WatermarkDomain", path: .relativeToRoot("Projects/WatermarkDomain")),
                 .project(target: "RenderEngine", path: .relativeToRoot("Projects/RenderEngine")),
+                .project(target: "WatermarkPreviewSupport", path: .relativeToRoot("Projects/WatermarkPreviewSupport")),
             ],
             settings: ManifestShared.moduleSettings()
         )

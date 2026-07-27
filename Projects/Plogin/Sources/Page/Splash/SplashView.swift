@@ -10,9 +10,8 @@ import SwiftUI
 import Design
 
 struct SplashView: View {
-    @EnvironmentObject var diContaner: DIContainer
-    @StateObject var manager = AppManager.shared
-    
+    @ObservedObject var rootUI: RootUIManager
+
     @State var opacity: CGFloat = 1.0
     
     var body: some View {
@@ -29,7 +28,7 @@ struct SplashView: View {
                 try await Task.sleep(for: .seconds(1.5))
                 withAnimation {
                     opacity = .zero
-                    manager.rootView = .navigation
+                    rootUI.rootView = .navigation
                 }
             } catch {}
         }

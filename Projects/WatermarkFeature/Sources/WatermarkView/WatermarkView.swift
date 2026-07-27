@@ -122,3 +122,9 @@ struct WatermarkCells: View {
         }
     }
 }
+
+#if DEBUG
+#Preview {
+    makePreviewWatermarkView()
+}
+#endif

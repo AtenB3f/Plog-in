@@ -1,5 +1,5 @@
 //
-//  AppManager.swift
+//  RootUIManager.swift
 //  Plogin
 //
 //  Created by AtenB on 9/20/25.
@@ -16,9 +16,9 @@ enum RootStatus {
     case navigation
 }
 
-public final class AppManager: ObservableObject {
-    public static var shared = AppManager()
-    
+public final class RootUIManager: ObservableObject {
+    public init() {}
+
     // MARK: Toast
     @Published var rootToast: ToastData?
     var toastAction: (() -> Void)?
@@ -28,11 +28,10 @@ public final class AppManager: ObservableObject {
     
     // MARK: Tab
     @Published var currentTab: Tab = .home
-    
 }
 
 // MARK: Toast
-public extension AppManager {
+public extension RootUIManager {
     @MainActor
     func pushToast(
         _ data: ToastData? = nil,
