@@ -43,7 +43,7 @@ public extension WatermarkFormat {
         case .none:
             return first.size
         case .horizontal:
-            if gridSize.width > 1500 {
+            if gridSize.width >= 1500 {
                 let width = 1500 / CGFloat(origins.count)
                 let height = width / cellRatio
                 return .init(width: width, height: height)
@@ -51,7 +51,7 @@ public extension WatermarkFormat {
                 return .init(width: first.size.width, height: first.size.width / cellRatio)
             }
         case .vertical:
-            if gridSize.height > 1500 {
+            if gridSize.height >= 1500 {
                 let height = 1500 / CGFloat(origins.count)
                 let width = height * cellRatio
                 return .init(width: width, height: height)
@@ -60,7 +60,7 @@ public extension WatermarkFormat {
             }
         case .grid:
             if gridSize.height > gridSize.width {
-                if gridSize.height > 1500 {
+                if gridSize.height >= 1500 {
                     let height = CGFloat(1500)/CGFloat(rows)
                     let ratio = 1500 / gridSize.height
                     let width = gridSize.width * ratio / CGFloat(columns)
@@ -69,7 +69,7 @@ public extension WatermarkFormat {
                     return first.size
                 }
             } else {
-                if gridSize.width > 1500 {
+                if gridSize.width >= 1500 {
                     let width = CGFloat(1500)/CGFloat(columns)
                     let ratio = 1500 / gridSize.width
                     let height = gridSize.height * ratio / CGFloat(rows)
@@ -264,7 +264,7 @@ public extension WatermarkFormat {
             if width * CGFloat(array.columns) * multiple >= max {
                 ratio = max / (width * CGFloat(array.columns) * multiple)
                 width = max
-                height *= ratio
+                height *= (multiple * ratio)
             } else {
                 width = width * CGFloat(array.columns) * multiple
                 height *= multiple
@@ -273,7 +273,7 @@ public extension WatermarkFormat {
             if height * CGFloat(array.rows) * multiple >= max {
                 ratio = max / (height * CGFloat(array.rows) * multiple)
                 height = max
-                width *= ratio
+                width *= (multiple * ratio)
             } else {
                 width *= multiple
                 height *= CGFloat(array.rows) * multiple
