@@ -19,6 +19,7 @@ private let project = Project(
                 .project(target: "PlatformCore", path: .relativeToRoot("Projects/PlatformCore"))
             ],
             settings: ManifestShared.moduleSettings()
-        )
+        ),
+        ManifestShared.unitTestTarget(for: name)
     ]
 )
