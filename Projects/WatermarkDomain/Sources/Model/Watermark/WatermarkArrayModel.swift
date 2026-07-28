@@ -28,7 +28,7 @@ public enum WatermarkArrayType: String, Codable, CaseIterable {
     }
 }
 
-public struct WatermarkArrayModel {
+public struct WatermarkArrayModel: Hashable {
     public var type: WatermarkArrayType
     public var rows: Int
     public var columns: Int

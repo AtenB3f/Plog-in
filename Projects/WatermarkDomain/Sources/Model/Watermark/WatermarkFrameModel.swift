@@ -14,7 +14,7 @@ public enum WatermarkFrameType: String, Codable {
     case custom
 }
 
-public struct WatermarkFrameModel: Identifiable {
+public struct WatermarkFrameModel: Identifiable, Hashable {
     public let id: UUID
     public var thumbnailData: Data?
     public var title: String

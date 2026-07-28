@@ -22,7 +22,7 @@ public enum WatermarkExportType: String, Codable, CaseIterable {
     }
 }
 
-public struct WatermarkExportModel {
+public struct WatermarkExportModel: Hashable {
     public var type: WatermarkExportType
     public var width: CGFloat   // multiple값이 적용된 최종 width
     public var height: CGFloat  // multiple값이 적용된 최종 height
