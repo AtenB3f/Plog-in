@@ -20,6 +20,7 @@ private let project = Project(
                 .project(target: "PlatformExport", path: .relativeToRoot("Projects/PlatformExport")),
                 .project(target: "Design", path: .relativeToRoot("Projects/Design")),
                 .project(target: "WatermarkDomain", path: .relativeToRoot("Projects/WatermarkDomain")),
+                .project(target: "CoreDomain", path: .relativeToRoot("Projects/CoreDomain")),
             ],
             settings: ManifestShared.moduleSettings()
         )

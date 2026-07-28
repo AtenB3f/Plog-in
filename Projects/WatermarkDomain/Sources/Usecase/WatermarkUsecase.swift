@@ -7,18 +7,23 @@
 
 import Foundation
 import PlatformCore
+import CoreDomain
 
 public class WatermarkUsecase {
     let wordDataStore: any WatermarkWordRepository
     let watermarkDataStore: any WatermarkRepository
+    let imageExportRepository: any ImageExportRepository
+
     let format: WatermarkFormat = WatermarkFormat()
-    
+
     public init(
         wordDataStore: any WatermarkWordRepository,
         watermarkDataStore: any WatermarkRepository,
+        imageExportRepository: any ImageExportRepository
     ) {
         self.wordDataStore = wordDataStore
         self.watermarkDataStore = watermarkDataStore
+        self.imageExportRepository = imageExportRepository
     }
 }
 
@@ -47,5 +52,11 @@ public extension WatermarkUsecase {
 
     func removeWatermark(id: UUID) {
         watermarkDataStore.removeWatermark(id)
+    }
+}
+
+public extension WatermarkUsecase {
+    func saveWatermarkImage(_ images: [PImage]) async -> [Bool] {
+        await imageExportRepository.save(images: images)
     }
 }

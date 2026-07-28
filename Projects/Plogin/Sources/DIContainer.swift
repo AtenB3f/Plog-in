@@ -17,11 +17,14 @@ import RenderEngine
 public class DIContainer: ObservableObject {
     private var cancellables = Set<AnyCancellable>()
     private let watermarkStore: WatermarkDataStore
+    private let imageExportRepository: PhotoLibraryExport
 
     public init(
-        watermarkStore: WatermarkDataStore = DIContainer.makeDefaultWatermarkStore()
+        watermarkStore: WatermarkDataStore = DIContainer.makeDefaultWatermarkStore(),
+        imageExportRepository: PhotoLibraryExport = PhotoLibraryExport()
     ) {
         self.watermarkStore = watermarkStore
+        self.imageExportRepository = imageExportRepository
 
         popupWatermark.objectWillChange
             .sink { [weak self] _ in
@@ -77,7 +80,8 @@ extension DIContainer {
     func makeWatermarkPopupUsecase() -> WatermarkUsecase {
         return WatermarkUsecase(
             wordDataStore: watermarkStore,
-            watermarkDataStore: watermarkStore
+            watermarkDataStore: watermarkStore,
+            imageExportRepository: imageExportRepository
         )
     }
     
@@ -164,7 +168,8 @@ extension DIContainer {
     ) -> WatermarkEditViewModel {
         let usecase = WatermarkUsecase(
             wordDataStore: watermarkStore,
-            watermarkDataStore: watermarkStore
+            watermarkDataStore: watermarkStore,
+            imageExportRepository: imageExportRepository
         )
         return WatermarkEditViewModel(
             popup: popupWatermark,

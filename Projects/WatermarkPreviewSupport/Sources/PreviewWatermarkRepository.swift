@@ -5,7 +5,9 @@
 
 #if DEBUG
 import Foundation
+import PlatformCore
 import WatermarkDomain
+import CoreDomain
 
 private final class PreviewWatermarkRepository: WatermarkWordRepository, WatermarkRepository {
     private var words: [WatermarkWordModel] = []
@@ -24,11 +26,18 @@ private final class PreviewWatermarkRepository: WatermarkWordRepository, Waterma
     }
 }
 
+private final class PreviewImageExportRepository: ImageExportRepository {
+    func save(images: [PImage]) async -> [Bool] {
+        images.map { _ in true }
+    }
+}
+
 public func makePreviewWatermarkUsecase() -> WatermarkUsecase {
     let repository = PreviewWatermarkRepository()
     return WatermarkUsecase(
         wordDataStore: repository,
-        watermarkDataStore: repository
+        watermarkDataStore: repository,
+        imageExportRepository: PreviewImageExportRepository()
     )
 }
 #endif

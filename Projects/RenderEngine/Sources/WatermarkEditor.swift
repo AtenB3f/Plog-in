@@ -1,6 +1,6 @@
 //
 //  WatermarkEditor.swift
-//  CoreDomain
+//  RenderEngine
 //
 //  Created by AtenB on 3/31/26.
 //
@@ -183,30 +183,6 @@ public class WatermarkEditor {
         }
 #elseif os(macOS)
 #endif
-    }
-
-    func saveImageToPhotoLibrary(image: PImage) async throws -> Bool {
-        let status = PHPhotoLibrary.authorizationStatus(for: .readWrite)
-        switch status {
-        case .authorized, .limited:
-            try await PHPhotoLibrary.shared().performChanges {
-                PHAssetChangeRequest.creationRequestForAsset(from: image)
-            }
-            return true
-
-        case .notDetermined:
-            let status = await PHPhotoLibrary.requestAuthorization(for: .readWrite)
-            if status == .authorized || status == .limited {
-                try await PHPhotoLibrary.shared().performChanges {
-                    PHAssetChangeRequest.creationRequestForAsset(from: image)
-                }
-                return true
-            }
-
-        default:
-            return false
-        }
-        return false
     }
 }
 
