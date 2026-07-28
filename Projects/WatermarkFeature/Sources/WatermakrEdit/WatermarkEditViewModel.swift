@@ -53,15 +53,20 @@ public class WatermarkEditViewModel: ObservableObject {
     @Published var frame = WatermarkListViewState()
     
     // MARK: - Watermark
+
     var store: WatermarkStore
-    let popup: WatermarkPopupCoordinator
-    let usecase: WatermarkUsecase
-    let format: WatermarkFormat
+    private let popup: WatermarkPopupCoordinator
+    private let usecase: WatermarkUsecase
+    private let format: WatermarkFormat
     let picker: AssetPicker
     let sticker: AssetPicker
-    
+
     private var cancellables = Set<AnyCancellable>()
     
+    // Watermark Flow Step
+    private let stepSubject = PassthroughSubject<WatermarkFlowStep, Never>()
+    public var step: AnyPublisher<WatermarkFlowStep, Never> { stepSubject.eraseToAnyPublisher() }
+
     public init(
         popup: WatermarkPopupCoordinator,
         usecase: WatermarkUsecase,
@@ -77,11 +82,11 @@ public class WatermarkEditViewModel: ObservableObject {
         self.sticker = stickerPicker
         self.store = store
         words = usecase.fetchWords().map { $0.text }
-        
+
         var new = WatermarkModel()
         new.text.text = (words.first ?? "PLAVE")
         self.store.setWatermark(new)
-        
+
         bind()
     }
 }
@@ -216,7 +221,7 @@ private extension WatermarkEditViewModel {
     }
     
     func makePreview() {
-        
+        stepSubject.send(.editFinished(watermark: store.watermark, origins: picker.images))
     }
     
     func word(_ text: String) {

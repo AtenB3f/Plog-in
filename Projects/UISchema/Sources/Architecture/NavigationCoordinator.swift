@@ -11,7 +11,7 @@ import SwiftUI
 public protocol NavigationRoute: Hashable { }
 
 public protocol NavigationCoordinator {
-    func push(_ route: NavigationRoute)
+    func push(_ route: any NavigationRoute)
     func pop()
     func popRoot()
 }
