@@ -62,8 +62,8 @@ struct MakeExportModelAutoTests {
             (CGSize(width: 100, height: 50), 1, 2, CGSize(width: 200, height: 50)),     // 가로형, 이하
             (CGSize(width: 1000, height: 100), 1, 2, CGSize(width: 1500, height: 75)),  // 가로형, 초과
             (CGSize(width: 50, height: 100), 2, 1, CGSize(width: 50, height: 200)),     // 세로형, 이하
-            (CGSize(width: 1000, height: 800), 2, 2, CGSize(width: 1500, height: 600)), // 가로형, 초과
-            (CGSize(width: 800, height: 1000), 2, 2, CGSize(width: 600, height: 1500))  // 세로형, 초과
+            (CGSize(width: 1000, height: 800), 2, 2, CGSize(width: 1500, height: 1200)), // 가로형, 초과
+            (CGSize(width: 800, height: 1000), 2, 2, CGSize(width: 1200, height: 1500))  // 세로형, 초과
         ]
     )
     func grid(imageSize: CGSize, rows: Int, columns: Int, expected: CGSize) {

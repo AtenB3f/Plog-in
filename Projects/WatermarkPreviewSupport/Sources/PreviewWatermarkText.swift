@@ -24,8 +24,7 @@ public func makePreviewWatermarkText(
         color: ColorData(.black),
         spacingWidthRatio: 0.3,
         spacingHeightRatio: 1.0,
-        date: Date(),
-        isGradient: false
+        date: Date()
     )
     WatermarkFormat().makeTextModel(
         origins: picker.images,

@@ -33,8 +33,9 @@ public struct WatermarkText: View {
             )
             let renderRatio = renderSize.width / watermarkSize.width
             
+            let displayText = viewModel.format.getDisplayText(for: viewModel.store.watermark.text)
             let renderTextAreaSize = viewModel.format.getTextArea(
-                text: viewModel.store.watermark.text.text + " " + (viewModel.store.watermark.text.date?.now() ?? ""),
+                text: displayText,
                 font: viewModel.store.watermark.text.toPFont,
                 fontSize: viewModel.store.watermark.text.fontSize * renderRatio
             )
@@ -45,6 +46,7 @@ public struct WatermarkText: View {
                 spacingRatioH: viewModel.store.watermark.text.spacingHeightRatio
             )
             WatermarkTextGridLayer(renderData: .init(
+                text: displayText,
                 watermark: viewModel.store.watermark.text,
                 renderRatio: renderRatio,
                 renderTextAreaSize: renderTextAreaSize,
@@ -98,17 +100,14 @@ private struct WatermarkTextGridViewState {
     let columns: Int
     
     init(
+        text: String,
         watermark: WatermarkTextModel,
         renderRatio: CGFloat,
         renderTextAreaSize: CGSize,
         renderRows: Int,
         renderColumns: Int
     ) {
-        if let date = watermark.date {
-            self.text = watermark.text + " " + date.now()
-        } else {
-            self.text = watermark.text
-        }
+        self.text = text
         let fontSize = watermark.fontSize * renderRatio
         self.font = .init(name: watermark.fontName, size: fontSize) ?? PFont.systemFont(ofSize: fontSize)
         self.color = watermark.color

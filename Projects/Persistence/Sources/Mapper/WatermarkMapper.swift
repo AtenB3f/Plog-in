@@ -58,7 +58,7 @@ public extension WatermarkTextModel {
             spacingWidthRatio: self.spacingWidthRatio,
             spacingHeightRatio: self.spacingHeightRatio,
             date: self.date,
-            isGradient: self.isGradient
+            gradientColors: self.gradientColors
         )
     }
 }
@@ -74,7 +74,7 @@ public extension WatermarkTextEntity {
             spacingWidthRatio: self.spacingWidthRatio,
             spacingHeightRatio: self.spacingHeightRatio,
             date: self.date,
-            isGradient: self.isGradient
+            gradientColors: self.gradientColors
         )
     }
 }

@@ -17,180 +17,174 @@ import AppKit
 #endif
 
 public class WatermarkEditor {
-    var format = WatermarkFormat()
-    
+    let format = WatermarkFormat()
+
     var origins: [PImage]
     var watermark: WatermarkModel
-    var gradient: [PColor] = []
-    
+
     public init(watermark: WatermarkModel, origins: [PImage]) {
         self.watermark = watermark
         self.origins = origins
     }
-    
+
     public func generateWatermarks() -> [PImage] {
-        var exportImage: [PImage] = []
+        guard !origins.isEmpty else { return [] }
+        let exportSize = watermark.export.getSize()
+
         guard watermark.array.type != .none else {
-            for image in origins {
-                exportImage.append(drawWatermark(image: image))
+            let naturalSize = origins.first?.size ?? exportSize
+            return origins.map {
+                drawWatermark(on: $0, canvasSize: exportSize, naturalSize: naturalSize)
             }
-            return exportImage
         }
-        
-        let arr = format.getRowColums(imageCount: origins.count, array: watermark.array)
-        let image = mergeImages(
-            origins: origins,
-            array: watermark.array,
-            exportSize: watermark.export.getSize())
-        exportImage.append(drawWatermark(image: image))
-        return exportImage
+
+        let naturalSize = format.getWatermarkImageSize(origins: origins, array: watermark.array)
+        let merged = mergeImages(origins: origins, array: watermark.array, canvasSize: exportSize)
+        return [drawWatermark(on: merged, canvasSize: exportSize, naturalSize: naturalSize)]
     }
 
-    func drawWatermark(image: PImage) -> PImage {
-        let exportSize = watermark.export.getSize()
-        
+    func drawWatermark(on image: PImage, canvasSize: CGSize, naturalSize: CGSize) -> PImage {
+        let renderRatio = format.getRenderRatio(originSize: naturalSize, renderSize: canvasSize)
+
 #if os(iOS)
-        let renderer = UIGraphicsImageRenderer(size: exportSize)
-        
+        let rendererFormat = UIGraphicsImageRendererFormat.default()
+        rendererFormat.opaque = true
+        rendererFormat.scale = 1.0
+        let renderer = UIGraphicsImageRenderer(size: canvasSize, format: rendererFormat)
+
         return renderer.image { context in
-            image.draw(in: CGRect(origin: .zero, size: exportSize))
-            
-            if watermark.text.isGradient {
+            image.draw(in: CGRect(origin: .zero, size: canvasSize))
+
+            if !watermark.text.gradientColors.isEmpty {
                 let colorSpace = CGColorSpaceCreateDeviceRGB()
-                let cgColors = gradient.map { $0.cgColor } as CFArray
-                let gradient = CGGradient(colorsSpace: colorSpace, colors: cgColors, locations: nil)!
-                
-                let startPoint = CGPoint(x: 0, y: 0)
-                let endPoint = CGPoint(x: image.size.width, y: image.size.height)
-                
-                context.cgContext.drawLinearGradient(
-                    gradient,
-                    start: startPoint,
-                    end: endPoint,
-                    options: []
-                )
+                let cgColors = watermark.text.gradientColors.map { $0.toPColor.cgColor } as CFArray
+                if let gradient = CGGradient(colorsSpace: colorSpace, colors: cgColors, locations: nil) {
+                    context.cgContext.drawLinearGradient(
+                        gradient,
+                        start: .zero,
+                        end: CGPoint(x: canvasSize.width, y: canvasSize.height),
+                        options: []
+                    )
+                }
             }
-            drawStickers(context: context, stickers: watermark.stickers)
-            drawText(context: context, textSetting: watermark.text, exportSize: exportSize)
+
+            drawStickers(context: context, stickers: watermark.stickers, canvasSize: canvasSize, renderRatio: renderRatio)
+            drawText(context: context, textSetting: watermark.text, canvasSize: canvasSize, renderRatio: renderRatio)
         }
 #elseif os(macOS)
+        return image
 #endif
     }
-    
+
     func drawStickers(
         context: UIGraphicsImageRendererContext,
-        stickers: [WatermarkStickerModel]
+        stickers: [WatermarkStickerModel],
+        canvasSize: CGSize,
+        renderRatio: CGFloat
     ) {
-        let canvasSize = context.format.bounds.size
         let canvasCenter = CGPoint(x: canvasSize.width / 2, y: canvasSize.height / 2)
         let orders = stickers.sorted(by: { $0.layer < $1.layer })
-        
+
         for sticker in orders {
             let image = sticker.image
             let rotation = sticker.rotation
             let alpha = sticker.alpha
-            let position = sticker.position
-            let scale = sticker.scale
-            
-            // position은 캔버스 중앙을 기준으로 한 오프셋으로 처리
+            let scale = sticker.scale * renderRatio
+            let position = CGPoint(x: sticker.position.x * renderRatio, y: sticker.position.y * renderRatio)
             let anchor = CGPoint(x: canvasCenter.x + position.x, y: canvasCenter.y + position.y)
-            
+
 #if os(iOS)
             let originalSize = image.size
             let drawSize = CGSize(width: originalSize.width * scale, height: originalSize.height * scale)
-            let drawOrigin = CGPoint(x: anchor.x - drawSize.width / 2, y: anchor.y - drawSize.height / 2)
-            let drawRect = CGRect(origin: drawOrigin, size: drawSize)
 
-            // 회전/알파 적용: 앵커(스티커 중심) 기준으로 회전 후 그리기
             context.cgContext.saveGState()
             context.cgContext.setAlpha(alpha)
-            // 회전 중심으로 이동
             context.cgContext.translateBy(x: anchor.x, y: anchor.y)
             context.cgContext.rotate(by: rotation * .pi / 180)
-            // 그리기 좌표계를 스티커 좌상단으로 이동
             context.cgContext.translateBy(x: -drawSize.width / 2, y: -drawSize.height / 2)
             image.draw(in: CGRect(origin: .zero, size: drawSize))
             context.cgContext.restoreGState()
 #elseif os(macOS)
-            let originalSize = image.size
-            let drawSize = CGSize(width: originalSize.width * scale, height: originalSize.height * scale)
-            let drawRect = CGRect(origin: .zero, size: drawSize)
-            if let cgImage = image.cgImage(forProposedRect: nil, context: nil, hints: nil) {
-                context.cgContext.saveGState()
-                context.cgContext.setAlpha(alpha)
-                // 회전 중심으로 이동
-                context.cgContext.translateBy(x: anchor.x, y: anchor.y)
-                context.cgContext.rotate(by: rotation * .pi / 180)
-                // 스티커 좌상단 기준으로 이동
-                context.cgContext.translateBy(x: -drawSize.width / 2, y: -drawSize.height / 2)
-                context.cgContext.draw(cgImage, in: drawRect)
-                context.cgContext.restoreGState()
-            }
 #endif
         }
     }
-    
+
     func drawText(
         context: UIGraphicsImageRendererContext,
         textSetting: WatermarkTextModel,
-        exportSize: CGSize
+        canvasSize: CGSize,
+        renderRatio: CGFloat
     ) {
-        guard let font =  PFont(name: textSetting.fontName, size: textSetting.fontSize) else { return }//textSetting.getPFont() else { return }
-        var spacing: CGSize = .init(
-            width: textSetting.spacingWidthRatio * textSetting.fontSize,
-            height: textSetting.spacingHeightRatio * textSetting.fontSize
-        ) //textSetting.getSpacing()
-        spacing.height = spacing.width
+        let fontSize = textSetting.fontSize * renderRatio
+        let font = PFont(name: textSetting.fontName, size: fontSize) ?? PFont.systemFont(ofSize: fontSize)
+        let text = format.getDisplayText(for: textSetting)
+
+        let textArea = format.getTextArea(text: text, font: font, fontSize: fontSize)
+        let spacing = CGSize(
+            width: textSetting.spacingWidthRatio * textArea.width,
+            height: textSetting.spacingHeightRatio * textArea.height
+        )
+
         let attributes: [NSAttributedString.Key: Any] = [
             .font: font,
             .foregroundColor: textSetting.color.toPColor
         ]
-        /*
-        let text = textSetting.text + (textSetting.isDate ? ("\n" + Date.now()) : "")
-        let textSize = text.getSize(font: font)
-        
-        let rotationAngle = textSetting.rotation * .pi / 180
-        let rotatedWidth = abs(textSize.width * cos(rotationAngle)) + abs(textSize.height * cos(rotationAngle))
-        let rotatedHeight = abs(textSize.width * sin(rotationAngle)) + abs(textSize.height * sin(rotationAngle))
+        let attributedText = NSAttributedString(string: text, attributes: attributes)
+        let textSize = attributedText.size()
 
-        // 타일의 중앙에 회전된 텍스트 배치
-        func drawTile(at origin: CGPoint) {
-            context.cgContext.saveGState()
-            context.cgContext.translateBy(x: origin.x + rotatedWidth/2, y: origin.y + rotatedHeight/2)
-            context.cgContext.rotate(by: rotationAngle)
-            context.cgContext.translateBy(x: -textSize.width / 2, y: -textSize.height / 2)
-            text.draw(at: .init(x: 0, y: 0), withAttributes: attributes)
-            context.cgContext.restoreGState()
-        }
-        
-        // 이미지 중앙 좌표
-        let center = CGPoint(x: exportSize.width / 2, y: exportSize.height / 2)
+        let centerX = canvasSize.width * 0.5
+        let centerY = canvasSize.height * 0.5
+        let stepX = textArea.width + spacing.width
+        let stepY = textArea.height + spacing.height
+        let radians = textSetting.rotation * .pi / 180
+        let cosTheta = cos(radians)
+        let sinTheta = sin(radians)
+        let u = CGVector(dx: cosTheta * stepX, dy: sinTheta * stepX)
+        let v = CGVector(dx: -sinTheta * stepY, dy: cosTheta * stepY)
 
-        // 타일 스텝 (회전된 외접 크기 + 간격)
-        let stepX = rotatedWidth + spacing.width
-        let stepY = rotatedHeight + spacing.height
+        let halfDiagonal = hypot(canvasSize.width, canvasSize.height) * 0.5
+        let safeStepX = max(stepX, 1)
+        let safeStepY = max(stepY, 1)
+        let grid = format.getTextGrid(
+            renderSize: canvasSize,
+            renderTextAreaSize: textArea,
+            spacingRatioW: textSetting.spacingWidthRatio,
+            spacingRatioH: textSetting.spacingHeightRatio
+        )
+        let columnRadius = max(Int(ceil(halfDiagonal / safeStepX)) + 2, grid.columns / 2 + 2)
+        let rowRadius = max(Int(ceil(halfDiagonal / safeStepY)) + 2, grid.rows / 2 + 2)
 
-        // 중앙 타일 먼저 그리기
-        let centerOrigin = CGPoint(x: center.x - rotatedWidth/2, y: center.y - rotatedHeight/2)
-        drawTile(at: centerOrigin)
+#if os(iOS)
+        let cgContext = context.cgContext
+        for rowOffset in (-rowRadius)...rowRadius {
+            for columnOffset in (-columnRadius)...columnRadius {
+                let x = centerX
+                    + CGFloat(columnOffset) * u.dx
+                    + CGFloat(rowOffset) * v.dx
+                let y = centerY
+                    + CGFloat(columnOffset) * u.dy
+                    + CGFloat(rowOffset) * v.dy
 
-        // 중앙에서 좌우/상하로 퍼져나가며 캔버스를 채우기
-        let maxXRepeats = Int(ceil(exportSize.width / stepX / 2)) + 1
-        let maxYRepeats = Int(ceil(exportSize.height / stepY / 2)) + 1
-        for yi in 0...maxYRepeats {
-            for xi in 0...maxXRepeats {
-                if xi == 0 && yi == 0 { continue } // center already drawn
-                let dx = (CGFloat(xi) * stepX)
-                let dy = (CGFloat(yi) * stepY)
-                drawTile(at: .init(x: centerOrigin.x + -dx, y: centerOrigin.y + -dy))
-                drawTile(at: .init(x: centerOrigin.x + dx, y: centerOrigin.y + dy))
-                drawTile(at: .init(x: centerOrigin.x + dx, y: centerOrigin.y + -dy))
-                drawTile(at: .init(x: centerOrigin.x + -dx, y: centerOrigin.y + dy))
+                let drawRect = CGRect(
+                    x: -textSize.width * 0.5,
+                    y: -textSize.height * 0.5,
+                    width: textSize.width,
+                    height: textSize.height
+                )
+
+                cgContext.saveGState()
+                cgContext.translateBy(x: x, y: y)
+                cgContext.rotate(by: radians)
+                UIGraphicsPushContext(cgContext)
+                attributedText.draw(in: drawRect)
+                UIGraphicsPopContext()
+                cgContext.restoreGState()
             }
         }
-         */
+#elseif os(macOS)
+#endif
     }
-    
+
     func saveImageToPhotoLibrary(image: PImage) async throws -> Bool {
         let status = PHPhotoLibrary.authorizationStatus(for: .readWrite)
         switch status {
@@ -199,7 +193,7 @@ public class WatermarkEditor {
                 PHAssetChangeRequest.creationRequestForAsset(from: image)
             }
             return true
-            
+
         case .notDetermined:
             let status = await PHPhotoLibrary.requestAuthorization(for: .readWrite)
             if status == .authorized || status == .limited {
@@ -208,7 +202,7 @@ public class WatermarkEditor {
                 }
                 return true
             }
-            
+
         default:
             return false
         }
@@ -217,31 +211,31 @@ public class WatermarkEditor {
 }
 
 public extension WatermarkEditor {
-    func mergeImages(origins: [PImage], array: WatermarkArrayModel, exportSize: CGSize) -> PImage {
-        let cellSize = format.getCellSize(origins: origins, array: array)
-        // 최종 이미지 크기 계산
-        let finalWidth = cellSize.width * CGFloat(array.columns)
-        let finalHeight = cellSize.height * CGFloat(array.rows)
-        let finalSize = CGSize(width: finalWidth, height: finalHeight)
-        
-        let format = UIGraphicsImageRendererFormat.default()
-        format.opaque = true
-        format.scale = 1.0
+    func mergeImages(origins: [PImage], array: WatermarkArrayModel, canvasSize: CGSize) -> PImage {
+        let cellSize = CGSize(
+            width: canvasSize.width / CGFloat(array.columns),
+            height: canvasSize.height / CGFloat(array.rows)
+        )
+
 #if os(iOS)
-        let renderer = UIGraphicsImageRenderer(size: finalSize, format: format)
+        let rendererFormat = UIGraphicsImageRendererFormat.default()
+        rendererFormat.opaque = true
+        rendererFormat.scale = 1.0
+        let renderer = UIGraphicsImageRenderer(size: canvasSize, format: rendererFormat)
         return renderer.image { context in
             placeGrid(
                 context: context.cgContext,
                 images: origins,
                 rows: array.rows,
                 columns: array.columns,
-                cellSize: .init(width: cellSize.width, height: cellSize.height)
+                cellSize: cellSize
             )
         }
 #elseif os(macOS)
+        return origins.first ?? PImage()
 #endif
     }
-    
+
     func placeGrid(
         context: CGContext,
         images: [PImage],
@@ -250,15 +244,13 @@ public extension WatermarkEditor {
         cellSize: CGSize
     ) {
         for (index, image) in images.enumerated() {
-            let row = (index/columns) + 1
-            let column = (index%columns) + 1
-            
-            // 셀의 위치 계산
-            let x = CGFloat(column-1) * cellSize.width
-            let y = CGFloat(row-1) * cellSize.height
+            let row = (index / columns) + 1
+            let column = (index % columns) + 1
+
+            let x = CGFloat(column - 1) * cellSize.width
+            let y = CGFloat(row - 1) * cellSize.height
             let cellRect = CGRect(x: x, y: y, width: cellSize.width, height: cellSize.height)
-            
-            // 이미지를 셀 크기에 맞게 조정하여 그리기
+
             resizeFitImage(image: image, rect: cellRect, context: context)
         }
     }
@@ -276,12 +268,14 @@ public extension WatermarkEditor {
         } else {
             ratio = imageSize.width / targetSize.width
         }
-        let scaledWidth: CGFloat = imageSize.width * (ratio > 1 ? (1/ratio) : ratio)
-        let scaledHeight: CGFloat = imageSize.height * (ratio > 1 ? (1/ratio) : ratio)
-        let drawRect = CGRect(x: rect.minX,
-                              y: rect.minY,
-                              width: scaledWidth,
-                              height: scaledHeight)
+        let scaledWidth: CGFloat = imageSize.width * (ratio > 1 ? (1 / ratio) : ratio)
+        let scaledHeight: CGFloat = imageSize.height * (ratio > 1 ? (1 / ratio) : ratio)
+        let drawRect = CGRect(
+            x: rect.minX,
+            y: rect.minY,
+            width: scaledWidth,
+            height: scaledHeight
+        )
 #if os(iOS)
         image.draw(in: drawRect)
 #elseif os(macOS)

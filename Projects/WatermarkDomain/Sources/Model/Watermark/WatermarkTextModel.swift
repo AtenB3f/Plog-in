@@ -18,8 +18,8 @@ public struct WatermarkTextModel {
     public var spacingWidthRatio: CGFloat
     public var spacingHeightRatio: CGFloat
     public var date: Date?
-    public var isGradient: Bool
-    
+    public var gradientColors: [ColorData]
+
     public init(
         text: String = "",
         fontName: String = "",
@@ -29,7 +29,7 @@ public struct WatermarkTextModel {
         spacingWidthRatio: CGFloat = .zero,
         spacingHeightRatio: CGFloat = .zero,
         date: Date? = nil,
-        isGradient: Bool = true
+        gradientColors: [ColorData] = []
     ) {
         self.text = text
         self.fontName = fontName
@@ -39,7 +39,7 @@ public struct WatermarkTextModel {
         self.spacingWidthRatio = spacingWidthRatio
         self.spacingHeightRatio = spacingHeightRatio
         self.date = date
-        self.isGradient = isGradient
+        self.gradientColors = gradientColors
     }
 }
 
@@ -47,5 +47,9 @@ public extension WatermarkTextModel {
     var toPFont: PFont {
         // TODO: font name에 맞는 폰트가 없을 경우의 정책 필요
         return PFont(name: fontName, size: fontSize)! //?? .systemFont(ofSize: fontSize)
+    }
+
+    var isGradient: Bool {
+        !gradientColors.isEmpty
     }
 }
