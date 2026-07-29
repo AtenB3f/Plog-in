@@ -68,6 +68,7 @@ public class WatermarkEditViewModel: ObservableObject {
     public var step: AnyPublisher<WatermarkFlowStep, Never> { stepSubject.eraseToAnyPublisher() }
 
     public init(
+        watermark: WatermarkModel? = nil,
         popup: WatermarkPopupCoordinator,
         usecase: WatermarkUsecase,
         picker: AssetPicker,
@@ -83,9 +84,13 @@ public class WatermarkEditViewModel: ObservableObject {
         self.store = store
         words = usecase.fetchWords().map { $0.text }
 
-        var new = WatermarkModel()
-        new.text.text = (words.first ?? "PLAVE")
-        self.store.setWatermark(new)
+        if let watermark = watermark {
+            self.store.setWatermark(watermark)
+        } else {
+            var new = WatermarkModel()
+            new.text.text = (words.first ?? "PLAVE")
+            self.store.setWatermark(new)
+        }
 
         bind()
     }
@@ -411,6 +416,11 @@ private extension WatermarkEditViewModel {
     }
     
     func setFrame(_ menu: WatermarkEditMenuType.FrameMenu) {
-
+        switch menu {
+        case .save:
+            usecase.saveWatermark(store.watermark)
+        case .title:
+            popup(.title)
+        }
     }
 }

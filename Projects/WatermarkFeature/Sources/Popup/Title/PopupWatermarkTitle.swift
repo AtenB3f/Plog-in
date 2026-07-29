@@ -36,10 +36,10 @@ public struct PopupWatermarkTitle: View {
     
     @ViewBuilder
     func makeContent() -> some View {
-        BasicTextField(text: $viewModel.text, placeholder: "제목을 입력하세요.")
+        BasicTextField(text: $viewModel.title, placeholder: "제목을 입력하세요.")
         .padding(.vertical)
-        .onChange(of: viewModel.text) { _ in
-            viewModel.input()
+        .onChange(of: viewModel.title) {
+            viewModel.action(.input)
         }
     }
     

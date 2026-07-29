@@ -109,7 +109,7 @@ extension DIContainer {
     private func handleWatermarkStep(_ step: WatermarkFlowStep) {
         switch step {
         case .editFinished(let watermark, let origins):
-            pendingWatermarkResult = (watermark: watermark, origins: origins)
+            pendingWatermarkResult = .init(watermark: watermark, origins: origins)
             navigation.push(route: TabNavigationRouter.watermarkResult)
 
         case .resultFinished:

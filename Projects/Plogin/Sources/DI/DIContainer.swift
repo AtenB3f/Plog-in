@@ -17,11 +17,13 @@ import RenderEngine
 
 public class DIContainer: ObservableObject {
     internal var cancellables = Set<AnyCancellable>()
-    internal var watermarkCancellables = Set<AnyCancellable>()
     internal var homeCancellables = Set<AnyCancellable>()
+    internal var watermarkCancellables = Set<AnyCancellable>()
+    internal var watermarkPopupCancellables = Set<AnyCancellable>()
     
-    internal var pendingWatermarkResult: (watermark: WatermarkModel, origins: [PImage])?
     internal var pendingHomeResult: HomeResultPayload?
+    internal var pendingWatermarkResult: WatermarkResultPayload?
+    internal var pendingWatermarkPopupResult: WatermarkPopupResultPayload?
     
     internal let watermarkStore: WatermarkDataStore
     internal let imageExportRepository: PhotoLibraryExport
@@ -91,6 +93,17 @@ extension DIContainer {
 
 // MARK: - Popup
 extension DIContainer {
+    func makeWatermarkPopup(_ route: WatermarkPopupRoute) -> some View {
+        switch route {
+        case .title:
+            return AnyView(PopupWatermarkTitle(viewModel: makePopupWatermarkTitleVM()))
+        case .word:
+            return AnyView(PopupWatermarkWord(viewModel: makePopupWatermarkWordVM()))
+        case .preview:
+            return AnyView(PopupWatermarkPreview(viewModel: makePopupWatermarkPreviewVM()))
+        }
+    }
+    
     func makeWatermarkPopupUsecase() -> WatermarkUsecase {
         return WatermarkUsecase(
             wordDataStore: watermarkStore,
@@ -103,29 +116,75 @@ extension DIContainer {
         return popupWatermark
     }
     
-//    func makePopupWatermarkTitle() -> PopupWatermarkTitle {
-//        return PopupWatermarkTitle(viewModel: makePopupWatermarkTitleVM())
-//    }
-//    
-//    func makePopupWatermarkTitleVM() -> PopupWatermarkTitleVM {
-//        return .init(
-//            coordinator: popupWatermark
-//        )
-//    }
-//    
-//    func makePopupWatermarkWord() -> PopupWatermarkWord {
-//        return PopupWatermarkWord(viewModel: makePopupWatermarkWordVM())
-//    }
-//    
-//    func makePopupWatermarkWordVM() -> PopupWatermarkWordVM {
-//        let watermarkStore = WatermarkDataStore()
-//        let usecase = WatermarkUsecase(
-//            wordDataStore: watermarkStore,
-//            watermarkDataStore: watermarkStore
-//        )
-//        return .init(
-//            coordinator: popupWatermark,
-//            usecase: usecase
-//        )
-//    }
+    func makePopupWatermarkTitle() -> PopupWatermarkTitle {
+        return PopupWatermarkTitle(viewModel: makePopupWatermarkTitleVM())
+    }
+    
+    func makePopupWatermarkTitleVM() -> PopupWatermarkTitleVM {
+        let vm = PopupWatermarkTitleVM()
+        vm.step
+            .sink { [weak self] step in
+                self?.handleWatermarkPopupStep(step)
+            }
+            .store(in: &homeCancellables)
+        return vm
+    }
+    
+    func makePopupWatermarkWord() -> PopupWatermarkWord {
+        return PopupWatermarkWord(viewModel: makePopupWatermarkWordVM())
+    }
+    
+    func makePopupWatermarkWordVM() -> PopupWatermarkWordVM {
+        let usecase = WatermarkUsecase(
+            wordDataStore: watermarkStore,
+            watermarkDataStore: watermarkStore,
+            imageExportRepository: imageExportRepository
+        )
+        let vm = PopupWatermarkWordVM(
+            usecase: usecase
+        )
+        vm.step
+            .sink { [weak self] step in
+                self?.handleWatermarkPopupStep(step)
+            }
+            .store(in: &homeCancellables)
+        return vm
+    }
+    
+    func makePopupWatermarkPreview() -> PopupWatermarkPreview {
+        return PopupWatermarkPreview(viewModel: makePopupWatermarkPreviewVM())
+    }
+    
+    func makePopupWatermarkPreviewVM() -> PopupWatermarkPreviewVM {
+        let usecase = WatermarkUsecase(
+            wordDataStore: watermarkStore,
+            watermarkDataStore: watermarkStore,
+            imageExportRepository: imageExportRepository
+        )
+        let vm = PopupWatermarkPreviewVM(usecase: usecase)
+        vm.step
+            .sink { [weak self] step in
+                self?.handleWatermarkPopupStep(step)
+            }
+            .store(in: &homeCancellables)
+        return vm
+    }
+    
+    internal func handleWatermarkPopupStep(_ step: WatermarkPopupFlowStep) {
+        if pendingWatermarkPopupResult == nil {
+            pendingWatermarkPopupResult = .init()
+        }
+        switch step {
+        case .dismiss:
+            popupWatermark.pop()
+        case .wordFinished(let word):
+            pendingWatermarkPopupResult?.word = word
+            popupWatermark.pop()
+        case .titleFinished(let title):
+            pendingWatermarkPopupResult?.title = title
+            popupWatermark.pop()
+        case .previewFinished:
+            popupWatermark.popRoot()
+        }
+    }
 }

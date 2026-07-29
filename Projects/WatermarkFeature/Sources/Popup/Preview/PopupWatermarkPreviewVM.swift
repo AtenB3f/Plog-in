@@ -7,46 +7,45 @@
 //
 
 import SwiftUI
+import Combine
 import Design
 import UISchema
 import WatermarkDomain
 import PlatformCore
 
-class PopupWatermarkPreviewVM: PopupViewModel {
-    
-    var coordinator: WatermarkPopupCoordinator
-    
-    public init(
-        coordinator: WatermarkPopupCoordinator
-//        editer: WatermarkEditor
-    ) {
-//        self.editer = editer
-        self.coordinator = coordinator
-        super.init()
-        self.loadWords()
-        
-    }
-//    private let dataManager = DataStore.shared
-//    let editer: WatermarkEditor
-    
-    @Published var assets: [AssetData] = []
-    @Published var words: [String] = []
-    @Published var text: String = ""
-    @Published var isShowInput: Bool = false
-    @Published var preview: Image?
-    var previewData: PImage?  {
-        didSet {
-            guard let previewData = previewData else { return }
-            preview = Image(uiImage: previewData)
-        }
-    }
-    
+public class PopupWatermarkPreviewVM: PopupViewModel {
     enum Action {
         case input
         case save
         case clear
         case cancel
         case confirm
+    }
+    
+    @Published var assets: [AssetData] = []
+    @Published var words: [String] = []
+    @Published var text: String = ""
+    @Published var isShowInput: Bool = false
+    @Published var preview: Image?
+    var previewData: PImage? {
+        didSet {
+            guard let previewData = previewData else { return }
+            preview = Image(uiImage: previewData)
+        }
+    }
+    
+    var usecase: WatermarkUsecase
+    
+    // Watermark Popup Flow Step
+    private let stepSubject = PassthroughSubject<WatermarkPopupFlowStep, Never>()
+    public var step: AnyPublisher<WatermarkPopupFlowStep, Never> { stepSubject.eraseToAnyPublisher() }
+    
+    public init(
+        usecase: WatermarkUsecase
+    ) {
+        self.usecase = usecase
+        super.init()
+        self.loadWords()
     }
 }
 
@@ -86,22 +85,14 @@ extension PopupWatermarkPreviewVM {
     
     func cancel() {
         // popup dismiss
-        coordinator.pop()
+//        coordinator.pop()
+        stepSubject.send(.previewFinished)
     }
     
     func confirm() {
         // data save
-        // popup dismiss
-        coordinator.popRoot()
         
-//        guard let preview = previewData else { return }
-//        Task.detached {
-//            do {
-//                try await self.editer.saveImageToPhotoLibrary(image: preview)
-//            } catch {
-//                
-//            }
-//        }
+        stepSubject.send(.previewFinished)
     }
 }
 

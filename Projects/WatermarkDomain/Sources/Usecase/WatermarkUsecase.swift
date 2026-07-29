@@ -27,6 +27,7 @@ public class WatermarkUsecase {
     }
 }
 
+// MARK: - 워터마크 단어
 public extension WatermarkUsecase {
     func fetchWords() -> [WatermarkWordModel] {
         return wordDataStore.getWords()
@@ -45,7 +46,15 @@ public extension WatermarkUsecase {
     }
 }
 
+// MARK: - 워터마크 모델
 public extension WatermarkUsecase {
+    func fetchWatermarks() -> [WatermarkModel] {
+        let basic = watermarkDataStore.getWatermarks(type: .basic)
+        let custom = watermarkDataStore.getWatermarks(type: .custom)
+        
+        return basic + custom
+    }
+    
     func saveWatermark(_ watermark: WatermarkModel) {
         watermarkDataStore.setWatermark(watermark)
     }
@@ -55,6 +64,7 @@ public extension WatermarkUsecase {
     }
 }
 
+// MARK: - 워터마크 이미지 출력
 public extension WatermarkUsecase {
     func saveWatermarkImage(_ images: [PImage]) async -> [Bool] {
         await imageExportRepository.save(images: images)
