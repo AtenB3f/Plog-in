@@ -8,7 +8,7 @@
 
 import Foundation
 
-public struct WatermarkModel {
+public struct WatermarkModel: Equatable, Hashable {
     public var id: UUID
     public var text: WatermarkTextModel
     public var stickers: [WatermarkStickerModel]

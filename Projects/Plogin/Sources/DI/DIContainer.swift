@@ -11,37 +11,53 @@ import Combine
 import Persistence
 import WatermarkFeature
 import WatermarkDomain
+import PlatformCore
 import PlatformExport
 import RenderEngine
 
 public class DIContainer: ObservableObject {
-    private var cancellables = Set<AnyCancellable>()
-    private let watermarkStore: WatermarkDataStore
-
+    internal var cancellables = Set<AnyCancellable>()
+    internal var watermarkCancellables = Set<AnyCancellable>()
+    internal var homeCancellables = Set<AnyCancellable>()
+    
+    internal var pendingWatermarkResult: (watermark: WatermarkModel, origins: [PImage])?
+    internal var pendingHomeResult: HomeResultPayload?
+    
+    internal let watermarkStore: WatermarkDataStore
+    internal let imageExportRepository: PhotoLibraryExport
+    
+    @Published public var navigation = TabNavigaionCoordinator()
+    @Published public var popupWatermark = WatermarkPopupCoordinator()
+    @Published public var rootUI = RootUIManager()
+    
     public init(
-        watermarkStore: WatermarkDataStore = DIContainer.makeDefaultWatermarkStore()
+        watermarkStore: WatermarkDataStore = DIContainer.makeDefaultWatermarkStore(),
+        imageExportRepository: PhotoLibraryExport = PhotoLibraryExport()
     ) {
         self.watermarkStore = watermarkStore
-
+        self.imageExportRepository = imageExportRepository
+        
         popupWatermark.objectWillChange
             .sink { [weak self] _ in
                 self?.objectWillChange.send()
             }
             .store(in: &cancellables)
-
+        
         navigation.objectWillChange
             .sink { [weak self] _ in
                 self?.objectWillChange.send()
             }
             .store(in: &cancellables)
-
+        
         rootUI.objectWillChange
             .sink { [weak self] _ in
                 self?.objectWillChange.send()
             }
             .store(in: &cancellables)
     }
+}
 
+extension DIContainer {
     public static func makeDefaultWatermarkStore() -> WatermarkDataStore {
         do {
             let dataStore = try DataStore.makePersistent()
@@ -50,10 +66,6 @@ public class DIContainer: ObservableObject {
             fatalError("영구 저장소 초기화 실패: \(error)")
         }
     }
-
-    @Published public var navigation = TabNavigaionCoordinator()
-    @Published public var popupWatermark = WatermarkPopupCoordinator()
-    @Published public var rootUI = RootUIManager()
 }
 
 // MARK: - Tab
@@ -61,9 +73,14 @@ extension DIContainer {
     func makeTabView(_ route: TabNavigationRouter) -> some View {
         switch route {
         case .watermarkEdit:
-            return makeWatermarkEditView()
+            return AnyView(makeWatermarkEditView())
         case .watermarkComplete:
-            return makeWatermarkEditView()
+            return AnyView(makeWatermarkEditView())
+        case .watermarkResult:
+            guard let pending = pendingWatermarkResult else {
+                return AnyView(EmptyView())
+            }
+            return AnyView(makeWatermarkResultView(watermark: pending.watermark, origins: pending.origins))
         }
     }
     
@@ -77,7 +94,8 @@ extension DIContainer {
     func makeWatermarkPopupUsecase() -> WatermarkUsecase {
         return WatermarkUsecase(
             wordDataStore: watermarkStore,
-            watermarkDataStore: watermarkStore
+            watermarkDataStore: watermarkStore,
+            imageExportRepository: imageExportRepository
         )
     }
     
@@ -110,68 +128,4 @@ extension DIContainer {
 //            usecase: usecase
 //        )
 //    }
-}
-
-// MARK: - Home
-extension DIContainer {
-    func makeHomeView() -> some View {
-        return HomeView(
-            viewModel: makeHomeVM()
-        )
-    }
-    
-    func makeHomeVM() -> HomeViewModel {
-        return HomeViewModel(watermarkPopup: popupWatermark, navigation: navigation)
-    }
-}
-
-// MARK: - Watermark
-extension DIContainer {
-    func makeWatermarkVM(
-        picker: AssetPicker,
-        stickerPicker: AssetPicker,
-        store: WatermarkStore
-    ) -> WatermarkViewModel {
-        return WatermarkViewModel(
-            picker: picker,
-            stickerPicker: stickerPicker,
-            store: store
-        )
-    }
-    
-    func makeWatermarkEditView() -> WatermarkEditView {
-        let picker = AssetPicker(mediaType: .image, limit: 10)
-        let stickerPicker = AssetPicker(mediaType: .image, limit: 10)
-        let store = WatermarkStore()
-        return WatermarkEditView(
-            viewModel: makeWatermarkEditVM(
-                picker: picker,
-                stickerPicker: stickerPicker,
-                store: store
-            ),
-            watermarkViewModel: makeWatermarkVM(
-                picker: picker,
-                stickerPicker: stickerPicker,
-                store: store
-            )
-        )
-    }
-    
-    func makeWatermarkEditVM(
-        picker: AssetPicker,
-        stickerPicker: AssetPicker,
-        store: WatermarkStore
-    ) -> WatermarkEditViewModel {
-        let usecase = WatermarkUsecase(
-            wordDataStore: watermarkStore,
-            watermarkDataStore: watermarkStore
-        )
-        return WatermarkEditViewModel(
-            popup: popupWatermark,
-            usecase: usecase,
-            picker: picker,
-            stickerPicker: stickerPicker,
-            store: store
-        )
-    }
 }

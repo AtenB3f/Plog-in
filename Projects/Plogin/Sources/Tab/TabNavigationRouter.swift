@@ -12,4 +12,5 @@ import UISchema
 public enum TabNavigationRouter: NavigationRoute {
     case watermarkEdit
     case watermarkComplete
+    case watermarkResult
 }

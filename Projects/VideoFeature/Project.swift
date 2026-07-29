@@ -20,7 +20,6 @@ private let project = Project(
             resources: ["Resources/**"],
             scripts: [ManifestShared.swiftLintScript],
             dependencies: [
-                .project(target: "WatermarkDomain", path: .relativeToRoot("Projects/WatermarkDomain")),
                 .project(target: "RenderEngine", path: .relativeToRoot("Projects/RenderEngine")),
                 .project(target: "Design", path: .relativeToRoot("Projects/Design")),
                 .package(product: "YouTubeKit"),

@@ -9,7 +9,7 @@
 import Foundation
 import PlatformCore
 
-public struct WatermarkStickerModel {
+public struct WatermarkStickerModel: Hashable {
     public var image: PImage
     public var alpha: CGFloat
     public var position: CGPoint

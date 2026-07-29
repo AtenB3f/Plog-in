@@ -9,7 +9,7 @@
 import Foundation
 import PlatformCore
 
-public struct WatermarkTextModel {
+public struct WatermarkTextModel: Hashable {
     public var text: String
     public var fontName: String
     public var fontSize: CGFloat

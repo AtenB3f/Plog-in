@@ -8,7 +8,7 @@
 
 import SwiftUI
 
-public struct ColorData: Codable, Equatable {
+public struct ColorData: Codable, Equatable, Hashable {
     public var red: CGFloat
     public var green: CGFloat
     public var blue: CGFloat

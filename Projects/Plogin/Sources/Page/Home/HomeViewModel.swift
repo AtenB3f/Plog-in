@@ -7,6 +7,7 @@
 //
 
 import SwiftUI
+import Combine
 import PlatformCore
 import WatermarkDomain
 import WatermarkFeature
@@ -16,22 +17,31 @@ class HomeViewModel: ObservableObject {
     @Published var mediaType: MediaType = .all
     @Published var assets: [AssetData] = []
     
-    private let watermarkPopup: WatermarkPopupCoordinator
     private let navigation: TabNavigaionCoordinator
+    private let watermarkPopup: WatermarkPopupCoordinator
+    
+    // Home Flow Step
+    private let stepSubject = PassthroughSubject<HomeFlowStep, Never>()
+    public var step: AnyPublisher<HomeFlowStep, Never> { stepSubject.eraseToAnyPublisher() }
     
     init(
-        watermarkPopup: WatermarkPopupCoordinator,
-        navigation: TabNavigaionCoordinator
+        navigation: TabNavigaionCoordinator,
+        watermarkPopup: WatermarkPopupCoordinator
     ) {
-        self.watermarkPopup = watermarkPopup
         self.navigation = navigation
+        self.watermarkPopup = watermarkPopup
     }
 }
 
 @MainActor
 extension HomeViewModel {
     func push(_ route: TabNavigationRouter) {
-        navigation.push(route: route)
+        switch route {
+        case .watermarkEdit:
+            stepSubject.send(.newWatermrk)
+        default:
+            break
+        }
     }
 }
 
