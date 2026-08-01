@@ -121,13 +121,7 @@ extension DIContainer {
     }
     
     func makePopupWatermarkTitleVM() -> PopupWatermarkTitleVM {
-        let vm = PopupWatermarkTitleVM()
-        vm.step
-            .sink { [weak self] step in
-                self?.handleWatermarkPopupStep(step)
-            }
-            .store(in: &homeCancellables)
-        return vm
+        return PopupWatermarkTitleVM(coodinator: popupWatermark)
     }
     
     func makePopupWatermarkWord() -> PopupWatermarkWord {
@@ -140,15 +134,10 @@ extension DIContainer {
             watermarkDataStore: watermarkStore,
             imageExportRepository: imageExportRepository
         )
-        let vm = PopupWatermarkWordVM(
-            usecase: usecase
+        return PopupWatermarkWordVM(
+            usecase: usecase,
+            coodinator: popupWatermark
         )
-        vm.step
-            .sink { [weak self] step in
-                self?.handleWatermarkPopupStep(step)
-            }
-            .store(in: &homeCancellables)
-        return vm
     }
     
     func makePopupWatermarkPreview() -> PopupWatermarkPreview {
@@ -161,13 +150,10 @@ extension DIContainer {
             watermarkDataStore: watermarkStore,
             imageExportRepository: imageExportRepository
         )
-        let vm = PopupWatermarkPreviewVM(usecase: usecase)
-        vm.step
-            .sink { [weak self] step in
-                self?.handleWatermarkPopupStep(step)
-            }
-            .store(in: &homeCancellables)
-        return vm
+        return PopupWatermarkPreviewVM(
+            usecase: usecase,
+            coodinator: popupWatermark
+        )
     }
     
     internal func handleWatermarkPopupStep(_ step: WatermarkPopupFlowStep) {

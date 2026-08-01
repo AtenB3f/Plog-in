@@ -35,22 +35,21 @@ public class PopupWatermarkPreviewVM: PopupViewModel {
     }
     
     var usecase: WatermarkUsecase
-    
-    // Watermark Popup Flow Step
-    private let stepSubject = PassthroughSubject<WatermarkPopupFlowStep, Never>()
-    public var step: AnyPublisher<WatermarkPopupFlowStep, Never> { stepSubject.eraseToAnyPublisher() }
+    var coodinator: WatermarkPopupCoordinator
     
     public init(
-        usecase: WatermarkUsecase
+        usecase: WatermarkUsecase,
+        coodinator: WatermarkPopupCoordinator
     ) {
         self.usecase = usecase
+        self.coodinator = coodinator
         super.init()
         self.loadWords()
     }
 }
 
-@MainActor
 extension PopupWatermarkPreviewVM {
+    @MainActor
     func action(_ action: Action) {
         switch action {
         case .input:
@@ -86,13 +85,13 @@ extension PopupWatermarkPreviewVM {
     func cancel() {
         // popup dismiss
 //        coordinator.pop()
-        stepSubject.send(.previewFinished)
+        coodinator.stepSubject.send(.previewFinished)
     }
     
     func confirm() {
         // data save
         
-        stepSubject.send(.previewFinished)
+        coodinator.stepSubject.send(.previewFinished)
     }
 }
 

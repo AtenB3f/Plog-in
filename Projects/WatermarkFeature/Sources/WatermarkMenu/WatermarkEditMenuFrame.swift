@@ -54,11 +54,11 @@ struct WatermarkEditMenuFrame: View {
                 }
             }
             .padding(16)
-            .foldingHeight(viewModel.currentFrameUUID != viewModel.store.watermark.id)
+            .foldingHeight(viewModel.hasUnsavedChanges)
             
             CategoryButton(
                 title: "프레임 제목",
-                button: viewModel.store.watermark.frame.title,
+                button: viewModel.store.watermark.frame.title.isEmpty ? "제목없음" : viewModel.store.watermark.frame.title,
                 onClick: {
                     viewModel.action(.update(.frame(.title)))
             })

@@ -25,8 +25,7 @@ func makePreviewWatermarkEditView() -> WatermarkEditView {
         stickerPicker: stickerPicker,
         store: store
     )
-    
-    store.watermark.text = makePreviewWatermarkText(picker: picker, array: store.watermark.array)
+    store.setText(makePreviewWatermarkText(picker: picker, array: store.watermark.array))
 
     return WatermarkEditView(
         viewModel: editViewModel,
@@ -43,7 +42,7 @@ func makePreviewWatermarkView() -> WatermarkView {
     picker.images = [makePreviewImage()]
     let stickerPicker = AssetPicker(mediaType: .image, limit: 10)
     let store = WatermarkStore()
-    store.watermark.text = makePreviewWatermarkText(picker: picker, array: store.watermark.array)
+    store.setText(makePreviewWatermarkText(picker: picker, array: store.watermark.array))
 
     return WatermarkView(
         viewModel: WatermarkViewModel(
@@ -94,8 +93,8 @@ private func makeWatermarkEditorComparisonView() -> WatermarkEditorComparisonVie
     var text = makePreviewWatermarkText(picker: picker, array: store.watermark.array)
     text.gradientColors = [Color.Yejun.main, Color.Noah.main, Color.Bamby.main, Color.Eunho.main, Color.Hamin.main].map { ColorData($0, alpha: 0.3) }
     text.date = Date()
-    store.watermark.text = text
-    store.watermark.export = WatermarkFormat().makeExportModel(origins: picker.images, array: store.watermark.array)
+    store.setText(text)
+    store.setExport(WatermarkFormat().makeExportModel(origins: picker.images, array: store.watermark.array))
 
     let watermarkView = WatermarkView(
         viewModel: WatermarkViewModel(picker: picker, stickerPicker: stickerPicker, store: store)

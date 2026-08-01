@@ -11,14 +11,13 @@ import UISchema
 
 public class PopupWatermarkTitleVM: PopupViewModel {
     @Published var title: String
-    
-    // Watermark Popup Flow Step
-    private let stepSubject = PassthroughSubject<WatermarkPopupFlowStep, Never>()
-    public var step: AnyPublisher<WatermarkPopupFlowStep, Never> { stepSubject.eraseToAnyPublisher() }
+    var coodinator: WatermarkPopupCoordinator
     
     public init(
+        coodinator: WatermarkPopupCoordinator,
         title: String = ""
     ) {
+        self.coodinator = coodinator
         self.title = title
     }
     
@@ -57,14 +56,10 @@ private extension PopupWatermarkTitleVM {
     }
     
     func cancel() {
-//        coordinator.pop()
-        
-        stepSubject.send(.dismiss)
+        coodinator.stepSubject.send(.dismiss)
     }
     
     func confirm() {
-        // data save
-        
-        stepSubject.send(.titleFinished(title: self.title))
+        coodinator.stepSubject.send(.titleFinished(title: self.title))
     }
 }

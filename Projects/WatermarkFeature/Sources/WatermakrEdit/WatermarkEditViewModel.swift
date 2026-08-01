@@ -55,6 +55,12 @@ public class WatermarkEditViewModel: ObservableObject {
     @Published var frames: [WatermarkModel] = []
     @Published var currentFrameUUID: UUID?
     
+    private var savedSnapshot: WatermarkModel?
+    var hasUnsavedChanges: Bool {
+        guard let savedSnapshot else { return true }
+        return savedSnapshot != store.watermark
+    }
+
     // MARK: - Watermark
     var store: WatermarkStore
     private let popup: WatermarkPopupCoordinator
@@ -89,10 +95,12 @@ public class WatermarkEditViewModel: ObservableObject {
 
         if let watermark = watermark {
             self.store.setWatermark(watermark)
+            self.savedSnapshot = watermark
         } else {
             var new = WatermarkModel()
             new.text.text = (words.first ?? "PLAVE")
             self.store.setWatermark(new)
+            self.savedSnapshot = nil
         }
 
         bind()
@@ -118,21 +126,20 @@ private extension WatermarkEditViewModel {
                 self?.objectWillChange.send()
             }
             .store(in: &cancellables)
-
-        popup.$history
-            .sink { [weak self] history in
-                guard let self = self else { return }
-                self.handlePopupComplete(history)
+        
+        popup.step
+            .sink { [weak self] step in
+                self?.handlePopupComplete(step)
             }
             .store(in: &cancellables)
     }
     
     func originInit() {
         if !picker.images.isEmpty {
-            store.watermark.export = format.makeExportModel(
+            store.setExport(format.makeExportModel(
                 origins: picker.images,
                 array: store.watermark.array
-            )
+            ))
             store.watermark.text.fontName = FontType.body1.fontName
             store.watermark.text.rotation = -30
             format.makeTextModel(
@@ -318,15 +325,20 @@ private extension WatermarkEditViewModel {
         }
     }
     
-    func handlePopupComplete(_ route: WatermarkPopupRoute?) {
-        guard let route = route else { return }
-        switch route {
-        case .word:
+    func handlePopupComplete(_ step: WatermarkPopupFlowStep) {
+        switch step {
+        case .dismiss:
+            popup.pop()
+        case .wordFinished(let word):
             words = usecase.fetchWords().map { $0.text }
-        case .title:
-            break
-        case .preview:
-            break
+            store.watermark.text.text = word
+            popup.pop()
+        case .titleFinished(let title):
+            store.watermark.frame.title = title
+            popup.pop()
+        case .previewFinished:
+            // save preview
+            popup.pop()
         }
     }
 }
@@ -364,17 +376,17 @@ private extension WatermarkEditViewModel {
                 array: store.watermark.array
             ).width
 
-            store.watermark.array = format.makeArrayModel(
+            store.setArray(format.makeArrayModel(
                 origins: picker.images,
                 type: type,
                 current: store.watermark.array
-            )
+            ))
             
             let exportType = store.watermark.export.type
-            store.watermark.export = format.makeExportModel(
+            store.setExport(format.makeExportModel(
                 origins: picker.images,
                 array: store.watermark.array
-            )
+            ))
             store.watermark.export.type = exportType
             format.makeTextModel(
                 origins: picker.images,
@@ -410,30 +422,32 @@ private extension WatermarkEditViewModel {
                     array: store.watermark.array
                 )
                 export.multiple = store.watermark.export.multiple
-                store.watermark.export = export
+                store.setExport(export)
             case .multiple:
-                store.watermark.export = format.makeExportModel(
+                store.setExport(format.makeExportModel(
                     origins: picker.images,
                     array: store.watermark.array,
                     multiple: store.watermark.export.multiple
-                )
+                ))
             }
         case .multiple: // 배율 조정
             guard store.watermark.export.type == .multiple else { return }
-            store.watermark.export = format.makeExportModel(
+            store.setExport(format.makeExportModel(
                 origins: picker.images,
                 array: store.watermark.array,
                 multiple: store.watermark.export.multiple
-            )
+            ))
         }
     }
     
     func setFrame(_ menu: WatermarkEditMenuType.FrameMenu) {
         switch menu {
         case .save:
-            currentFrameUUID = store.watermark.id
             usecase.saveWatermark(store.watermark)
-            
+            savedSnapshot = store.watermark
+            currentFrameUUID = store.watermark.id
+            print(store.watermark)
+
         case .title:
             popup(.title)
         }

@@ -23,20 +23,19 @@ public class PopupWatermarkWordVM: PopupViewModel {
     @Published var isFocusField: Bool = false
     
     var usecase: WatermarkUsecase
-    
-    // Watermark Popup Flow Step
-    private let stepSubject = PassthroughSubject<WatermarkPopupFlowStep, Never>()
-    public var step: AnyPublisher<WatermarkPopupFlowStep, Never> { stepSubject.eraseToAnyPublisher() }
+    var coodinator: WatermarkPopupCoordinator
     
     public init(
-        usecase: WatermarkUsecase
+        usecase: WatermarkUsecase,
+        coodinator: WatermarkPopupCoordinator
     ) {
         self.usecase = usecase
+        self.coodinator = coodinator
     }
 }
 
-@MainActor
 public extension PopupWatermarkWordVM {
+    @MainActor
     func action(_ action: Action) {
         Task {
             switch action {
@@ -72,12 +71,12 @@ extension PopupWatermarkWordVM {
     
     func cancel() {
         isFocusField = false
-        stepSubject.send(.dismiss)
+        coodinator.stepSubject.send(.dismiss)
     }
     
     func confirm() {
         isFocusField = false
         usecase.saveWord(text)
-        stepSubject.send(.wordFinished(word: self.text))
+        coodinator.stepSubject.send(.wordFinished(word: self.text))
     }
 }

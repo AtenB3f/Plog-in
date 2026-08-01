@@ -65,7 +65,7 @@ struct WatermarkEditMenuExport: View {
             CategoryContent(title: "배율") {
                 HStack(alignment: .center, spacing: 8) {
                     TextSlider(value: $viewModel.store.watermark.export.multiple, min: 0.1, max: 1.5)
-                        .onChange(of: viewModel.store.watermark.export.multiple) { _ in
+                        .onChange(of: viewModel.store.watermark.export.multiple) {
                             viewModel.action(.update(.export(.multiple)))
                         }
                     Text("×" + String(format: "%.2f", viewModel.store.watermark.export.multiple))
