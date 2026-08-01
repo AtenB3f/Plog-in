@@ -365,6 +365,9 @@ public extension WatermarkFormat {
         font: PFont,
         fontSize: CGFloat
     ) -> CGSize {
+        guard !text.isEmpty else {
+            return .init(width: 100, height: 100)
+        }
         let renderFont = font.withSize(fontSize)
         let attributes: [NSAttributedString.Key: Any] = [
             .font: renderFont
