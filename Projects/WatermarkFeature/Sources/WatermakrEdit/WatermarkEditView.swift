@@ -35,13 +35,20 @@ public struct WatermarkEditView: View {
                     dismiss()
                 }
             })
-            Button {
-                viewModel.action(.open(.picture))
-            } label: {
-                Text("Picker")
+            
+            if viewModel.picker.images.isEmpty {
+                VStack(spacing: 0) {
+                    Button {
+                        viewModel.action(.open(.picture))
+                    } label: {
+                        Image.iconImage
+                    }
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            } else {
+                WatermarkView(viewModel: watermarkViewModel)
+                    .padding(10)
             }
-            WatermarkView(viewModel: watermarkViewModel)
-                .padding(10)
             
             WatermarkEditMenu()
                 .environmentObject(viewModel)

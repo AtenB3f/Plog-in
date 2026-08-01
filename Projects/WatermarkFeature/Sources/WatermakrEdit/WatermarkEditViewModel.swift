@@ -29,6 +29,8 @@ public class WatermarkEditViewModel: ObservableObject {
         case replicate(_ type: WatermarkMenuType)
     }
     
+    let colorPalet: [Color] = [.white, .Gray.medium, .black, .Yejun.main, .Noah.main, .Bamby.main, .Eunho.main, .Hamin.main]
+    
     // MARK: - Picker
     @Published var isShowPicker: Bool = false
     @Published var pickerType: WatermarkEditPickerType?
@@ -42,18 +44,18 @@ public class WatermarkEditViewModel: ObservableObject {
     @Published var indexCategory: Int = 0
     @Published var menuHeight: CGFloat = .zero
     
-    let colorPalet: [Color] = [.white, .Gray.medium, .black, .Yejun.main, .Noah.main, .Bamby.main, .Eunho.main, .Hamin.main]
+    @Published var stickerState: FrameListState = FrameListState()
     
     @Published var isShowArrayType = false
-    @Published var arrayMode: FrameListMode = .none
-    @Published var arraySelect: Int?
-    @Published var stickerMode: FrameListMode = .none
-    @Published var stickerSelect: Int?
+    @Published var arrayState: FrameListState = FrameListState()
+    
     @Published var isShowExportType = false
-    @Published var frame = WatermarkListViewState()
+    
+    @Published var frameState: FrameListState = FrameListState()
+    @Published var frames: [WatermarkModel] = []
+    @Published var currentFrameUUID: UUID?
     
     // MARK: - Watermark
-
     var store: WatermarkStore
     private let popup: WatermarkPopupCoordinator
     private let usecase: WatermarkUsecase
@@ -83,6 +85,7 @@ public class WatermarkEditViewModel: ObservableObject {
         self.sticker = stickerPicker
         self.store = store
         words = usecase.fetchWords().map { $0.text }
+        frames = usecase.fetchWatermarks()
 
         if let watermark = watermark {
             self.store.setWatermark(watermark)
@@ -244,12 +247,12 @@ private extension WatermarkEditViewModel {
     func remove(_ type: WatermarkMenuType) {
         switch type {
         case .array:
-            arraySelect = nil
-            arrayMode = .none
+            arrayState.index = nil
+            arrayState.mode = .none
             picker.images = []
         case .sticker:
-            stickerSelect = nil
-            stickerMode = .none
+            stickerState.index = nil
+            stickerState.mode = .none
             store.watermark.stickers = []
         default:
             break
@@ -260,20 +263,28 @@ private extension WatermarkEditViewModel {
         switch type {
         case .array:
             guard index < picker.images.count else { return }
-            if arraySelect == index {
-                arraySelect = nil
-            } else if let selected = arraySelect, selected > index {
-                arraySelect = selected - 1
+            if arrayState.index == index {
+                arrayState.index = nil
+            } else if let selected = arrayState.index, selected > index {
+                arrayState.index = selected - 1
             }
             picker.images.remove(at: index)
         case .sticker:
             guard index < store.watermark.stickers.count else { return }
-            if stickerSelect == index {
-                stickerSelect = nil
-            } else if let selected = stickerSelect, selected > index {
-                stickerSelect = selected - 1
+            if stickerState.index == index {
+                stickerState.index = nil
+            } else if let selected = stickerState.index, selected > index {
+                stickerState.index = selected - 1
             }
             store.watermark.stickers.remove(at: index)
+        case .frame:
+            guard index < frames.count else { return }
+            if frameState.index == index {
+                frameState.index = nil
+            } else if let selected = frameState.index, selected > index {
+                frameState.index = selected - 1
+            }
+            frames.remove(at: index)
         default:
             break
         }
@@ -285,6 +296,8 @@ private extension WatermarkEditViewModel {
             picker.images.move(fromOffsets: from, toOffset: to)
         case .sticker:
             store.watermark.stickers.move(fromOffsets: from, toOffset: to)
+        case .frame:
+            frames.move(fromOffsets: from, toOffset: to)
         default:
             break
         }
@@ -293,7 +306,7 @@ private extension WatermarkEditViewModel {
     func replicate(_ type: WatermarkMenuType) {
         switch type {
         case .sticker:
-            guard let index = stickerSelect else { return }
+            guard let index = stickerState.index else { return }
             guard store.watermark.stickers.count <= 10 else { return }
             var model = store.watermark.stickers[index]
             model.layer = store.watermark.stickers.count
@@ -418,7 +431,9 @@ private extension WatermarkEditViewModel {
     func setFrame(_ menu: WatermarkEditMenuType.FrameMenu) {
         switch menu {
         case .save:
+            currentFrameUUID = store.watermark.id
             usecase.saveWatermark(store.watermark)
+            
         case .title:
             popup(.title)
         }

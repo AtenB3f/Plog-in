@@ -20,8 +20,8 @@ struct WatermarkEditMenuSticker: View {
         }
         .padding(.vertical, 12)
         .onTapGesture {
-            if viewModel.stickerMode != .edit {
-                viewModel.stickerMode = .none
+            if viewModel.stickerState.mode != .edit {
+                viewModel.stickerState.mode = .none
             }
         }
     }
@@ -32,8 +32,8 @@ extension WatermarkEditMenuSticker {
     func stickers() -> some View {
         CategoryContent(title: "스티커") {
             HStack {
-                if let index = viewModel.stickerSelect,
-                   viewModel.stickerMode == .select {
+                if viewModel.stickerState.index != nil,
+                   viewModel.stickerState.mode == .select {
                     Button {
                         viewModel.action(.replicate(.sticker))
                     } label: {
@@ -57,7 +57,7 @@ extension WatermarkEditMenuSticker {
         VStack(spacing: 0) {
             CategoryContent(title: "편집", content: {
                 HStack {
-                    if viewModel.stickerMode == .edit {
+                    if viewModel.stickerState.mode == .edit {
                         Button {
                             viewModel.action(.remove(.sticker))
                         } label: {
@@ -70,13 +70,13 @@ extension WatermarkEditMenuSticker {
                     }
                     
                     Button {
-                        if viewModel.stickerMode == .edit {
-                            viewModel.stickerMode = .none
+                        if viewModel.stickerState.mode == .edit {
+                            viewModel.stickerState.mode = .none
                         } else {
-                            viewModel.stickerMode = .edit
+                            viewModel.stickerState.mode = .edit
                         }
                     } label: {
-                        Text(viewModel.stickerMode == .edit ? "편집 종료" : "편집모드")
+                        Text(viewModel.stickerState.mode == .edit ? "편집 종료" : "편집모드")
                             .font(.bold2)
                             .foreground(.Text.light)
                             .padding(.vertical, 4)
@@ -85,9 +85,8 @@ extension WatermarkEditMenuSticker {
                 }
             })
             FrameList(
-                mode: $viewModel.stickerMode,
-                list: viewModel.store.watermark.stickers.map(\.image),
-                select: $viewModel.stickerSelect,
+                list: viewModel.store.watermark.stickers.map { $0.image },
+                state: $viewModel.stickerState,
                 onDelete: { viewModel.action(.removeAt(.sticker, $0)) },
                 onMove: { viewModel.action(.move(.sticker, $0, $1)) }
             )
