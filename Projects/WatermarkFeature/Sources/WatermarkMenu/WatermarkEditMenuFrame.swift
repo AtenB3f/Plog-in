@@ -34,8 +34,10 @@ struct WatermarkEditMenuFrame: View {
                     onDelete: { viewModel.action(.removeAt(.frame, $0)) },
                     onMove: { viewModel.action(.move(.frame, $0, $1)) }
                 )
+                .onChange(of: viewModel.frameState.index) {
+                    viewModel.action(.update(.frame(.load)))
+                }
                 .padding(.vertical, 6)
-                .background(Color.Base.medium)
                 .foldingHeight(!viewModel.frames.isEmpty)
             }
             

@@ -442,6 +442,16 @@ private extension WatermarkEditViewModel {
     
     func setFrame(_ menu: WatermarkEditMenuType.FrameMenu) {
         switch menu {
+        case .load:
+            guard let index = frameState.index, index < frames.count else { return }
+            store.watermark.text = frames[index].text
+            store.watermark.stickers = frames[index].stickers
+            store.watermark.array = frames[index].array
+            store.watermark.export = frames[index].export
+            store.watermark.frame = frames[index].frame
+            
+            setArray(.type(store.watermark.array.type))
+            setExport(.type(store.watermark.export.type))
         case .save:
             usecase.saveWatermark(store.watermark)
             savedSnapshot = store.watermark
