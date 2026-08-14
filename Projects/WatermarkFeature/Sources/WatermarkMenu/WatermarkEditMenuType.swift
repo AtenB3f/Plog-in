@@ -63,6 +63,7 @@ public enum WatermarkEditMenuType {
     }
     
     public enum FrameMenu {
+        case load
         case save
         case title
     }

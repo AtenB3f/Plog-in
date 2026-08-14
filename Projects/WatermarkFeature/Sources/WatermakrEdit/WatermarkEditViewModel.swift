@@ -29,6 +29,8 @@ public class WatermarkEditViewModel: ObservableObject {
         case replicate(_ type: WatermarkMenuType)
     }
     
+    let colorPalet: [Color] = [.white, .Gray.medium, .black, .Yejun.main, .Noah.main, .Bamby.main, .Eunho.main, .Hamin.main]
+    
     // MARK: - Picker
     @Published var isShowPicker: Bool = false
     @Published var pickerType: WatermarkEditPickerType?
@@ -42,18 +44,24 @@ public class WatermarkEditViewModel: ObservableObject {
     @Published var indexCategory: Int = 0
     @Published var menuHeight: CGFloat = .zero
     
-    let colorPalet: [Color] = [.white, .Gray.medium, .black, .Yejun.main, .Noah.main, .Bamby.main, .Eunho.main, .Hamin.main]
+    @Published var stickerState: FrameListState = FrameListState()
     
     @Published var isShowArrayType = false
-    @Published var arrayMode: FrameListMode = .none
-    @Published var arraySelect: Int?
-    @Published var stickerMode: FrameListMode = .none
-    @Published var stickerSelect: Int?
-    @Published var isShowExportType = false
-    @Published var frame = WatermarkListViewState()
+    @Published var arrayState: FrameListState = FrameListState()
     
-    // MARK: - Watermark
+    @Published var isShowExportType = false
+    
+    @Published var frameState: FrameListState = FrameListState()
+    @Published var frames: [WatermarkModel] = []
+    @Published var currentFrameUUID: UUID?
+    
+    private var savedSnapshot: WatermarkModel?
+    var hasUnsavedChanges: Bool {
+        guard let savedSnapshot else { return true }
+        return savedSnapshot != store.watermark
+    }
 
+    // MARK: - Watermark
     var store: WatermarkStore
     private let popup: WatermarkPopupCoordinator
     private let usecase: WatermarkUsecase
@@ -68,6 +76,7 @@ public class WatermarkEditViewModel: ObservableObject {
     public var step: AnyPublisher<WatermarkFlowStep, Never> { stepSubject.eraseToAnyPublisher() }
 
     public init(
+        watermark: WatermarkModel? = nil,
         popup: WatermarkPopupCoordinator,
         usecase: WatermarkUsecase,
         picker: AssetPicker,
@@ -82,10 +91,17 @@ public class WatermarkEditViewModel: ObservableObject {
         self.sticker = stickerPicker
         self.store = store
         words = usecase.fetchWords().map { $0.text }
+        frames = usecase.fetchWatermarks()
 
-        var new = WatermarkModel()
-        new.text.text = (words.first ?? "PLAVE")
-        self.store.setWatermark(new)
+        if let watermark = watermark {
+            self.store.setWatermark(watermark)
+            self.savedSnapshot = watermark
+        } else {
+            var new = WatermarkModel()
+            new.text.text = (words.first ?? "PLAVE")
+            self.store.setWatermark(new)
+            self.savedSnapshot = nil
+        }
 
         bind()
     }
@@ -110,21 +126,20 @@ private extension WatermarkEditViewModel {
                 self?.objectWillChange.send()
             }
             .store(in: &cancellables)
-
-        popup.$history
-            .sink { [weak self] history in
-                guard let self = self else { return }
-                self.handlePopupComplete(history)
+        
+        popup.step
+            .sink { [weak self] step in
+                self?.handlePopupComplete(step)
             }
             .store(in: &cancellables)
     }
     
     func originInit() {
         if !picker.images.isEmpty {
-            store.watermark.export = format.makeExportModel(
+            store.setExport(format.makeExportModel(
                 origins: picker.images,
                 array: store.watermark.array
-            )
+            ))
             store.watermark.text.fontName = FontType.body1.fontName
             store.watermark.text.rotation = -30
             format.makeTextModel(
@@ -239,12 +254,12 @@ private extension WatermarkEditViewModel {
     func remove(_ type: WatermarkMenuType) {
         switch type {
         case .array:
-            arraySelect = nil
-            arrayMode = .none
+            arrayState.index = nil
+            arrayState.mode = .none
             picker.images = []
         case .sticker:
-            stickerSelect = nil
-            stickerMode = .none
+            stickerState.index = nil
+            stickerState.mode = .none
             store.watermark.stickers = []
         default:
             break
@@ -255,20 +270,28 @@ private extension WatermarkEditViewModel {
         switch type {
         case .array:
             guard index < picker.images.count else { return }
-            if arraySelect == index {
-                arraySelect = nil
-            } else if let selected = arraySelect, selected > index {
-                arraySelect = selected - 1
+            if arrayState.index == index {
+                arrayState.index = nil
+            } else if let selected = arrayState.index, selected > index {
+                arrayState.index = selected - 1
             }
             picker.images.remove(at: index)
         case .sticker:
             guard index < store.watermark.stickers.count else { return }
-            if stickerSelect == index {
-                stickerSelect = nil
-            } else if let selected = stickerSelect, selected > index {
-                stickerSelect = selected - 1
+            if stickerState.index == index {
+                stickerState.index = nil
+            } else if let selected = stickerState.index, selected > index {
+                stickerState.index = selected - 1
             }
             store.watermark.stickers.remove(at: index)
+        case .frame:
+            guard index < frames.count else { return }
+            if frameState.index == index {
+                frameState.index = nil
+            } else if let selected = frameState.index, selected > index {
+                frameState.index = selected - 1
+            }
+            frames.remove(at: index)
         default:
             break
         }
@@ -280,6 +303,8 @@ private extension WatermarkEditViewModel {
             picker.images.move(fromOffsets: from, toOffset: to)
         case .sticker:
             store.watermark.stickers.move(fromOffsets: from, toOffset: to)
+        case .frame:
+            frames.move(fromOffsets: from, toOffset: to)
         default:
             break
         }
@@ -288,7 +313,7 @@ private extension WatermarkEditViewModel {
     func replicate(_ type: WatermarkMenuType) {
         switch type {
         case .sticker:
-            guard let index = stickerSelect else { return }
+            guard let index = stickerState.index else { return }
             guard store.watermark.stickers.count <= 10 else { return }
             var model = store.watermark.stickers[index]
             model.layer = store.watermark.stickers.count
@@ -300,15 +325,20 @@ private extension WatermarkEditViewModel {
         }
     }
     
-    func handlePopupComplete(_ route: WatermarkPopupRoute?) {
-        guard let route = route else { return }
-        switch route {
-        case .word:
+    func handlePopupComplete(_ step: WatermarkPopupFlowStep) {
+        switch step {
+        case .dismiss:
+            popup.pop()
+        case .wordFinished(let word):
             words = usecase.fetchWords().map { $0.text }
-        case .title:
-            break
-        case .preview:
-            break
+            store.watermark.text.text = word
+            popup.pop()
+        case .titleFinished(let title):
+            store.watermark.frame.title = title
+            popup.pop()
+        case .previewFinished:
+            // save preview
+            popup.pop()
         }
     }
 }
@@ -346,17 +376,17 @@ private extension WatermarkEditViewModel {
                 array: store.watermark.array
             ).width
 
-            store.watermark.array = format.makeArrayModel(
+            store.setArray(format.makeArrayModel(
                 origins: picker.images,
                 type: type,
                 current: store.watermark.array
-            )
+            ))
             
             let exportType = store.watermark.export.type
-            store.watermark.export = format.makeExportModel(
+            store.setExport(format.makeExportModel(
                 origins: picker.images,
                 array: store.watermark.array
-            )
+            ))
             store.watermark.export.type = exportType
             format.makeTextModel(
                 origins: picker.images,
@@ -392,25 +422,44 @@ private extension WatermarkEditViewModel {
                     array: store.watermark.array
                 )
                 export.multiple = store.watermark.export.multiple
-                store.watermark.export = export
+                store.setExport(export)
             case .multiple:
-                store.watermark.export = format.makeExportModel(
+                store.setExport(format.makeExportModel(
                     origins: picker.images,
                     array: store.watermark.array,
                     multiple: store.watermark.export.multiple
-                )
+                ))
             }
         case .multiple: // 배율 조정
             guard store.watermark.export.type == .multiple else { return }
-            store.watermark.export = format.makeExportModel(
+            store.setExport(format.makeExportModel(
                 origins: picker.images,
                 array: store.watermark.array,
                 multiple: store.watermark.export.multiple
-            )
+            ))
         }
     }
     
     func setFrame(_ menu: WatermarkEditMenuType.FrameMenu) {
+        switch menu {
+        case .load:
+            guard let index = frameState.index, index < frames.count else { return }
+            store.watermark.text = frames[index].text
+            store.watermark.stickers = frames[index].stickers
+            store.watermark.array = frames[index].array
+            store.watermark.export = frames[index].export
+            store.watermark.frame = frames[index].frame
+            
+            setArray(.type(store.watermark.array.type))
+            setExport(.type(store.watermark.export.type))
+        case .save:
+            usecase.saveWatermark(store.watermark)
+            savedSnapshot = store.watermark
+            currentFrameUUID = store.watermark.id
+            print(store.watermark)
 
+        case .title:
+            popup(.title)
+        }
     }
 }

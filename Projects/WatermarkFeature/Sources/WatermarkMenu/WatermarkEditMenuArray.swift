@@ -65,7 +65,7 @@ struct WatermarkEditMenuArray: View {
             
             if viewModel.picker.images.count >= 1 {
                 VStack(spacing: 0) {
-                    switch viewModel.arrayMode {
+                    switch viewModel.arrayState.mode {
                     case .edit:
                         CategoryContent(title: "편집") {
                             HStack {
@@ -77,7 +77,7 @@ struct WatermarkEditMenuArray: View {
                                         .foreground(.Text.light)
                                 }
                                 Button {
-                                    viewModel.arrayMode = .none
+                                    viewModel.arrayState.mode = .none
                                 } label: {
                                     Text("편집 종료")
                                         .font(.bold1)
@@ -90,7 +90,7 @@ struct WatermarkEditMenuArray: View {
                     default:
                         CategoryContent(title: "편집") {
                             Button {
-                                viewModel.arrayMode = .edit
+                                viewModel.arrayState.mode = .edit
                             } label: {
                                 Text("편집 모드")
                                     .font(.bold1)
@@ -100,9 +100,8 @@ struct WatermarkEditMenuArray: View {
                     }
                     
                     FrameList(
-                        mode: $viewModel.arrayMode,
                         list: viewModel.picker.images,
-                        select: $viewModel.arraySelect,
+                        state: $viewModel.arrayState,
                         onDelete: { viewModel.action(.removeAt(.array, $0)) },
                         onMove: { viewModel.action(.move(.array, $0, $1)) }
                     )

@@ -7,40 +7,13 @@
 //
 
 import SwiftUI
+import Combine
 import Design
 import UISchema
 import WatermarkDomain
 import PlatformCore
 
-class PopupWatermarkPreviewVM: PopupViewModel {
-    
-    var coordinator: WatermarkPopupCoordinator
-    
-    public init(
-        coordinator: WatermarkPopupCoordinator
-//        editer: WatermarkEditor
-    ) {
-//        self.editer = editer
-        self.coordinator = coordinator
-        super.init()
-        self.loadWords()
-        
-    }
-//    private let dataManager = DataStore.shared
-//    let editer: WatermarkEditor
-    
-    @Published var assets: [AssetData] = []
-    @Published var words: [String] = []
-    @Published var text: String = ""
-    @Published var isShowInput: Bool = false
-    @Published var preview: Image?
-    var previewData: PImage?  {
-        didSet {
-            guard let previewData = previewData else { return }
-            preview = Image(uiImage: previewData)
-        }
-    }
-    
+public class PopupWatermarkPreviewVM: PopupViewModel {
     enum Action {
         case input
         case save
@@ -48,10 +21,35 @@ class PopupWatermarkPreviewVM: PopupViewModel {
         case cancel
         case confirm
     }
+    
+    @Published var assets: [AssetData] = []
+    @Published var words: [String] = []
+    @Published var text: String = ""
+    @Published var isShowInput: Bool = false
+    @Published var preview: Image?
+    var previewData: PImage? {
+        didSet {
+            guard let previewData = previewData else { return }
+            preview = Image(uiImage: previewData)
+        }
+    }
+    
+    var usecase: WatermarkUsecase
+    var coodinator: WatermarkPopupCoordinator
+    
+    public init(
+        usecase: WatermarkUsecase,
+        coodinator: WatermarkPopupCoordinator
+    ) {
+        self.usecase = usecase
+        self.coodinator = coodinator
+        super.init()
+        self.loadWords()
+    }
 }
 
-@MainActor
 extension PopupWatermarkPreviewVM {
+    @MainActor
     func action(_ action: Action) {
         switch action {
         case .input:
@@ -86,22 +84,14 @@ extension PopupWatermarkPreviewVM {
     
     func cancel() {
         // popup dismiss
-        coordinator.pop()
+//        coordinator.pop()
+        coodinator.stepSubject.send(.previewFinished)
     }
     
     func confirm() {
         // data save
-        // popup dismiss
-        coordinator.popRoot()
         
-//        guard let preview = previewData else { return }
-//        Task.detached {
-//            do {
-//                try await self.editer.saveImageToPhotoLibrary(image: preview)
-//            } catch {
-//                
-//            }
-//        }
+        coodinator.stepSubject.send(.previewFinished)
     }
 }
 

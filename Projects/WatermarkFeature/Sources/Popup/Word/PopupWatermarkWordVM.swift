@@ -6,24 +6,11 @@
 //
 
 import Foundation
+import Combine
 import UISchema
 import WatermarkDomain
 
 public class PopupWatermarkWordVM: PopupViewModel {
-    @Published var text: String = ""
-    @Published var isFocusField: Bool = false
-    
-    var coordinator: WatermarkPopupCoordinator
-    var usecase: WatermarkUsecase
-    
-    public init(
-        coordinator: WatermarkPopupCoordinator,
-        usecase: WatermarkUsecase
-    ) {
-        self.coordinator = coordinator
-        self.usecase = usecase
-    }
-    
     public enum Action {
         case appear
         case focus(_ isFocus: Bool)
@@ -31,10 +18,24 @@ public class PopupWatermarkWordVM: PopupViewModel {
         case cancel
         case confirm
     }
+    
+    @Published var text: String = ""
+    @Published var isFocusField: Bool = false
+    
+    var usecase: WatermarkUsecase
+    var coodinator: WatermarkPopupCoordinator
+    
+    public init(
+        usecase: WatermarkUsecase,
+        coodinator: WatermarkPopupCoordinator
+    ) {
+        self.usecase = usecase
+        self.coodinator = coodinator
+    }
 }
 
-@MainActor
 public extension PopupWatermarkWordVM {
+    @MainActor
     func action(_ action: Action) {
         Task {
             switch action {
@@ -70,12 +71,12 @@ extension PopupWatermarkWordVM {
     
     func cancel() {
         isFocusField = false
-        coordinator.pop()
+        coodinator.stepSubject.send(.dismiss)
     }
     
     func confirm() {
         isFocusField = false
         usecase.saveWord(text)
-        coordinator.popRoot()
+        coodinator.stepSubject.send(.wordFinished(word: self.text))
     }
 }

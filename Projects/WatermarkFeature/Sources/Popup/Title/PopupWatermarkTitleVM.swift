@@ -6,16 +6,19 @@
 //
 
 import SwiftUI
+import Combine
 import UISchema
 
 public class PopupWatermarkTitleVM: PopupViewModel {
-    @Published var text: String = ""
+    @Published var title: String
+    var coodinator: WatermarkPopupCoordinator
     
-    var coordinator: WatermarkPopupCoordinator
     public init(
-        coordinator: WatermarkPopupCoordinator
+        coodinator: WatermarkPopupCoordinator,
+        title: String = ""
     ) {
-        self.coordinator = coordinator
+        self.coodinator = coodinator
+        self.title = title
     }
     
     public enum Action {
@@ -43,23 +46,20 @@ public extension PopupWatermarkTitleVM {
 }
 
 @MainActor
-extension PopupWatermarkTitleVM {
+private extension PopupWatermarkTitleVM {
     func input() {
         
     }
     
     func clear() {
-        text = ""
+        title = ""
     }
     
     func cancel() {
-        // popup dismiss
-        coordinator.pop()
+        coodinator.stepSubject.send(.dismiss)
     }
     
     func confirm() {
-        // data save
-        // popup dismiss
-        coordinator.popRoot()
+        coodinator.stepSubject.send(.titleFinished(title: self.title))
     }
 }

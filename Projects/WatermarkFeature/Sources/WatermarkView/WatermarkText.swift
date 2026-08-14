@@ -31,33 +31,37 @@ public struct WatermarkText: View {
                 origins: viewModel.picker.images,
                 array: viewModel.store.watermark.array
             )
-            let renderRatio = renderSize.width / watermarkSize.width
-            
-            let displayText = viewModel.format.getDisplayText(for: viewModel.store.watermark.text)
-            let renderTextAreaSize = viewModel.format.getTextArea(
-                text: displayText,
-                font: viewModel.store.watermark.text.toPFont,
-                fontSize: viewModel.store.watermark.text.fontSize * renderRatio
-            )
-            let grid = viewModel.format.getTextGrid(
-                renderSize: renderSize,
-                renderTextAreaSize: renderTextAreaSize,
-                spacingRatioW: viewModel.store.watermark.text.spacingWidthRatio,
-                spacingRatioH: viewModel.store.watermark.text.spacingHeightRatio
-            )
-            WatermarkTextGridLayer(renderData: .init(
-                text: displayText,
-                watermark: viewModel.store.watermark.text,
-                renderRatio: renderRatio,
-                renderTextAreaSize: renderTextAreaSize,
-                renderRows: grid.rows,
-                renderColumns: grid.columns
-            ))
-            .frame(width: renderSize.width, height: renderSize.height)
-            .position(x: proxy.size.width * 0.5, y: proxy.size.height * 0.5)
-            .overlay(alignment: .center) {
-                if viewModel.isShowEdit {
-                    editGuide(renderTextAreaSize: renderTextAreaSize)
+            if watermarkSize.width == .zero || watermarkSize.height == .zero {
+                EmptyView()
+            } else {
+                let renderRatio = renderSize.width / watermarkSize.width
+                
+                let displayText = viewModel.format.getDisplayText(for: viewModel.store.watermark.text)
+                let renderTextAreaSize = viewModel.format.getTextArea(
+                    text: displayText,
+                    font: viewModel.store.watermark.text.toPFont,
+                    fontSize: viewModel.store.watermark.text.fontSize * renderRatio
+                )
+                let grid = viewModel.format.getTextGrid(
+                    renderSize: renderSize,
+                    renderTextAreaSize: renderTextAreaSize,
+                    spacingRatioW: viewModel.store.watermark.text.spacingWidthRatio,
+                    spacingRatioH: viewModel.store.watermark.text.spacingHeightRatio
+                )
+                WatermarkTextGridLayer(renderData: .init(
+                    text: displayText,
+                    watermark: viewModel.store.watermark.text,
+                    renderRatio: renderRatio,
+                    renderTextAreaSize: renderTextAreaSize,
+                    renderRows: grid.rows,
+                    renderColumns: grid.columns
+                ))
+                .frame(width: renderSize.width, height: renderSize.height)
+                .position(x: proxy.size.width * 0.5, y: proxy.size.height * 0.5)
+                .overlay(alignment: .center) {
+                    if viewModel.isShowEdit {
+                        editGuide(renderTextAreaSize: renderTextAreaSize)
+                    }
                 }
             }
         }

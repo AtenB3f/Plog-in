@@ -8,83 +8,104 @@
 
 import SwiftUI
 import PlatformCore
+import UniformTypeIdentifiers
 
-public struct FrameListItemView: View {
+public struct FrameItemState: Codable {
+    public var id: UUID
+    public var data: Data
+    public var image: PImage { PImage(data: data) ?? PImage() }
+    
+    public init(
+        id: UUID = UUID(),
+        image: PImage
+    ) {
+        self.id = id
+        self.data = image.pngData() ?? Data()
+    }
+    
+    public init(
+        id: UUID = UUID(),
+        data: Data
+    ) {
+        self.id = id
+        self.data = data
+    }
+}
+
+extension FrameItemState: Transferable {
+    public static var transferRepresentation: some TransferRepresentation {
+        DataRepresentation(contentType: .data) { item in
+            let transfer = FrameItemState(
+                id: item.id,
+                image: item.image
+            )
+            return try JSONEncoder().encode(transfer)
+        } importing: { data in
+            let transfer = try JSONDecoder().decode(FrameItemState.self, from: data)
+            return FrameItemState(
+                id: transfer.id,
+                image: PImage(data: transfer.data) ?? PImage()
+            )
+        }
+    }
+}
+
+public struct FrameItemView: View {
     let image: PImage
     let index: Int
     let mode: FrameListMode
-    let isDragging: Bool
-    let onTap: () -> Void
     let onDelete: () -> Void
-    let onLongPress: () -> Void
     let size: Double
 
     init(
         image: PImage,
         index: Int,
         mode: FrameListMode,
-        isDragging: Bool,
         size: Double,
-        onTap: @escaping () -> Void,
-        onDelete: @escaping () -> Void,
-        onLongPress: @escaping () -> Void
+        onDelete: @escaping () -> Void
     ) {
         self.image = image
         self.index = index
         self.mode = mode
-        self.isDragging = isDragging
         self.size = size
-        self.onTap = onTap
         self.onDelete = onDelete
-        self.onLongPress = onLongPress
     }
 
     public var body: some View {
-        RoundedCorner(radius: 4, corner: .all)
-            .frame(width: size, height: size)
-            .foreground(Color.Base.medium)
-            .scaleEffect(isDragging ? 0.7 : 1.0)
-            .overlay(alignment: .topTrailing) {
-                ZStack(alignment: .topTrailing) {
-                    Image(pImage: image)
+        ZStack(alignment: .topTrailing) {
+            Image(pImage: image)
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
+
+            LinearGradient(gradient: .shallow, startPoint: .bottom, endPoint: .top)
+                .frame(height: 24)
+                .opacity((mode == .edit || mode == .sort) ? 1.0 : .zero)
+
+            if mode == .edit {
+                Button(action: onDelete) {
+                    Image.iconCloseSM
                         .resizable()
-                        .aspectRatio(contentMode: .fit)
-                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
-
-                    LinearGradient(gradient: .shallow, startPoint: .bottom, endPoint: .top)
-                        .frame(height: 24)
-                        .opacity((mode == .edit || mode == .sort) ? 1.0 : .zero)
-
-                    if mode == .edit {
-                        Button(action: onDelete) {
-                            Image.iconCloseSM
-                                .resizable()
-                                .renderingMode(.template)
-                                .frame(width: 18, height: 18)
-                                .foreground(.Text.light)
-                        }
-                    }
-                    if mode == .sort {
-                        Image.iconMenuDuo
-                            .resizable()
-                            .renderingMode(.template)
-                            .frame(width: 18, height: 18)
-                            .foreground(.Text.light)
-
-                        if isDragging { Color.Shadow.disable }
-                    }
-                    if mode == .select {
-                        RoundedCorner(radius: 4, corner: .all)
-                            .stroke()
-                            .foreground(.Text.light)
-                    }
+                        .renderingMode(.template)
+                        .frame(width: 18, height: 18)
+                        .foreground(.Text.light)
                 }
-                .cornerRadius(4, corner: .all)
-                .scaleEffect(isDragging ? 0.7 : 1.0)
-                .transition(.opacity)
             }
-        .onTapGesture {
-            onTap()
+            if mode == .sort {
+                Image.iconMenuDuo
+                    .resizable()
+                    .renderingMode(.template)
+                    .frame(width: 18, height: 18)
+                    .foreground(.Text.light)
+            }
+            if mode == .select {
+                RoundedCorner(radius: 4, corner: .all)
+                    .stroke()
+                    .foreground(.Text.light)
+            }
         }
+        .frame(width: size, height: size)
+        .background(Color.Base.medium)
+        .cornerRadius(4, corner: .all)
     }
 }

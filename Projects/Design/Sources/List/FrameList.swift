@@ -8,6 +8,23 @@
 
 import SwiftUI
 import PlatformCore
+import UniformTypeIdentifiers
+
+public struct FrameListState {
+    public var mode: FrameListMode
+    public var index: Int?
+    public var isFolding: Bool
+
+    public init(
+        mode: FrameListMode = .none,
+        index: Int? = nil,
+        isFolding: Bool = true
+    ) {
+        self.mode = mode
+        self.index = index
+        self.isFolding = isFolding
+    }
+}
 
 public enum FrameListMode {
     case none
@@ -17,163 +34,177 @@ public enum FrameListMode {
 }
 
 public struct FrameList: View {
-    @Binding var mode: FrameListMode
-    let list: [PImage]
-    @Binding var select: Int?
-
+    let list: [FrameItemState]
+    @Binding var state: FrameListState
     let onDelete: ((Int) -> Void)?
     let onMove: ((IndexSet, Int) -> Void)?
-
-    @State private var sortList: [PImage] = []
-    @State private var draggingItem: PImage?
-    @GestureState private var dragOffset: CGSize = .zero
+    
+    @State private var hoverIndex: Int?
     private let spacing = 8.0
     private let size: Double
-
-    @State private var sortDelayTimer: DispatchWorkItem?
-    @State private var shouldStartSorting = false
-
+    
     public init(
-        mode: Binding<FrameListMode>,
         list: [PImage],
-        select: Binding<Int?>,
+        state: Binding<FrameListState>,
         size: Double = 76,
         onDelete: ((Int) -> Void)? = nil,
         onMove: ((IndexSet, Int) -> Void)? = nil
     ) {
-        self._mode = mode
-        self.list = list
-        self._select = select
+        self.list = list.map { .init(image: $0)}
+        self._state = state
         self.size = size
         self.onDelete = onDelete
         self.onMove = onMove
     }
-
-    private var displayList: [PImage] { mode == .sort ? sortList : list }
-
+    
     public var body: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: spacing) {
-                ForEach(Array(displayList.enumerated()), id: \.offset) { index, item in
-                    FrameListItemView(
-                        image: item,
-                        index: index,
-                        mode: mode == .select ? (select == index ? .select : .none) : mode,
-                        isDragging: draggingItem === item,
-                        size: size,
-                        onTap: {
-                            handleTap(at: index)
-                        },
-                        onDelete: {
-                            handleDelete(at: index)
-                        },
-                        onLongPress: {}
-                    )
-                    .animation(.easeInOut, value: index)
-                    .offset(draggingItem === item ? dragOffset : .zero)
-                    .gesture(
-                        LongPressGesture(minimumDuration: 0.5)
-                            .onEnded { _ in
-                                handleSortStart(item: item)
-                            }
-                            .sequenced(before: DragGesture()
-                                .updating($dragOffset) { value, state, _ in
-                                    handleSorting(item: item, translation: value.translation)
-                                }
-                                .onEnded { _ in
-                                    handleSortEnd()
-                                }
-                            )
-                            .onEnded { value in
-                                switch value {
-                                case .second(true, _):
-                                    handleSortEnd()
-                                default:
-                                    break
-                                }
-                            }
-                    )
+        ScrollView(.horizontal) {
+            LazyHStack(spacing: 0) {
+                ForEach(list.indices, id: \.self) { index in
+                    item(state.mode, index: index, item: list[index])
                 }
             }
-            .padding(.horizontal)
+            .padding(.horizontal, state.mode == .sort ? 0 : 16)
         }
-        .onAppear {
-            sortList = list
+        .frame(height: size)
+        .scrollIndicators(.hidden)
+        .onTapGesture {
+            guard state.mode != .edit else { return }
+            state.mode = .none
+            state.index = nil
+            hoverIndex = nil
         }
-        .onChange(of: list) {
-            if mode != .sort {
-                sortList = list
+    }
+    
+    @ViewBuilder
+    func item(_ mode: FrameListMode, index: Int, item: FrameItemState) -> some View {
+        HStack(spacing: 0) {
+            switch mode {
+            case .sort:
+                Rectangle()
+                    .foreground(.Base.dark)
+                    .frame(
+                        width: (hoverIndex == index) ? size : (index == 0 ? 16 : spacing),
+                        height: size
+                    )
+                    .dropDestination(for: FrameItemState.self) { items, _ in
+                        return onDropHander(items: items)
+                    } isTargeted: { isTarget in
+                        guard isTarget else { return }
+                        onDragHandler(index: index)
+                    }
+                
+                FrameItemView(
+                    image: item.image,
+                    index: index,
+                    mode: .sort,
+                    size: size,
+                    onDelete: { onDelete?(index) }
+                )
+                .draggable(item)
+                .overlay {
+                    RoundedRectangle(cornerRadius: 4)
+                        .stroke()
+                        .foreground(state.index == index ? .Text.light : .clear)
+                }
+                .dropDestination(for: FrameItemState.self) { items, _ in
+                    return onDropHander(items: items)
+                } isTargeted: { isTarget in
+                    guard isTarget else { return }
+                    onDragHandler(index: list.count - 1 == index ? index+1 : index)
+                }
+                
+                if list.count - 1 == index {
+                    Rectangle()
+                        .foreground(.Base.dark)
+                        .frame(
+                            width: hoverIndex == list.count ? size : 16,
+                            height: size
+                        )
+                        .dropDestination(for: FrameItemState.self) { items, _ in
+                            return onDropHander(items: items)
+                        } isTargeted: { isTarget in
+                            guard isTarget else { return }
+                            onDragHandler(index: index+1)
+                        }
+                }
+                
+            default:
+                FrameItemView(
+                    image: item.image,
+                    index: index,
+                    mode: state.mode == .edit ? .edit : (state.index == index ? .select : .none),
+                    size: size,
+                    onDelete: { onDelete?(index) }
+                )
+                .overlay {
+                    RoundedRectangle(cornerRadius: 4)
+                        .stroke()
+                        .foreground(state.index == index ? .Text.light : .clear)
+                }
+                .onTapGesture {
+                    state.mode = state.mode == .edit ? .edit : .select
+                    state.index = index
+                    hoverIndex = nil
+                }
+                .onLongPressGesture(minimumDuration: 0.5) {
+                    state.mode = .sort
+                    state.index = nil
+                }
+                
+                Spacer()
+                    .frame(width: spacing, height: size)
             }
         }
     }
-
-    private func handleTap(at index: Int) {
-        mode = .select
-        select = index
-    }
-
-    private func handleDelete(at index: Int) {
-        guard mode == .edit, index < list.count else { return }
+    
+    @MainActor
+    func onDragHandler(index: Int) {
         withAnimation {
-            if select == index {
-                select = nil
-            } else if let selectedIndex = select, selectedIndex > index {
-                select = selectedIndex - 1
+            hoverIndex = index
+        }
+    }
+    
+    func onDropHander(items: [FrameItemState]) -> Bool {
+        guard let item = items.first,
+              let from = list.firstIndex(where: { $0.id == item.id }) else {
+            hoverIndex = nil
+            return false
+        }
+        guard var to = hoverIndex else {
+            hoverIndex = nil
+            return false
+        }
+//        print(from, to)
+        if from > to {
+            if to == list.count {
+                to = list.count - 1
             }
+        } else if to == from {
+            hoverIndex = nil
+            return false
         }
-        onDelete?(index)
+        onMove?(.init(integer: from), to)
+        hoverIndex = nil
+        return true
     }
+}
 
-    private func handleSortStart(item: PImage) {
-        guard mode == .none || mode == .sort else { return }
-        sortList = list
-        mode = .sort
-        draggingItem = item
-        select = nil
-    }
+#Preview {
+    @Previewable @State var list: [PImage] = [
+        PImage(systemName: "star") ?? PImage(),
+        PImage(systemName: "star.fill") ?? PImage(),
+        PImage(systemName: "moon") ?? PImage(),
+        PImage(systemName: "moon.fill") ?? PImage()
+    ]
+    @Previewable @State var state: FrameListState = .init()
 
-    private func handleSorting(item: PImage, translation: CGSize) {
-        let offset = translation.width
-        guard mode == .sort, let dragIndex = sortList.firstIndex(where: { $0 === item }) else { return }
-
-        if !shouldStartSorting {
-            sortDelayTimer?.cancel()
-            let workItem = DispatchWorkItem {
-                self.shouldStartSorting = true
-                self.sortDelayTimer = nil
-                self.handleSorting(item: item, translation: translation)
-            }
-            sortDelayTimer = workItem
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.02, execute: workItem)
-            return
-        }
-
-        let itemWidth = size + spacing
-        let estimatedCenterPosition = (CGFloat(dragIndex) * itemWidth) + (itemWidth / 2) + offset
-        let newIndex = Int(round(estimatedCenterPosition / itemWidth)) - 1
-        if newIndex >= 0 && newIndex < sortList.count && newIndex != dragIndex {
-            sortList.move(
-                fromOffsets: IndexSet(integer: dragIndex),
-                toOffset: newIndex > dragIndex ? newIndex + 1 : newIndex
-            )
-        }
-    }
-
-    private func handleSortEnd() {
-        sortDelayTimer?.cancel()
-        sortDelayTimer = nil
-        shouldStartSorting = false
-
-        if let draggingItem,
-           let fromIndex = list.firstIndex(where: { $0 === draggingItem }),
-           let toIndex = sortList.firstIndex(where: { $0 === draggingItem }),
-           fromIndex != toIndex {
-            let toOffset = toIndex > fromIndex ? toIndex + 1 : toIndex
-            onMove?(IndexSet(integer: fromIndex), toOffset)
-        }
-
-        withAnimation {
-            draggingItem = nil
-        }
-    }
+    FrameList(
+        list: list,
+        state: $state,
+        size: 76,
+        onDelete: {_ in
+        }, onMove: {from, to in
+            list.move(fromOffsets: from, toOffset: to)
+        })
 }

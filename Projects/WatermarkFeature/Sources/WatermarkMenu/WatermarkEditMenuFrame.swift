@@ -28,16 +28,21 @@ struct WatermarkEditMenuFrame: View {
         VStack {
             VStack(spacing: 0) {
                 CategoryTitle("설정 가져오기")
-                FrameList(mode: $viewModel.frame.mode,
-                          list: viewModel.frame.list.map { $0.image },
-                          select: $viewModel.frame.select)
+                FrameList(
+                    list: viewModel.frames.map { PImage(data: $0.frame.thumbnailData ?? Data()) ?? PImage() },
+                    state: $viewModel.frameState,
+                    onDelete: { viewModel.action(.removeAt(.frame, $0)) },
+                    onMove: { viewModel.action(.move(.frame, $0, $1)) }
+                )
+                .onChange(of: viewModel.frameState.index) {
+                    viewModel.action(.update(.frame(.load)))
+                }
                 .padding(.vertical, 6)
-                .background(Color.Base.medium)
-                .foldingHeight(!viewModel.frame.list.isEmpty)
+                .foldingHeight(!viewModel.frames.isEmpty)
             }
             
             Button {
-//                viewModel.saveWatermarkFrame()
+                viewModel.action(.update(.frame(.save)))
             } label: {
                 HStack(spacing: 0) {
                     Image.iconSave
@@ -51,21 +56,15 @@ struct WatermarkEditMenuFrame: View {
                 }
             }
             .padding(16)
-            .foldingHeight(!viewModel.frame.list.contains(where: { $0.id == viewModel.store.watermark.id }))
+            .foldingHeight(viewModel.hasUnsavedChanges)
             
             CategoryButton(
-                title: "제목",
-                button: viewModel.store.watermark.frame.title,
+                title: "프레임 제목",
+                button: viewModel.store.watermark.frame.title.isEmpty ? "제목없음" : viewModel.store.watermark.frame.title,
                 onClick: {
-//                manager.pushPopup(.titleChange(
-//                    text: $viewModel.frameTitle,
-//                    callback: { title in
-//                        guard let title = title else { return }
-//                        watermarkViewModel.watermark.frameSetting.title = title
-////                        viewModel.saveWatermarkFrame()
-//                }))
+                    viewModel.action(.update(.frame(.title)))
             })
-            .foldingHeight(viewModel.frame.list.contains(where: { $0.id == viewModel.store.watermark.id }))
+            .foldingHeight(viewModel.currentFrameUUID != nil)
         }
         .padding(.vertical, 12)
     }

@@ -29,12 +29,14 @@ struct RootView: View {
             }
             
             if let watermarkPopup = diContainer.popupWatermark.path.last {
-                WatermarkPopup(
-                    type: watermarkPopup,
-                    coordinator: diContainer.popupWatermark,
-                    usecase: diContainer.makeWatermarkPopupUsecase()
-                )
-                    .transition(.opacity)
+                ZStack {
+                    Color.Shadow.medium
+                        .ignoresSafeArea()
+                    
+                    diContainer.makeWatermarkPopup(watermarkPopup)
+                        .padding(.horizontal, 30)
+                }
+                .transition(.opacity)
             }
         }
     }

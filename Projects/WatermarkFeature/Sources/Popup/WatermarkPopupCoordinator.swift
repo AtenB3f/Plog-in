@@ -6,12 +6,16 @@
 //
 
 import SwiftUI
+import Combine
 import UISchema
 
 public class WatermarkPopupCoordinator: ObservableObject {
     @Published public var path: [WatermarkPopupRoute] = []
-    @Published public var history: WatermarkPopupRoute?
     public init() {}
+    
+    // Watermark Popup Flow Step
+    public let stepSubject = PassthroughSubject<WatermarkPopupFlowStep, Never>()
+    public var step: AnyPublisher<WatermarkPopupFlowStep, Never> { stepSubject.eraseToAnyPublisher() }
 }
 
 extension WatermarkPopupCoordinator: PopupCoordinator {
@@ -29,14 +33,12 @@ extension WatermarkPopupCoordinator: PopupCoordinator {
     public func pop() {
         guard !path.isEmpty else { return }
         withAnimation {
-            history = path.last
             path.removeLast()
         }
     }
     
     public func popRoot() {
         withAnimation {
-            history = path.last
             path.removeAll()
         }
     }

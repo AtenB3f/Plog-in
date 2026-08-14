@@ -23,6 +23,7 @@ public struct CategoryTitle: View {
                 .font(.body1)
                 .foreground(.Text.dark)
                 .frame(width: 80, alignment: .leading)
+                .padding(.vertical, 5)
             
             Spacer()
         }

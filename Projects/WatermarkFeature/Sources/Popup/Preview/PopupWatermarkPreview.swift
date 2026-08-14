@@ -11,23 +11,16 @@ import Combine
 import UISchema
 import Design
 
-struct PopupWatermarkPreview: View {
-//    @StateObject var viewModel = PopupWatermarkPreviewViewModel()
-//    @FocusState var isFocus: Bool
-//    let watermark: WatermarkModel
-    
-//    init(watermark: WatermarkModel) {
-//        self.watermark = watermark
-//    }
+public struct PopupWatermarkPreview: View {
     @StateObject var viewModel: PopupWatermarkPreviewVM
     
-    init(
+    public init(
         viewModel: PopupWatermarkPreviewVM
     ) {
         self._viewModel = StateObject(wrappedValue: viewModel)
     }
     
-    var body: some View {
+    public var body: some View {
         Popup(layout: viewModel)
             .task {
                 viewModel.setHeader(type: .title, header: PopupHeaderTitle(title: "미리보기"))
