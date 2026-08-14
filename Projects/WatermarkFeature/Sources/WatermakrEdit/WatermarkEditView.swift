@@ -41,7 +41,12 @@ public struct WatermarkEditView: View {
                     Button {
                         viewModel.action(.open(.picture))
                     } label: {
-                        Image.iconImage
+                        VStack(spacing: 4) {
+                            Image.iconImageLG
+                            Text("이미지 불러오기")
+                                .font(.bold2)
+                                .foreground(.Text.light)
+                        }
                     }
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
