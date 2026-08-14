@@ -64,6 +64,7 @@ extension WatermarkEditMenuText {
                 .padding(.horizontal, 18)
                 .padding(.vertical, 4)
             }
+            .scrollIndicators(.hidden)
             .background(Color.Base.medium)
             .foldingHeight(!viewModel.words.isEmpty)
         }
@@ -94,7 +95,7 @@ extension WatermarkEditMenuText {
         CategoryContent(title: "불투명도") {
             HStack(alignment: .center, spacing: 8) {
                 TextSlider(value: $viewModel.store.watermark.text.color.opacity, min: 0, max: 1, distance: 1)
-                Text(String(format: "%.0f", viewModel.store.watermark.text.color.opacity * 100) + "%")
+                Text("\(Int(viewModel.store.watermark.text.color.opacity * 100))%")
                     .font(.body2)
                     .foreground(.Text.light)
                     .frame(width: 42, alignment: .leading)
@@ -106,11 +107,11 @@ extension WatermarkEditMenuText {
     func spacing() -> some View {
         CategoryContent(title: "간격") {
             HStack(alignment: .center, spacing: 8) {
-                TextSlider(value: $viewModel.store.watermark.text.spacingWidthRatio, min: 0, max: 2, distance: 0.1)
+                TextSlider(value: $viewModel.store.watermark.text.spacingWidthRatio, min: 0, max: 2, distance: 1)
                     .onChange(of: viewModel.store.watermark.text.spacingWidthRatio) {
                         viewModel.store.watermark.text.spacingHeightRatio = viewModel.store.watermark.text.spacingWidthRatio
                     }
-                Text(String(format: "%.1f%", viewModel.store.watermark.text.spacingWidthRatio * 100))
+                Text("\(Int(viewModel.store.watermark.text.spacingWidthRatio * 100))%")
                     .font(.body2)
                     .foreground(.Text.light)
                     .frame(width: 42, alignment: .leading)

@@ -46,7 +46,7 @@ extension WatermarkEditMenuSticker {
                 Button {
                     viewModel.action(.open(.sticker))
                 } label: {
-                    IconLabel(text: "불러오기", icon: .iconChevronRightSM)
+                    IconLabel(text: "불러오기", icon: .iconChevronRight)
                 }
             }
         }

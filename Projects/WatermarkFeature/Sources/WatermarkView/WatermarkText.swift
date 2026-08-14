@@ -78,13 +78,14 @@ public struct WatermarkText: View {
                 .rotationEffect(.degrees(viewModel.store.watermark.text.rotation))
 
             Image.iconCloseCircle
+                .renderingMode(.template)
                 .frame(width: 16, height: 16)
                 .background {
                     Circle()
                         .frame(width: 16, height: 16)
                         .foreground(.white)
                 }
-                .foreground(.Gray.light)
+                .foreground(.Gray.dark)
                 .offset(x: 8, y: -8)
                 .onTapGesture {
                     viewModel.action(.textMode(isOn: false))
