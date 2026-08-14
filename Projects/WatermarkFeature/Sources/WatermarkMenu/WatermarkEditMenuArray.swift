@@ -60,7 +60,7 @@ struct WatermarkEditMenuArray: View {
                     columns: $viewModel.store.watermark.array.columns)
                 .frame(width: viewModel.store.watermark.array.type == .grid ? nil : 0)
                 .padding(.vertical, 12)
-                .foldingHeight(viewModel.store.watermark.array.type == .grid)
+                .foldingHeight(viewModel.isShowArrayType && viewModel.store.watermark.array.type == .grid)
             }
             
             if viewModel.picker.images.count >= 1 {

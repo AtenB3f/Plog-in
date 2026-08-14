@@ -25,7 +25,6 @@ public struct CategoryTabbar: View {
     
     public var body: some View {
         ZStack(alignment: .leading) {
-            // 배경 인디케이터
             if let frame = tabFrames[index] {
                 RoundedCorner(radius: 15, corner: .all)
                     .fill(backgroundColors[index%5])
@@ -41,12 +40,13 @@ public struct CategoryTabbar: View {
                     .animation(.spring(response: 0.3, dampingFraction: 0.7), value: index)
             }
             
-            // 탭 버튼들
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 4) {
                     ForEach(list.indices, id: \.self) { item in
                         Button {
-                            index = item
+                            withAnimation {
+                                index = item
+                            }
                         } label: {
                             Text(list[item])
                                 .font(.body2)

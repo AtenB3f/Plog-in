@@ -352,7 +352,11 @@ private extension WatermarkEditViewModel {
             let alpha = store.watermark.text.color.opacity
             store.watermark.text.color = ColorData(color, alpha: alpha)
         case .date:
-            store.watermark.text.date = Date()
+            if store.watermark.text.date == nil {
+                store.watermark.text.date = Date()
+            } else {
+                store.watermark.text.date = nil
+            }
         case .gradient:
             if store.watermark.text.gradientColors.isEmpty {
                 store.watermark.text.gradientColors = Color.disablePrimarys.map { ColorData($0, alpha: 0.3) }
@@ -363,7 +367,6 @@ private extension WatermarkEditViewModel {
     }
     
     func setSticker(_ menu: WatermarkEditMenuType.StickerMenu) {
-
     }
     
     func setArray(_ menu: WatermarkEditMenuType.ArrayMenu) {

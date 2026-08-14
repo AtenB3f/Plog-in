@@ -24,7 +24,7 @@ public struct WatermarkResultView: View {
         VStack(spacing: 0) {
             NavigationTitle(
                 title: "미리보기",
-                leftIcon: .iconChevronLeftSM,
+                leftIcon: .iconChevronLeft,
                 rightIcon: .iconSave, callback: { isRight in
                 if isRight {
                     viewModel.action(.save)

@@ -107,26 +107,28 @@ private struct StickerItemView: View {
             .resizable()
             .aspectRatio(contentMode: .fit)
             .frame(width: displayWidth, height: displayHeight)
+            .scaleEffect(activeMagnify)
             .overlay {
                 if isSelected {
                     ZStack(alignment: .topTrailing) {
                         Rectangle()
                             .stroke(Color.white, lineWidth: 1.5)
+                            .scaleEffect(activeMagnify)
 
                         Image.iconCloseCircle
-                            .frame(width: 20, height: 20)
+                            .renderingMode(.template)
                             .background {
                                 Circle()
                                     .fill(Color.white)
                                     .frame(width: 20, height: 20)
                             }
-                            .foreground(.Gray.light)
+                            .foreground(.Gray.dark)
                             .offset(x: 10, y: -10)
+                            .frame(width: 20, height: 20)
                             .onTapGesture(perform: onClose)
                     }
                 }
             }
-            .scaleEffect(activeMagnify)
             .rotationEffect(.degrees(sticker.rotation) + activeRotation)
             .opacity(Double(sticker.alpha))
             // position은 원본 좌표계로 저장되므로 renderRatio를 곱해 화면 좌표계로 변환

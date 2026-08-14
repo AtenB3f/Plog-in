@@ -12,7 +12,7 @@ public struct NavigationTitle: View {
     let title: String
     let leftIcon: Image?
     let rightIcon: Image?
-    let callback: (Bool)->Void
+    let callback: (Bool) -> Void
     
     public init(
         title: String,
@@ -70,7 +70,7 @@ public struct NavigationTitle: View {
                     .frame(width: 44, height: 44)
             }
         }
-        .padding(.horizontal, 6)
+//        .padding(.horizontal, 6)
         .frame(maxWidth: .infinity)
     }
 }

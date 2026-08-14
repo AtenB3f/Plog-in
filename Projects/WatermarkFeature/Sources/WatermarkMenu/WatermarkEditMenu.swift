@@ -15,6 +15,7 @@ struct WatermarkEditMenu: View {
     var body: some View {
         VStack(spacing: 0) {
             HStack {
+                /*
                 Button {
                     
                 } label: {
@@ -25,7 +26,7 @@ struct WatermarkEditMenu: View {
                 } label: {
                     
                 }
-                
+                */
                 Spacer()
                 
                 Button {
@@ -47,7 +48,8 @@ struct WatermarkEditMenu: View {
             
             CategoryTabbar(
                 index: $viewModel.indexCategory,
-                list: WatermarkMenuType.allCases.map { $0.menuName })
+                list: WatermarkMenuType.allCases.map { $0.menuName }
+            )
             .padding(.vertical)
             .padding(.horizontal, 20)
             .background(Color.black)
@@ -62,21 +64,18 @@ extension WatermarkEditMenu {
         ScrollViewReader { proxy in
             ScrollView(.horizontal) {
                 HStack(spacing: 0) {
-                    ForEach(WatermarkMenuType.allCases, id: \.self) { type in
+                    ForEach(Array(WatermarkMenuType.allCases.enumerated()), id: \.offset) { index, type in
                         if WatermarkMenuType.allCases[viewModel.indexCategory] == type {
                             menu(type)
                                 .containerRelativeFrame(.horizontal)
                                 .environmentObject(viewModel)
-                                .id(type.rawValue)
-                        } else {
-                            Spacer()
-                                .containerRelativeFrame(.horizontal)
-                                .frame(height: 1)
-                                .id(type.rawValue)
+                                .tag(index)
                         }
                     }
                 }
             }
+            .scrollBounceBehavior(.basedOnSize)
+            .scrollTargetLayout()
             .scrollTargetBehavior(.paging)
             .scrollIndicators(.hidden)
             .background(Color.Base.dark)

@@ -38,6 +38,7 @@ public extension Image {
     static let iconHamburger: Image = .init("Hamburger", bundle: .module)
     static let iconHeart: Image = .init("Heart", bundle: .module)
     static let iconImage: Image = .init("Image", bundle: .module)
+    static let iconImageLG: Image = .init("Image_LG", bundle: .module)
     static let iconLabel: Image = .init("Label", bundle: .module)
     static let iconLayer: Image = .init("Layer", bundle: .module)
     static let iconLink: Image = .init("Link", bundle: .module)
@@ -65,4 +66,3 @@ public extension Image {
     static let iconVolumeOn: Image = .init("Volume_On", bundle: .module)
     static let iconVolumeUp: Image = .init("Volume_Up", bundle: .module)
 }
-
