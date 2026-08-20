@@ -10,14 +10,23 @@ import SwiftUI
 import Design
 
 struct TabNavigationView: View {
-    @StateObject var diContainer: DIContainer
+    @ObservedObject var diContainer: DIContainer
+    @ObservedObject var navigation: TabNavigaionCoordinator
+    @ObservedObject var rootUI: RootUIManager
     let viewModel: TabNavigationViewModel
+
+    init(diContainer: DIContainer, viewModel: TabNavigationViewModel) {
+        self.diContainer = diContainer
+        self.navigation = diContainer.navigation
+        self.rootUI = diContainer.rootUI
+        self.viewModel = viewModel
+    }
 
     var body: some View {
         ZStack(alignment: .bottom) {
-            NavigationStack(path: $diContainer.navigation.path) {
+            NavigationStack(path: $navigation.path) {
                 VStack(spacing: 0) {
-                    switch diContainer.rootUI.currentTab {
+                    switch rootUI.currentTab {
                     case .home:
                         diContainer.makeHomeView()
                     case .setting:
