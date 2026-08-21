@@ -16,7 +16,6 @@ import PlatformExport
 import RenderEngine
 
 public class DIContainer: ObservableObject {
-    internal var cancellables = Set<AnyCancellable>()
     internal var homeCancellables = Set<AnyCancellable>()
     internal var watermarkCancellables = Set<AnyCancellable>()
     internal var watermarkPopupCancellables = Set<AnyCancellable>()
@@ -38,24 +37,6 @@ public class DIContainer: ObservableObject {
     ) {
         self.watermarkStore = watermarkStore
         self.imageExportRepository = imageExportRepository
-        
-        popupWatermark.objectWillChange
-            .sink { [weak self] _ in
-                self?.objectWillChange.send()
-            }
-            .store(in: &cancellables)
-        
-        navigation.objectWillChange
-            .sink { [weak self] _ in
-                self?.objectWillChange.send()
-            }
-            .store(in: &cancellables)
-        
-        rootUI.objectWillChange
-            .sink { [weak self] _ in
-                self?.objectWillChange.send()
-            }
-            .store(in: &cancellables)
     }
 }
 
