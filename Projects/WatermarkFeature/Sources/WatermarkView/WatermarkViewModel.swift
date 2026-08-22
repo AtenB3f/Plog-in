@@ -18,9 +18,18 @@ public class WatermarkViewModel: ObservableObject {
         case textMode(isOn: Bool)
         case stickerMode(index: Int?)
     }
+    
+    public enum WatermarkEditType {
+        case text
+        case sticker
+    }
+    
+    public struct WatermarkEdit {
+        var mode: WatermarkEditType?
+        var index: Int?
+    }
 
-    @Published var isShowEdit: Bool = false
-    @Published var selectedStickerIndex: Int?
+    @Published var edit: WatermarkEdit = WatermarkEdit()
     @Published var page: Int = 0
     
     let format: WatermarkFormat
@@ -67,17 +76,17 @@ public extension WatermarkViewModel {
             break
         case .textMode(let isOn):
             guard !isOn else {
-                isShowEdit = false
+                edit.mode = nil
                 return
             }
-            if selectedStickerIndex != nil {
-                selectedStickerIndex = nil
+            if edit.index != nil {
+                edit.index = nil
             } else {
-                isShowEdit.toggle()
+                edit.mode = nil
             }
         case .stickerMode(let index):
-            selectedStickerIndex = index
-            if index != nil { isShowEdit = false }
+            edit.index = index
+            if edit.index != nil { edit.mode = nil }
         }
     }
 }

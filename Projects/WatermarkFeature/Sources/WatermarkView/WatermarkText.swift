@@ -59,7 +59,7 @@ public struct WatermarkText: View {
                 .frame(width: renderSize.width, height: renderSize.height)
                 .position(x: proxy.size.width * 0.5, y: proxy.size.height * 0.5)
                 .overlay(alignment: .center) {
-                    if viewModel.isShowEdit {
+                    if viewModel.edit.mode == .text {
                         editGuide(renderTextAreaSize: renderTextAreaSize)
                     }
                 }

@@ -40,9 +40,9 @@ struct WatermarkSticker: View {
                             set: { viewModel.store.watermark.stickers[index] = $0 }
                         ),
                         renderRatio: renderRatio,
-                        isSelected: viewModel.selectedStickerIndex == index,
-                        activeMagnify: viewModel.selectedStickerIndex == index ? magnifyScale : 1.0,
-                        activeRotation: viewModel.selectedStickerIndex == index ? rotationAngle : .zero,
+                        isSelected: viewModel.edit.index == index,
+                        activeMagnify: viewModel.edit.index == index ? magnifyScale : 1.0,
+                        activeRotation: viewModel.edit.index == index ? rotationAngle : .zero,
                         onTap: { viewModel.action(.stickerMode(index: index)) },
                         onClose: { viewModel.action(.stickerMode(index: nil)) }
                     )
@@ -54,28 +54,28 @@ struct WatermarkSticker: View {
             .simultaneousGesture(
                 MagnifyGesture()
                     .updating($magnifyScale) { value, state, _ in
-                        guard viewModel.selectedStickerIndex != nil else { return }
+                        guard viewModel.edit.index != nil else { return }
                         state = value.magnification
                     }
                     .onEnded { value in
-                        guard let index = viewModel.selectedStickerIndex else { return }
+                        guard let index = viewModel.edit.index else { return }
                         viewModel.store.watermark.stickers[index].scale *= value.magnification
                     }
                     .simultaneously(with:
                         RotationGesture()
                             .updating($rotationAngle) { value, state, _ in
-                                guard viewModel.selectedStickerIndex != nil else { return }
+                                guard viewModel.edit.index != nil else { return }
                                 state = value
                             }
                             .onEnded { value in
-                                guard let index = viewModel.selectedStickerIndex else { return }
+                                guard let index = viewModel.edit.index else { return }
                                 viewModel.store.watermark.stickers[index].rotation += value.degrees
                             }
                     )
             )
         }
         .onChange(of: viewModel.store.watermark.stickers.count) {
-            if let selected = viewModel.selectedStickerIndex,
+            if let selected = viewModel.edit.index,
                selected >= viewModel.store.watermark.stickers.count {
                 viewModel.action(.stickerMode(index: nil))
             }
