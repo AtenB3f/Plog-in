@@ -19,12 +19,14 @@ extension DIContainer {
     func makeWatermarkVM(
         picker: AssetPicker,
         stickerPicker: AssetPicker,
-        store: WatermarkStore
+        store: WatermarkStore,
+        editMode: WatermarkEditModeStore?
     ) -> WatermarkViewModel {
         return WatermarkViewModel(
             picker: picker,
             stickerPicker: stickerPicker,
-            store: store
+            store: store,
+            editMode: editMode
         )
     }
     
@@ -33,10 +35,13 @@ extension DIContainer {
         stickerPicker: AssetPicker = AssetPicker(mediaType: .image, limit: 10),
         store: WatermarkStore = WatermarkStore()
     ) -> WatermarkEditView {
+        // 캔버스와 편집 메뉴가 같은 편집모드를 보도록 하나의 인스턴스를 양쪽에 넘긴다.
+        let editMode = WatermarkEditModeStore()
         let editVM = makeWatermarkEditVM(
             picker: picker,
             stickerPicker: stickerPicker,
-            store: store
+            store: store,
+            editMode: editMode
         )
         editVM.step
             .sink { [weak self] step in
@@ -48,7 +53,8 @@ extension DIContainer {
             watermarkViewModel: makeWatermarkVM(
                 picker: picker,
                 stickerPicker: stickerPicker,
-                store: store
+                store: store,
+                editMode: editMode
             )
         )
     }
@@ -56,7 +62,8 @@ extension DIContainer {
     func makeWatermarkEditVM(
         picker: AssetPicker,
         stickerPicker: AssetPicker,
-        store: WatermarkStore
+        store: WatermarkStore,
+        editMode: WatermarkEditModeStore
     ) -> WatermarkEditViewModel {
         let usecase = WatermarkUsecase(
             wordDataStore: watermarkStore,
@@ -68,7 +75,8 @@ extension DIContainer {
             usecase: usecase,
             picker: picker,
             stickerPicker: stickerPicker,
-            store: store
+            store: store,
+            editMode: editMode
         )
     }
     

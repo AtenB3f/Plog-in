@@ -10,123 +10,55 @@ import PlatformCore
 import Design
 import WatermarkDomain
 
+/// 워터마크 텍스트 레이어
 public struct WatermarkText: View {
     @EnvironmentObject var viewModel: WatermarkViewModel
     
     private let watermarkSize: CGSize
+    
+    private let rotation: Angle
 
     public init(
-        watermarkImageSize: CGSize
+        watermarkImageSize: CGSize,
+        rotation: Angle = .zero
     ) {
         self.watermarkSize = watermarkImageSize
+        self.rotation = rotation
     }
 
     public var body: some View {
         GeometryReader { proxy in
-            let renderSize = viewModel.format.getRenderSize(
-                watermarkSize: watermarkSize,
+            if let layout = viewModel.makeWatermarkTextLayout(
+                watermarkImageSize: watermarkSize,
                 containerSize: proxy.size
-            )
-            let watermarkSize = viewModel.format.getWatermarkImageSize(
-                origins: viewModel.picker.images,
-                array: viewModel.store.watermark.array
-            )
-            if watermarkSize.width == .zero || watermarkSize.height == .zero {
-                EmptyView()
-            } else {
-                let renderRatio = renderSize.width / watermarkSize.width
-                
-                let displayText = viewModel.format.getDisplayText(for: viewModel.store.watermark.text)
-                let renderTextAreaSize = viewModel.format.getTextArea(
-                    text: displayText,
-                    font: viewModel.store.watermark.text.toPFont,
-                    fontSize: viewModel.store.watermark.text.fontSize * renderRatio
-                )
-                let grid = viewModel.format.getTextGrid(
-                    renderSize: renderSize,
-                    renderTextAreaSize: renderTextAreaSize,
-                    spacingRatioW: viewModel.store.watermark.text.spacingWidthRatio,
-                    spacingRatioH: viewModel.store.watermark.text.spacingHeightRatio
-                )
+            ) {
                 WatermarkTextGridLayer(renderData: .init(
-                    text: displayText,
+                    text: layout.displayText,
                     watermark: viewModel.store.watermark.text,
-                    renderRatio: renderRatio,
-                    renderTextAreaSize: renderTextAreaSize,
-                    renderRows: grid.rows,
-                    renderColumns: grid.columns
+                    renderRatio: layout.renderRatio,
+                    renderTextAreaSize: layout.renderTextAreaSize,
+                    renderRows: layout.renderRows,
+                    renderColumns: layout.renderColumns
                 ))
-                .frame(width: renderSize.width, height: renderSize.height)
+                .frame(width: canvasSize(of: layout).width, height: canvasSize(of: layout).height)
+                .rotationEffect(rotation)
+                .frame(width: layout.renderSize.width, height: layout.renderSize.height)
+                .clipped()
                 .position(x: proxy.size.width * 0.5, y: proxy.size.height * 0.5)
-                .overlay(alignment: .center) {
-                    if viewModel.isShowEdit {
-                        editGuide(renderTextAreaSize: renderTextAreaSize)
-                    }
-                }
             }
         }
     }
-    
-    @ViewBuilder
-    func editGuide(renderTextAreaSize size: CGSize) -> some View {
-        ZStack(alignment: .topTrailing) {
-            Rectangle()
-                .stroke(lineWidth: 2)
-                .foreground(.white)
-                .shadow(.light)
-                .frame(width: size.width, height: size.height)
-                .rotationEffect(.degrees(viewModel.store.watermark.text.rotation))
+}
 
-            Image.iconCloseCircle
-                .renderingMode(.template)
-                .frame(width: 16, height: 16)
-                .background {
-                    Circle()
-                        .frame(width: 16, height: 16)
-                        .foreground(.white)
-                }
-                .foreground(.Gray.dark)
-                .offset(x: 8, y: -8)
-                .onTapGesture {
-                    viewModel.action(.textMode(isOn: false))
-                }
-            }
+private extension WatermarkText {
+    func canvasSize(of layout: WatermarkTextLayout) -> CGSize {
+        guard viewModel.mode == .text else { return layout.renderSize }
+        let side = hypot(layout.renderSize.width, layout.renderSize.height)
+        return CGSize(width: side, height: side)
     }
 }
 
-private struct WatermarkTextGridViewState {
-    let text: String
-    let font: PFont
-    let color: ColorData
-    let spacing: CGSize
-    let rotation: CGFloat
-    let textArea: CGSize
-    let rows: Int
-    let columns: Int
-    
-    init(
-        text: String,
-        watermark: WatermarkTextModel,
-        renderRatio: CGFloat,
-        renderTextAreaSize: CGSize,
-        renderRows: Int,
-        renderColumns: Int
-    ) {
-        self.text = text
-        let fontSize = watermark.fontSize * renderRatio
-        self.font = .init(name: watermark.fontName, size: fontSize) ?? PFont.systemFont(ofSize: fontSize)
-        self.color = watermark.color
-        self.rotation = watermark.rotation
-        self.spacing = .init(
-            width: watermark.spacingWidthRatio * renderTextAreaSize.width,
-            height: watermark.spacingHeightRatio * renderTextAreaSize.height
-        )
-        self.textArea = renderTextAreaSize
-        self.rows = renderRows
-        self.columns = renderColumns
-    }
-}
-
+// MARK: - 워터마크 텍스트 레이어(그리드)
 private struct WatermarkTextGridLayer: View {
     @EnvironmentObject var viewModel: WatermarkViewModel
 
