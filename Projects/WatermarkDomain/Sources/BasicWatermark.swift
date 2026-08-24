@@ -37,11 +37,17 @@ public enum BasicWatermarkType: String, CaseIterable {
 }
 
 public extension BasicWatermarkType {
-    public var watermark: WatermarkModel {
+    var watermark: WatermarkModel {
         switch self {
         case .melonStreaming:
             return .init(
-                text: .init(),
+                text: .init(
+                    fontSize: 36,
+                    rotation: -30,
+                    color: .init(red: 1, green: 1, blue: 1, opacity: 0.25),
+                    spacingWidthRatio: 0.25,
+                    spacingHeightRatio: 0.25,
+                ),
                 stickers: [],
                 array: .init(type: .none, rows: 1, columns: 1),
                 export: .init(type: .auto, width: 650, height: 650),
@@ -49,7 +55,13 @@ public extension BasicWatermarkType {
             )
         case .melonWeekly:
             return .init(
-                text: .init(),
+                text: .init(
+                    fontSize: 36,
+                    rotation: -30,
+                    color: .init(red: 1, green: 1, blue: 1, opacity: 0.25),
+                    spacingWidthRatio: 0.25,
+                    spacingHeightRatio: 0.25,
+                ),
                 stickers: [],
                 array: .init(type: .none, rows: 1, columns: 1),
                 export: .init(type: .auto, width: 650, height: 650),
@@ -57,9 +69,14 @@ public extension BasicWatermarkType {
             )
         case .youtubeStreaming:
             return .init(
-                text: .init(),
+                text: .init(
+                    rotation: -30,
+                    color: .init(red: 1, green: 1, blue: 1, opacity: 0.25),
+                    spacingWidthRatio: 0.25,
+                    spacingHeightRatio: 0.25,
+                ),
                 stickers: [],
-                array: .init(type: .none, rows: 1, columns: 1),
+                array: .init(type: .none, rows: 2, columns: 1),
                 export: .init(type: .auto, width: 650, height: 650),
                 frame: .init(title: self.rawValue, type: .basic)
             )
