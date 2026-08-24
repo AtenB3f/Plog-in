@@ -63,6 +63,7 @@ public class WatermarkEditViewModel: ObservableObject {
 
     // MARK: - Watermark
     var store: WatermarkStore
+    let editMode: WatermarkEditModeStore
     private let popup: WatermarkPopupCoordinator
     private let usecase: WatermarkUsecase
     private let format: WatermarkFormat
@@ -82,6 +83,7 @@ public class WatermarkEditViewModel: ObservableObject {
         picker: AssetPicker,
         stickerPicker: AssetPicker,
         store: WatermarkStore,
+        editMode: WatermarkEditModeStore,
         format: WatermarkFormat = WatermarkFormat()
     ) {
         self.popup = popup
@@ -90,6 +92,7 @@ public class WatermarkEditViewModel: ObservableObject {
         self.picker = picker
         self.sticker = stickerPicker
         self.store = store
+        self.editMode = editMode
         words = usecase.fetchWords().map { $0.text }
         frames = usecase.fetchWatermarks()
 
@@ -130,6 +133,36 @@ private extension WatermarkEditViewModel {
         popup.step
             .sink { [weak self] step in
                 self?.handlePopupComplete(step)
+            }
+            .store(in: &cancellables)
+
+        bindEditMode()
+    }
+
+    /// 하단 스티커 리스트 선택과 캔버스 편집모드를 양방향으로 맞춘다.
+    /// 두 sink 모두 willSet 시점에 발행되므로 self의 현재 값이 아닌 전달받은 값을 사용해야 한다.
+    func bindEditMode() {
+        // 리스트 -> 편집모드. 삭제/이동 시의 인덱스 보정 결과도 이 경로로 전달된다.
+        $stickerState
+            .map(\.index)
+            .removeDuplicates()
+            .sink { [weak self] index in
+                self?.editMode.selectSticker(index)
+            }
+            .store(in: &cancellables)
+
+        // 편집모드 -> 리스트. 캔버스에서 스티커를 탭한 경우가 여기로 들어온다.
+        editMode.$mode
+            .map(\.stickerIndex)
+            .removeDuplicates()
+            .sink { [weak self] index in
+                guard let self, stickerState.index != index else { return }
+                stickerState.index = index
+                if index != nil {
+                    if stickerState.mode == .none { stickerState.mode = .select }
+                } else if stickerState.mode == .select {
+                    stickerState.mode = .none
+                }
             }
             .store(in: &cancellables)
     }
@@ -302,6 +335,12 @@ private extension WatermarkEditViewModel {
         case .array:
             picker.images.move(fromOffsets: from, toOffset: to)
         case .sticker:
+            // 순서가 바뀌어도 선택이 같은 스티커를 따라가도록 보정한다.
+            if let selected = stickerState.index {
+                var indices = Array(store.watermark.stickers.indices)
+                indices.move(fromOffsets: from, toOffset: to)
+                stickerState.index = indices.firstIndex(of: selected)
+            }
             store.watermark.stickers.move(fromOffsets: from, toOffset: to)
         case .frame:
             frames.move(fromOffsets: from, toOffset: to)

@@ -29,7 +29,7 @@ public struct WatermarkView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .onTapGesture {
-            viewModel.action(.textMode(isOn: false))
+            viewModel.action(.textMode)
         }
     }
     
@@ -43,11 +43,11 @@ public struct WatermarkView: View {
                     .aspectRatio(contentMode: .fit)
                     .overlay {
                         gradientOverlay()
-                        WatermarkText(watermarkImageSize: image.size)
-                            .environmentObject(viewModel)
                     }
                     .drawingGroup()
                     .overlay {
+                        WatermarkText(watermarkImageSize: image.size)
+                            .environmentObject(viewModel)
                         WatermarkSticker(imageSize: image.size)
                             .environmentObject(viewModel)
                     }
@@ -60,22 +60,20 @@ public struct WatermarkView: View {
     
     @ViewBuilder
     func cells() -> some View {
+        let watermarkImageSize = viewModel.format.getWatermarkImageSize(
+            origins: viewModel.picker.images,
+            array: viewModel.store.watermark.array
+        )
+
         WatermarkCells(viewModel: viewModel)
         .overlay {
             gradientOverlay()
-            WatermarkText(watermarkImageSize: viewModel.format.getWatermarkImageSize(
-                    origins: viewModel.picker.images,
-                    array: viewModel.store.watermark.array
-                )
-            )
-                .environmentObject(viewModel)
         }
         .drawingGroup()
         .overlay {
-            WatermarkSticker(imageSize: viewModel.format.getWatermarkImageSize(
-                origins: viewModel.picker.images,
-                array: viewModel.store.watermark.array)
-            )
+            WatermarkText(watermarkImageSize: watermarkImageSize)
+                .environmentObject(viewModel)
+            WatermarkSticker(imageSize: watermarkImageSize)
                 .environmentObject(viewModel)
         }
         .clipped()

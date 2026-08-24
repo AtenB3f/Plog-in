@@ -14,6 +14,8 @@ public struct WatermarkText: View {
     @EnvironmentObject var viewModel: WatermarkViewModel
     
     private let watermarkSize: CGSize
+    
+    @GestureState private var rotationAngle: Angle = .zero
 
     public init(
         watermarkImageSize: CGSize
@@ -23,75 +25,75 @@ public struct WatermarkText: View {
 
     public var body: some View {
         GeometryReader { proxy in
-            let renderSize = viewModel.format.getRenderSize(
-                watermarkSize: watermarkSize,
+            if let layout = viewModel.makeWatermarkTextLayout(
+                watermarkImageSize: watermarkSize,
                 containerSize: proxy.size
-            )
-            let watermarkSize = viewModel.format.getWatermarkImageSize(
-                origins: viewModel.picker.images,
-                array: viewModel.store.watermark.array
-            )
-            if watermarkSize.width == .zero || watermarkSize.height == .zero {
-                EmptyView()
-            } else {
-                let renderRatio = renderSize.width / watermarkSize.width
-                
-                let displayText = viewModel.format.getDisplayText(for: viewModel.store.watermark.text)
-                let renderTextAreaSize = viewModel.format.getTextArea(
-                    text: displayText,
-                    font: viewModel.store.watermark.text.toPFont,
-                    fontSize: viewModel.store.watermark.text.fontSize * renderRatio
-                )
-                let grid = viewModel.format.getTextGrid(
-                    renderSize: renderSize,
-                    renderTextAreaSize: renderTextAreaSize,
-                    spacingRatioW: viewModel.store.watermark.text.spacingWidthRatio,
-                    spacingRatioH: viewModel.store.watermark.text.spacingHeightRatio
-                )
+            ) {
                 WatermarkTextGridLayer(renderData: .init(
-                    text: displayText,
+                    text: layout.displayText,
                     watermark: viewModel.store.watermark.text,
-                    renderRatio: renderRatio,
-                    renderTextAreaSize: renderTextAreaSize,
-                    renderRows: grid.rows,
-                    renderColumns: grid.columns
+                    renderRatio: layout.renderRatio,
+                    renderTextAreaSize: layout.renderTextAreaSize,
+                    renderRows: layout.renderRows,
+                    renderColumns: layout.renderColumns
                 ))
-                .frame(width: renderSize.width, height: renderSize.height)
+                .frame(width: canvasSize(of: layout).width, height: canvasSize(of: layout).height)
+                .rotationEffect(rotationAngle)
+                .frame(width: layout.renderSize.width, height: layout.renderSize.height)
+                .clipped()
+                .contentShape(Rectangle())
+                .onTapGesture { viewModel.action(.textMode) }
+                .gesture(rotationGesture)
                 .position(x: proxy.size.width * 0.5, y: proxy.size.height * 0.5)
-                .overlay(alignment: .center) {
-                    if viewModel.edit.mode == .text {
-                        editGuide(renderTextAreaSize: renderTextAreaSize)
-                    }
-                }
+                
+                editGuide(renderTextAreaSize: layout.renderTextAreaSize)
+                    .position(x: proxy.size.width * 0.5, y: proxy.size.height * 0.5)
             }
         }
     }
     
     @ViewBuilder
     func editGuide(renderTextAreaSize size: CGSize) -> some View {
-        ZStack(alignment: .topTrailing) {
-            Rectangle()
-                .stroke(lineWidth: 2)
-                .foreground(.white)
-                .shadow(.light)
-                .frame(width: size.width, height: size.height)
-                .rotationEffect(.degrees(viewModel.store.watermark.text.rotation))
+        if viewModel.mode == .text {
+            ZStack(alignment: .topTrailing) {
+                Rectangle()
+                    .stroke(lineWidth: 2)
+                    .foreground(.white)
+                    .shadow(.light)
+                    .frame(width: size.width, height: size.height)
+                    .rotationEffect(.degrees(viewModel.store.watermark.text.rotation) + rotationAngle)
+            }
+        }
+    }
+}
 
-            Image.iconCloseCircle
-                .renderingMode(.template)
-                .frame(width: 16, height: 16)
-                .background {
-                    Circle()
-                        .frame(width: 16, height: 16)
-                        .foreground(.white)
-                }
-                .foreground(.Gray.dark)
-                .offset(x: 8, y: -8)
-                .onTapGesture {
-                    viewModel.action(.textMode(isOn: false))
-                }
+private extension WatermarkText {
+    var rotationGesture: some Gesture {
+        RotationGesture()
+            .updating($rotationAngle) { value, state, _ in
+                guard viewModel.editMode?.mode == .text else { return }
+                state = value
+            }
+            .onEnded { value in
+                guard viewModel.editMode?.mode == .text else { return }
+                viewModel.store.watermark.text.rotation += value.degrees
             }
     }
+
+    func canvasSize(of layout: WatermarkTextLayout) -> CGSize {
+        guard viewModel.mode == .text else { return layout.renderSize }
+        let side = hypot(layout.renderSize.width, layout.renderSize.height)
+        return CGSize(width: side, height: side)
+    }
+}
+
+public struct WatermarkTextLayout {
+    let renderSize: CGSize
+    let renderRatio: CGFloat
+    let displayText: String
+    let renderTextAreaSize: CGSize
+    let renderRows: Int
+    let renderColumns: Int
 }
 
 private struct WatermarkTextGridViewState {

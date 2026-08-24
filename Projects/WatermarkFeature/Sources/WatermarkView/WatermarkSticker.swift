@@ -32,54 +32,65 @@ struct WatermarkSticker: View {
                 )
             )
 
-            ZStack {
-                ForEach(viewModel.store.watermark.stickers.indices, id: \.self) { index in
-                    StickerItemView(
-                        sticker: Binding(
-                            get: { viewModel.store.watermark.stickers[index] },
-                            set: { viewModel.store.watermark.stickers[index] = $0 }
-                        ),
-                        renderRatio: renderRatio,
-                        isSelected: viewModel.edit.index == index,
-                        activeMagnify: viewModel.edit.index == index ? magnifyScale : 1.0,
-                        activeRotation: viewModel.edit.index == index ? rotationAngle : .zero,
-                        onTap: { viewModel.action(.stickerMode(index: index)) },
-                        onClose: { viewModel.action(.stickerMode(index: nil)) }
-                    )
-                }
+            if viewModel.mode.stickerIndex != nil {
+                stickerLayer(renderRatio: renderRatio)
+                    .contentShape(Rectangle())
+                    .simultaneousGesture(transformGesture)
+            } else {
+                stickerLayer(renderRatio: renderRatio)
             }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .contentShape(Rectangle())
-            // 확대/축소 + 회전은 이미지 전체 영역에서 동작
-            .simultaneousGesture(
-                MagnifyGesture()
-                    .updating($magnifyScale) { value, state, _ in
-                        guard viewModel.edit.index != nil else { return }
-                        state = value.magnification
-                    }
-                    .onEnded { value in
-                        guard let index = viewModel.edit.index else { return }
-                        viewModel.store.watermark.stickers[index].scale *= value.magnification
-                    }
-                    .simultaneously(with:
-                        RotationGesture()
-                            .updating($rotationAngle) { value, state, _ in
-                                guard viewModel.edit.index != nil else { return }
-                                state = value
-                            }
-                            .onEnded { value in
-                                guard let index = viewModel.edit.index else { return }
-                                viewModel.store.watermark.stickers[index].rotation += value.degrees
-                            }
-                    )
-            )
         }
         .onChange(of: viewModel.store.watermark.stickers.count) {
-            if let selected = viewModel.edit.index,
+            if let selected = viewModel.mode.stickerIndex,
                selected >= viewModel.store.watermark.stickers.count {
                 viewModel.action(.stickerMode(index: nil))
             }
         }
+    }
+}
+
+private extension WatermarkSticker {
+    @ViewBuilder
+    func stickerLayer(renderRatio: CGFloat) -> some View {
+        ZStack {
+            ForEach(viewModel.store.watermark.stickers.indices, id: \.self) { index in
+                StickerItemView(
+                    sticker: Binding(
+                        get: { viewModel.store.watermark.stickers[index] },
+                        set: { viewModel.store.watermark.stickers[index] = $0 }
+                    ),
+                    renderRatio: renderRatio,
+                    isSelected: viewModel.mode.stickerIndex == index,
+                    activeMagnify: viewModel.mode.stickerIndex == index ? magnifyScale : 1.0,
+                    activeRotation: viewModel.mode.stickerIndex == index ? rotationAngle : .zero,
+                    onTap: { viewModel.action(.stickerMode(index: index)) }
+                )
+            }
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+
+    var transformGesture: some Gesture {
+        MagnifyGesture()
+            .updating($magnifyScale) { value, state, _ in
+                guard viewModel.mode.stickerIndex != nil else { return }
+                state = value.magnification
+            }
+            .onEnded { value in
+                guard let index = viewModel.mode.stickerIndex else { return }
+                viewModel.store.watermark.stickers[index].scale *= value.magnification
+            }
+            .simultaneously(with:
+                RotationGesture()
+                    .updating($rotationAngle) { value, state, _ in
+                        guard viewModel.mode.stickerIndex != nil else { return }
+                        state = value
+                    }
+                    .onEnded { value in
+                        guard let index = viewModel.mode.stickerIndex else { return }
+                        viewModel.store.watermark.stickers[index].rotation += value.degrees
+                    }
+            )
     }
 }
 
@@ -90,7 +101,6 @@ private struct StickerItemView: View {
     let activeMagnify: CGFloat
     let activeRotation: Angle
     let onTap: () -> Void
-    let onClose: () -> Void
 
     @GestureState private var dragOffset: CGSize = .zero
 
@@ -114,18 +124,6 @@ private struct StickerItemView: View {
                         Rectangle()
                             .stroke(Color.white, lineWidth: 1.5)
                             .scaleEffect(activeMagnify)
-
-                        Image.iconCloseCircle
-                            .renderingMode(.template)
-                            .background {
-                                Circle()
-                                    .fill(Color.white)
-                                    .frame(width: 20, height: 20)
-                            }
-                            .foreground(.Gray.dark)
-                            .offset(x: 10, y: -10)
-                            .frame(width: 20, height: 20)
-                            .onTapGesture(perform: onClose)
                     }
                 }
             }

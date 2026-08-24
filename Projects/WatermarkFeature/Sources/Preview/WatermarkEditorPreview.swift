@@ -17,13 +17,15 @@ func makePreviewWatermarkEditView() -> WatermarkEditView {
     picker.images = [makePreviewImage()]
     let stickerPicker = AssetPicker(mediaType: .image, limit: 10)
     let store = WatermarkStore()
+    let editMode = WatermarkEditModeStore()
 
     let editViewModel = WatermarkEditViewModel(
         popup: WatermarkPopupCoordinator(),
         usecase: usecase,
         picker: picker,
         stickerPicker: stickerPicker,
-        store: store
+        store: store,
+        editMode: editMode
     )
     store.setText(makePreviewWatermarkText(picker: picker, array: store.watermark.array))
 
@@ -32,7 +34,8 @@ func makePreviewWatermarkEditView() -> WatermarkEditView {
         watermarkViewModel: WatermarkViewModel(
             picker: picker,
             stickerPicker: stickerPicker,
-            store: store
+            store: store,
+            editMode: editMode
         )
     )
 }
