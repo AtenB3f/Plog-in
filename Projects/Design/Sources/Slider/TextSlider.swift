@@ -43,20 +43,21 @@ public struct TextSlider: View {
                     .frame(width: width, height: isPress ? 15 : 8)
             }
             .onAppear {
-                width = value * geometry.size.width / (maxValue - minValue)
+                width = widthForValue(value, in: geometry.size.width)
+            }
+            .onChange(of: value) {
+                width = widthForValue(value, in: geometry.size.width)
             }
             .gesture(
                 DragGesture(minimumDistance: distance)
                     .onChanged { gesture in
                         isPress = true
-                        if gesture.location.x >= geometry.size.width {
-                            width = geometry.size.width
-                        } else if gesture.location.x <= 0 {
-                            width = .zero
-                        } else {
-                            width = gesture.location.x
-                        }
-                        value = width / geometry.size.width * (maxValue - minValue)
+                        let clampedX = min(max(gesture.location.x, 0), geometry.size.width)
+                        let rawValue = minValue + (clampedX / geometry.size.width) * (maxValue - minValue)
+                        let steppedValue = minValue + ((rawValue - minValue) / distance).rounded() * distance
+                        let clampedValue = min(max(steppedValue, minValue), maxValue)
+                        value = clampedValue
+                        width = widthForValue(clampedValue, in: geometry.size.width)
                     }
                     .onEnded { _ in
                         isPress = false
@@ -66,11 +67,17 @@ public struct TextSlider: View {
         .frame(height: isPress ? 15 : 8)
         .animation(.easeInOut(duration: 0.2), value: isPress)
     }
+
+    private func widthForValue(_ value: CGFloat, in totalWidth: CGFloat) -> CGFloat {
+        guard maxValue > minValue else { return 0 }
+        let clampedValue = min(max(value, minValue), maxValue)
+        return (clampedValue - minValue) / (maxValue - minValue) * totalWidth
+    }
 }
 
-//#Preview {
-//    @State var value: CGFloat = 10
-//    TextSlider(value: $value, min: 0, max: 100)
-//        .padding(20)
-//        .background(Color.black)
-//}
+#Preview {
+    @State var value: CGFloat = 10
+    TextSlider(value: $value, min: 0, max: 100)
+        .padding(20)
+        .background(Color.black)
+}
