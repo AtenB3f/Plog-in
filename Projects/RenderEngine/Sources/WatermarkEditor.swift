@@ -39,7 +39,7 @@ public class WatermarkEditor {
         }
 
         let watermarkSize = format.getWatermarkImageSize(origins: origins, array: watermark.array)
-        let merged = mergeImages(origins: origins, array: watermark.array, canvasSize: exportSize)
+        let merged = mergeImages(origins: origins, array: watermark.array, exportSize: exportSize)
         return [drawWatermark(on: merged, exportSize: exportSize, watermarkSize: watermarkSize)]
     }
 
@@ -68,8 +68,8 @@ public class WatermarkEditor {
                 }
             }
 
-            drawStickers(context: context, stickers: watermark.stickers, exportSize: exportSize, renderRatio: renderRatio)
             drawText(context: context, textSetting: watermark.text, exportSize: exportSize, renderRatio: renderRatio)
+            drawStickers(context: context, stickers: watermark.stickers, exportSize: exportSize, renderRatio: renderRatio)
         }
 #elseif os(macOS)
         return image
@@ -187,17 +187,17 @@ public class WatermarkEditor {
 }
 
 public extension WatermarkEditor {
-    func mergeImages(origins: [PImage], array: WatermarkArrayModel, canvasSize: CGSize) -> PImage {
+    func mergeImages(origins: [PImage], array: WatermarkArrayModel, exportSize: CGSize) -> PImage {
         let cellSize = CGSize(
-            width: canvasSize.width / CGFloat(array.columns),
-            height: canvasSize.height / CGFloat(array.rows)
+            width: exportSize.width / CGFloat(array.columns),
+            height: exportSize.height / CGFloat(array.rows)
         )
 
 #if os(iOS)
         let rendererFormat = UIGraphicsImageRendererFormat.default()
         rendererFormat.opaque = true
         rendererFormat.scale = 1.0
-        let renderer = UIGraphicsImageRenderer(size: canvasSize, format: rendererFormat)
+        let renderer = UIGraphicsImageRenderer(size: exportSize, format: rendererFormat)
         return renderer.image { context in
             placeGrid(
                 context: context.cgContext,
