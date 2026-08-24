@@ -10,17 +10,20 @@ import PlatformCore
 import Design
 import WatermarkDomain
 
+/// 워터마크 텍스트 레이어
 public struct WatermarkText: View {
     @EnvironmentObject var viewModel: WatermarkViewModel
     
     private let watermarkSize: CGSize
     
-    @GestureState private var rotationAngle: Angle = .zero
+    private let rotation: Angle
 
     public init(
-        watermarkImageSize: CGSize
+        watermarkImageSize: CGSize,
+        rotation: Angle = .zero
     ) {
         self.watermarkSize = watermarkImageSize
+        self.rotation = rotation
     }
 
     public var body: some View {
@@ -38,48 +41,16 @@ public struct WatermarkText: View {
                     renderColumns: layout.renderColumns
                 ))
                 .frame(width: canvasSize(of: layout).width, height: canvasSize(of: layout).height)
-                .rotationEffect(rotationAngle)
+                .rotationEffect(rotation)
                 .frame(width: layout.renderSize.width, height: layout.renderSize.height)
                 .clipped()
-                .contentShape(Rectangle())
-                .onTapGesture { viewModel.action(.textMode) }
-                .gesture(rotationGesture)
                 .position(x: proxy.size.width * 0.5, y: proxy.size.height * 0.5)
-                
-                editGuide(renderTextAreaSize: layout.renderTextAreaSize)
-                    .position(x: proxy.size.width * 0.5, y: proxy.size.height * 0.5)
-            }
-        }
-    }
-    
-    @ViewBuilder
-    func editGuide(renderTextAreaSize size: CGSize) -> some View {
-        if viewModel.mode == .text {
-            ZStack(alignment: .topTrailing) {
-                Rectangle()
-                    .stroke(lineWidth: 2)
-                    .foreground(.white)
-                    .shadow(.light)
-                    .frame(width: size.width, height: size.height)
-                    .rotationEffect(.degrees(viewModel.store.watermark.text.rotation) + rotationAngle)
             }
         }
     }
 }
 
 private extension WatermarkText {
-    var rotationGesture: some Gesture {
-        RotationGesture()
-            .updating($rotationAngle) { value, state, _ in
-                guard viewModel.editMode?.mode == .text else { return }
-                state = value
-            }
-            .onEnded { value in
-                guard viewModel.editMode?.mode == .text else { return }
-                viewModel.store.watermark.text.rotation += value.degrees
-            }
-    }
-
     func canvasSize(of layout: WatermarkTextLayout) -> CGSize {
         guard viewModel.mode == .text else { return layout.renderSize }
         let side = hypot(layout.renderSize.width, layout.renderSize.height)
@@ -87,48 +58,7 @@ private extension WatermarkText {
     }
 }
 
-public struct WatermarkTextLayout {
-    let renderSize: CGSize
-    let renderRatio: CGFloat
-    let displayText: String
-    let renderTextAreaSize: CGSize
-    let renderRows: Int
-    let renderColumns: Int
-}
-
-private struct WatermarkTextGridViewState {
-    let text: String
-    let font: PFont
-    let color: ColorData
-    let spacing: CGSize
-    let rotation: CGFloat
-    let textArea: CGSize
-    let rows: Int
-    let columns: Int
-    
-    init(
-        text: String,
-        watermark: WatermarkTextModel,
-        renderRatio: CGFloat,
-        renderTextAreaSize: CGSize,
-        renderRows: Int,
-        renderColumns: Int
-    ) {
-        self.text = text
-        let fontSize = watermark.fontSize * renderRatio
-        self.font = .init(name: watermark.fontName, size: fontSize) ?? PFont.systemFont(ofSize: fontSize)
-        self.color = watermark.color
-        self.rotation = watermark.rotation
-        self.spacing = .init(
-            width: watermark.spacingWidthRatio * renderTextAreaSize.width,
-            height: watermark.spacingHeightRatio * renderTextAreaSize.height
-        )
-        self.textArea = renderTextAreaSize
-        self.rows = renderRows
-        self.columns = renderColumns
-    }
-}
-
+// MARK: - 워터마크 텍스트 레이어(그리드)
 private struct WatermarkTextGridLayer: View {
     @EnvironmentObject var viewModel: WatermarkViewModel
 

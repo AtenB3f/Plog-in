@@ -46,9 +46,7 @@ public struct WatermarkView: View {
                     }
                     .drawingGroup()
                     .overlay {
-                        WatermarkText(watermarkImageSize: image.size)
-                            .environmentObject(viewModel)
-                        WatermarkSticker(imageSize: image.size)
+                        WatermarkEditMode(watermarkImageSize: image.size)
                             .environmentObject(viewModel)
                     }
                     .clipped()
@@ -71,9 +69,7 @@ public struct WatermarkView: View {
         }
         .drawingGroup()
         .overlay {
-            WatermarkText(watermarkImageSize: watermarkImageSize)
-                .environmentObject(viewModel)
-            WatermarkSticker(imageSize: watermarkImageSize)
+            WatermarkEditMode(watermarkImageSize: watermarkImageSize)
                 .environmentObject(viewModel)
         }
         .clipped()

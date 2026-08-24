@@ -143,6 +143,15 @@ public extension WatermarkFormat {
         }
     }
 
+    /// 스티커 위치 제한 계산 함수
+    /// 중앙을 기준으로 워터마크 이미지의 2배 영역까지만 이동 가능하도록 함
+    func limitStickerPosition(_ position: CGPoint, watermarkImageSize: CGSize) -> CGPoint {
+        CGPoint(
+            x: min(max(position.x, -watermarkImageSize.width), watermarkImageSize.width),
+            y: min(max(position.y, -watermarkImageSize.height), watermarkImageSize.height)
+        )
+    }
+
     /// 워터마크 이미지 크기 변화 비율만큼 기존 스티커의 scale을 재조정
     func rescaleStickers(
         _ stickers: [WatermarkStickerModel],

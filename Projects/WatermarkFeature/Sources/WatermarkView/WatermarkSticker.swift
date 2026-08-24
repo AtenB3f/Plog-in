@@ -10,16 +10,25 @@ import PlatformCore
 import Design
 import WatermarkDomain
 
+// MARK: - 워터마크 스티커 레이어
 struct WatermarkSticker: View {
     @EnvironmentObject var viewModel: WatermarkViewModel
 
     private let imageSize: CGSize
+    private let magnify: CGFloat
+    private let rotation: Angle
+    private let drag: CGSize
 
-    @GestureState private var magnifyScale: CGFloat = 1.0
-    @GestureState private var rotationAngle: Angle = .zero
-
-    init(imageSize: CGSize) {
+    init(
+        imageSize: CGSize,
+        magnify: CGFloat,
+        rotation: Angle,
+        drag: CGSize
+    ) {
         self.imageSize = imageSize
+        self.magnify = magnify
+        self.rotation = rotation
+        self.drag = drag
     }
 
     var body: some View {
@@ -31,14 +40,7 @@ struct WatermarkSticker: View {
                     containerSize: proxy.size
                 )
             )
-
-            if viewModel.mode.stickerIndex != nil {
-                stickerLayer(renderRatio: renderRatio)
-                    .contentShape(Rectangle())
-                    .simultaneousGesture(transformGesture)
-            } else {
-                stickerLayer(renderRatio: renderRatio)
-            }
+            stickerLayer(renderRatio: renderRatio, containerSize: proxy.size)
         }
         .onChange(of: viewModel.store.watermark.stickers.count) {
             if let selected = viewModel.mode.stickerIndex,
@@ -51,58 +53,36 @@ struct WatermarkSticker: View {
 
 private extension WatermarkSticker {
     @ViewBuilder
-    func stickerLayer(renderRatio: CGFloat) -> some View {
+    func stickerLayer(renderRatio: CGFloat, containerSize: CGSize) -> some View {
         ZStack {
             ForEach(viewModel.store.watermark.stickers.indices, id: \.self) { index in
-                StickerItemView(
+                let isSelected = viewModel.mode.stickerIndex == index
+                
+                StickerItem(
                     sticker: Binding(
                         get: { viewModel.store.watermark.stickers[index] },
                         set: { viewModel.store.watermark.stickers[index] = $0 }
                     ),
                     renderRatio: renderRatio,
-                    isSelected: viewModel.mode.stickerIndex == index,
-                    activeMagnify: viewModel.mode.stickerIndex == index ? magnifyScale : 1.0,
-                    activeRotation: viewModel.mode.stickerIndex == index ? rotationAngle : .zero,
+                    magnify: isSelected ? magnify : 1.0,
+                    rotation: isSelected ? rotation : .zero,
+                    drag: isSelected ? drag : .zero,
                     onTap: { viewModel.action(.stickerMode(index: index)) }
                 )
             }
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-    }
-
-    var transformGesture: some Gesture {
-        MagnifyGesture()
-            .updating($magnifyScale) { value, state, _ in
-                guard viewModel.mode.stickerIndex != nil else { return }
-                state = value.magnification
-            }
-            .onEnded { value in
-                guard let index = viewModel.mode.stickerIndex else { return }
-                viewModel.store.watermark.stickers[index].scale *= value.magnification
-            }
-            .simultaneously(with:
-                RotationGesture()
-                    .updating($rotationAngle) { value, state, _ in
-                        guard viewModel.mode.stickerIndex != nil else { return }
-                        state = value
-                    }
-                    .onEnded { value in
-                        guard let index = viewModel.mode.stickerIndex else { return }
-                        viewModel.store.watermark.stickers[index].rotation += value.degrees
-                    }
-            )
+        .frame(width: containerSize.width, height: containerSize.height)
     }
 }
 
-private struct StickerItemView: View {
+// MARK: - 개별 스티커
+private struct StickerItem: View {
     @Binding var sticker: WatermarkStickerModel
     let renderRatio: CGFloat
-    let isSelected: Bool
-    let activeMagnify: CGFloat
-    let activeRotation: Angle
+    let magnify: CGFloat
+    let rotation: Angle
+    let drag: CGSize
     let onTap: () -> Void
-
-    @GestureState private var dragOffset: CGSize = .zero
 
     private var displayWidth: CGFloat {
         sticker.image.size.width * sticker.scale * renderRatio
@@ -117,36 +97,12 @@ private struct StickerItemView: View {
             .resizable()
             .aspectRatio(contentMode: .fit)
             .frame(width: displayWidth, height: displayHeight)
-            .scaleEffect(activeMagnify)
-            .overlay {
-                if isSelected {
-                    ZStack(alignment: .topTrailing) {
-                        Rectangle()
-                            .stroke(Color.white, lineWidth: 1.5)
-                            .scaleEffect(activeMagnify)
-                    }
-                }
-            }
-            .rotationEffect(.degrees(sticker.rotation) + activeRotation)
+            .scaleEffect(magnify)
+            .rotationEffect(.degrees(sticker.rotation) + rotation)
             .opacity(Double(sticker.alpha))
-            // position은 원본 좌표계로 저장되므로 renderRatio를 곱해 화면 좌표계로 변환
             .offset(
-                x: sticker.position.x * renderRatio + dragOffset.width,
-                y: sticker.position.y * renderRatio + dragOffset.height
-            )
-            // 드래그는 스티커 이미지 영역에서만 동작
-            .simultaneousGesture(
-                DragGesture()
-                    .updating($dragOffset) { value, state, _ in
-                        guard isSelected else { return }
-                        state = value.translation
-                    }
-                    .onEnded { value in
-                        guard isSelected else { return }
-                        // 드래그 값은 화면 좌표계이므로 renderRatio로 나눠 원본 좌표계로 변환
-                        sticker.position.x += value.translation.width / renderRatio
-                        sticker.position.y += value.translation.height / renderRatio
-                    }
+                x: sticker.position.x * renderRatio + drag.width,
+                y: sticker.position.y * renderRatio + drag.height
             )
             .onTapGesture(perform: onTap)
     }
