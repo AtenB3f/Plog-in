@@ -94,7 +94,7 @@ extension WatermarkEditMenuText {
     func opacity() -> some View {
         CategoryContent(title: "불투명도") {
             HStack(alignment: .center, spacing: 8) {
-                TextSlider(value: $viewModel.store.watermark.text.color.opacity, min: 0, max: 1, distance: 1)
+                TextSlider(value: $viewModel.store.watermark.text.color.opacity, min: 0, max: 1, distance: 0.01)
                 Text("\(Int(viewModel.store.watermark.text.color.opacity * 100))%")
                     .font(.body2)
                     .foreground(.Text.light)
@@ -107,7 +107,7 @@ extension WatermarkEditMenuText {
     func spacing() -> some View {
         CategoryContent(title: "간격") {
             HStack(alignment: .center, spacing: 8) {
-                TextSlider(value: $viewModel.store.watermark.text.spacingWidthRatio, min: 0, max: 2, distance: 1)
+                TextSlider(value: $viewModel.store.watermark.text.spacingWidthRatio, min: 0, max: 2, distance: 0.01)
                     .onChange(of: viewModel.store.watermark.text.spacingWidthRatio) {
                         viewModel.store.watermark.text.spacingHeightRatio = viewModel.store.watermark.text.spacingWidthRatio
                     }

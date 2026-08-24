@@ -136,13 +136,7 @@ private extension WatermarkEditViewModel {
             }
             .store(in: &cancellables)
 
-        bindEditMode()
-    }
-
-    /// 하단 스티커 리스트 선택과 캔버스 편집모드를 양방향으로 맞춘다.
-    /// 두 sink 모두 willSet 시점에 발행되므로 self의 현재 값이 아닌 전달받은 값을 사용해야 한다.
-    func bindEditMode() {
-        // 리스트 -> 편집모드. 삭제/이동 시의 인덱스 보정 결과도 이 경로로 전달된다.
+        // edit mode: sticker 선택 인덱스
         $stickerState
             .map(\.index)
             .removeDuplicates()
@@ -151,7 +145,7 @@ private extension WatermarkEditViewModel {
             }
             .store(in: &cancellables)
 
-        // 편집모드 -> 리스트. 캔버스에서 스티커를 탭한 경우가 여기로 들어온다.
+        // edit mode
         editMode.$mode
             .map(\.stickerIndex)
             .removeDuplicates()
@@ -166,7 +160,7 @@ private extension WatermarkEditViewModel {
             }
             .store(in: &cancellables)
     }
-    
+
     func originInit() {
         if !picker.images.isEmpty {
             store.setExport(format.makeExportModel(
@@ -174,7 +168,8 @@ private extension WatermarkEditViewModel {
                 array: store.watermark.array
             ))
             store.watermark.text.fontName = FontType.body1.fontName
-            store.watermark.text.rotation = -30
+            store.watermark.text.date = Date()
+            store.watermark.text.gradientColors = Color.disablePrimarys.map { ColorData($0, alpha: 0.3) }
             format.makeTextModel(
                 origins: picker.images,
                 array: store.watermark.array,
@@ -194,7 +189,7 @@ private extension WatermarkEditViewModel {
             origins: picker.images,
             array: store.watermark.array
         )
-        store.setSticker(models)
+        store.setSticker(store.watermark.stickers + models)
         sticker.images = []
     }
 }
