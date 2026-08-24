@@ -83,7 +83,7 @@ public extension WatermarkStickerModel {
         return .init(
             image: self.image.toData() ?? Data(),
             alpha: self.alpha,
-            position: self.position,
+            position: PointData(self.position),
             rotation: self.rotation,
             scale: self.scale,
             layer: self.layer
@@ -97,7 +97,7 @@ public extension WatermarkStickerEntity {
         return .init(
             image: image,
             alpha: self.alpha,
-            position: self.position,
+            position: self.position.point,
             rotation: self.rotation,
             scale: self.scale,
             layer: self.layer

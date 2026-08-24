@@ -8,22 +8,23 @@
 
 import Foundation
 import SwiftData
+import PlatformCore
 
 @Model
 public final class WatermarkStickerEntity {
     var imageData: Data
     var alpha: CGFloat
-    var position: CGPoint
+    var position: PointData
     var rotation: CGFloat
     var scale: CGFloat
     var layer: Int
-    
+
     var watermark: WatermarkEntity?
-    
+
     init(
         image: Data,
         alpha: CGFloat,
-        position: CGPoint,
+        position: PointData,
         rotation: CGFloat,
         scale: CGFloat,
         layer: Int
