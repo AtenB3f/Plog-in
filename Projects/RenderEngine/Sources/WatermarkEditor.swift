@@ -32,28 +32,28 @@ public class WatermarkEditor {
         let exportSize = watermark.export.getSize()
 
         guard watermark.array.type != .none else {
-            let naturalSize = origins.first?.size ?? exportSize
+            let watermarkSize = origins.first?.size ?? exportSize
             return origins.map {
-                drawWatermark(on: $0, canvasSize: exportSize, naturalSize: naturalSize)
+                drawWatermark(on: $0, exportSize: exportSize, watermarkSize: watermarkSize)
             }
         }
 
-        let naturalSize = format.getWatermarkImageSize(origins: origins, array: watermark.array)
+        let watermarkSize = format.getWatermarkImageSize(origins: origins, array: watermark.array)
         let merged = mergeImages(origins: origins, array: watermark.array, canvasSize: exportSize)
-        return [drawWatermark(on: merged, canvasSize: exportSize, naturalSize: naturalSize)]
+        return [drawWatermark(on: merged, exportSize: exportSize, watermarkSize: watermarkSize)]
     }
 
-    func drawWatermark(on image: PImage, canvasSize: CGSize, naturalSize: CGSize) -> PImage {
-        let renderRatio = format.getRenderRatio(originSize: naturalSize, renderSize: canvasSize)
+    func drawWatermark(on image: PImage, exportSize: CGSize, watermarkSize: CGSize) -> PImage {
+        let renderRatio = format.getRenderRatio(originSize: watermarkSize, renderSize: exportSize)
 
 #if os(iOS)
         let rendererFormat = UIGraphicsImageRendererFormat.default()
         rendererFormat.opaque = true
         rendererFormat.scale = 1.0
-        let renderer = UIGraphicsImageRenderer(size: canvasSize, format: rendererFormat)
+        let renderer = UIGraphicsImageRenderer(size: exportSize, format: rendererFormat)
 
         return renderer.image { context in
-            image.draw(in: CGRect(origin: .zero, size: canvasSize))
+            image.draw(in: CGRect(origin: .zero, size: exportSize))
 
             if !watermark.text.gradientColors.isEmpty {
                 let colorSpace = CGColorSpaceCreateDeviceRGB()
@@ -62,14 +62,14 @@ public class WatermarkEditor {
                     context.cgContext.drawLinearGradient(
                         gradient,
                         start: .zero,
-                        end: CGPoint(x: canvasSize.width, y: canvasSize.height),
+                        end: CGPoint(x: exportSize.width, y: exportSize.height),
                         options: []
                     )
                 }
             }
 
-            drawStickers(context: context, stickers: watermark.stickers, canvasSize: canvasSize, renderRatio: renderRatio)
-            drawText(context: context, textSetting: watermark.text, canvasSize: canvasSize, renderRatio: renderRatio)
+            drawStickers(context: context, stickers: watermark.stickers, exportSize: exportSize, renderRatio: renderRatio)
+            drawText(context: context, textSetting: watermark.text, exportSize: exportSize, renderRatio: renderRatio)
         }
 #elseif os(macOS)
         return image
@@ -79,10 +79,10 @@ public class WatermarkEditor {
     func drawStickers(
         context: UIGraphicsImageRendererContext,
         stickers: [WatermarkStickerModel],
-        canvasSize: CGSize,
+        exportSize: CGSize,
         renderRatio: CGFloat
     ) {
-        let canvasCenter = CGPoint(x: canvasSize.width / 2, y: canvasSize.height / 2)
+        let canvasCenter = CGPoint(x: exportSize.width / 2, y: exportSize.height / 2)
         let orders = stickers.sorted(by: { $0.layer < $1.layer })
 
         for sticker in orders {
@@ -112,7 +112,7 @@ public class WatermarkEditor {
     func drawText(
         context: UIGraphicsImageRendererContext,
         textSetting: WatermarkTextModel,
-        canvasSize: CGSize,
+        exportSize: CGSize,
         renderRatio: CGFloat
     ) {
         let fontSize = textSetting.fontSize * renderRatio
@@ -132,8 +132,8 @@ public class WatermarkEditor {
         let attributedText = NSAttributedString(string: text, attributes: attributes)
         let textSize = attributedText.size()
 
-        let centerX = canvasSize.width * 0.5
-        let centerY = canvasSize.height * 0.5
+        let centerX = exportSize.width * 0.5
+        let centerY = exportSize.height * 0.5
         let stepX = textArea.width + spacing.width
         let stepY = textArea.height + spacing.height
         let radians = textSetting.rotation * .pi / 180
@@ -142,11 +142,11 @@ public class WatermarkEditor {
         let u = CGVector(dx: cosTheta * stepX, dy: sinTheta * stepX)
         let v = CGVector(dx: -sinTheta * stepY, dy: cosTheta * stepY)
 
-        let halfDiagonal = hypot(canvasSize.width, canvasSize.height) * 0.5
+        let halfDiagonal = hypot(exportSize.width, exportSize.height) * 0.5
         let safeStepX = max(stepX, 1)
         let safeStepY = max(stepY, 1)
         let grid = format.getTextGrid(
-            renderSize: canvasSize,
+            renderSize: exportSize,
             renderTextAreaSize: textArea,
             spacingRatioW: textSetting.spacingWidthRatio,
             spacingRatioH: textSetting.spacingHeightRatio
