@@ -189,7 +189,7 @@ private extension WatermarkEditViewModel {
             origins: picker.images,
             array: store.watermark.array
         )
-        store.setSticker(models)
+        store.setSticker(store.watermark.stickers + models)
         sticker.images = []
     }
 }
