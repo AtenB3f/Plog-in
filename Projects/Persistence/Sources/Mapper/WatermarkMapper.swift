@@ -150,6 +150,7 @@ public extension WatermarkFrameModel {
     var toEntity: WatermarkFrameEntity {
         return .init(
             id: self.id,
+            code: self.code,
             thumnail: self.thumbnailData,
             title: self.title,
             type: self.type
@@ -159,10 +160,18 @@ public extension WatermarkFrameModel {
 
 public extension WatermarkFrameEntity {
     var toModel: WatermarkFrameModel {
-        return .init(
-            thumbnailData: self.thumbnailData,
-            title: self.title,
-            type: self.type
-        )
+        switch self.type {
+        case .basic:
+            return .init(
+                thumbnailData: self.thumbnailData,
+                title: self.title,
+                code: self.code
+            )
+        case .custom:
+            return .init(
+                thumbnailData: self.thumbnailData,
+                title: self.title
+            )
+        }
     }
 }
