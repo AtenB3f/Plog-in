@@ -80,8 +80,8 @@ extension DIContainer {
             return AnyView(PopupWatermarkTitle(viewModel: makePopupWatermarkTitleVM()))
         case .word:
             return AnyView(PopupWatermarkWord(viewModel: makePopupWatermarkWordVM()))
-        case .preview:
-            return AnyView(PopupWatermarkPreview(viewModel: makePopupWatermarkPreviewVM()))
+        case .preview(let id):
+            return AnyView(PopupWatermarkPreview(viewModel: makePopupWatermarkPreviewVM(id: id)))
         }
     }
     
@@ -121,17 +121,18 @@ extension DIContainer {
         )
     }
     
-    func makePopupWatermarkPreview() -> PopupWatermarkPreview {
-        return PopupWatermarkPreview(viewModel: makePopupWatermarkPreviewVM())
+    func makePopupWatermarkPreview(id: UUID) -> PopupWatermarkPreview {
+        return PopupWatermarkPreview(viewModel: makePopupWatermarkPreviewVM(id: id))
     }
     
-    func makePopupWatermarkPreviewVM() -> PopupWatermarkPreviewVM {
+    func makePopupWatermarkPreviewVM(id: UUID) -> PopupWatermarkPreviewVM {
         let usecase = WatermarkUsecase(
             wordDataStore: watermarkStore,
             watermarkDataStore: watermarkStore,
             imageExportRepository: imageExportRepository
         )
         return PopupWatermarkPreviewVM(
+            id: id,
             usecase: usecase,
             coodinator: popupWatermark
         )

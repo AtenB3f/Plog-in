@@ -6,10 +6,12 @@
 //  Copyright © 2026 AtenB. All rights reserved.
 //
 
+import Foundation
+
 public enum HomeFlowStep {
     case newWatermrk
-    case basicWatermark
-    case custromWatermark
+    case basicWatermark(id: UUID)
+    case custromWatermark(id: UUID)
 }
 
 public struct HomeResultPayload {

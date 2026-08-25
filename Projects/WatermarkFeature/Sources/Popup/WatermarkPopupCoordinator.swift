@@ -47,5 +47,5 @@ extension WatermarkPopupCoordinator: PopupCoordinator {
 public enum WatermarkPopupRoute: PopupRoute {
     case title
     case word
-    case preview
+    case preview(id: UUID)
 }

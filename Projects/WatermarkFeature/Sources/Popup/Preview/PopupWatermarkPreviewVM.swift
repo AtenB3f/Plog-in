@@ -38,6 +38,7 @@ public class PopupWatermarkPreviewVM: PopupViewModel {
     var coodinator: WatermarkPopupCoordinator
     
     public init(
+        id: UUID,
         usecase: WatermarkUsecase,
         coodinator: WatermarkPopupCoordinator
     ) {

@@ -51,7 +51,7 @@ public extension BasicWatermarkType {
                 stickers: [],
                 array: .init(type: .none, rows: 1, columns: 1),
                 export: .init(type: .auto, width: 650, height: 650),
-                frame: .init(title: self.rawValue, type: .basic)
+                frame: .init(title: self.title, code: self.rawValue)
             )
         case .melonWeekly:
             return .init(
@@ -65,7 +65,7 @@ public extension BasicWatermarkType {
                 stickers: [],
                 array: .init(type: .none, rows: 1, columns: 1),
                 export: .init(type: .auto, width: 650, height: 650),
-                frame: .init(title: self.rawValue, type: .basic)
+                frame: .init(title: self.title, code: self.rawValue)
             )
         case .youtubeStreaming:
             return .init(
@@ -78,7 +78,7 @@ public extension BasicWatermarkType {
                 stickers: [],
                 array: .init(type: .none, rows: 2, columns: 1),
                 export: .init(type: .auto, width: 650, height: 650),
-                frame: .init(title: self.rawValue, type: .basic)
+                frame: .init(title: self.title, code: self.rawValue)
             )
         }
     }
