@@ -31,21 +31,16 @@ extension DIContainer {
 }
 
 extension DIContainer {
-    func startHomeWatermarkPopupFlow(id: UUID) {
-//        homeCancellables.removeAll()
-        popupWatermark.push(route: .preview(id: id))
-    }
-        
     internal func handleHomeStep(_ step: HomeFlowStep) {
         switch step {
         case .newWatermrk:
             startWatermarkFlow()
 
         case .basicWatermark(let id):
-            startHomeWatermarkPopupFlow(id: id)
+            startWatermarkPopupFlow(id: id)
 
         case .custromWatermark(let id):
-            startHomeWatermarkPopupFlow(id: id)
+            startWatermarkPopupFlow(id: id)
         }
     }
 }

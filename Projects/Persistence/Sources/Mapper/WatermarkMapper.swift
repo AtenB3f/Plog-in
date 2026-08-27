@@ -26,6 +26,7 @@ public extension WatermarkWordModel {
 public extension WatermarkModel {
     var toEntity: WatermarkEntity {
         return .init(
+            id: self.id,
             textSetting: self.text.toEntity,
             stickers: self.stickers.map { $0.toEntity },
             arraySetting: self.array.toEntity,
@@ -38,7 +39,7 @@ public extension WatermarkModel {
 public extension WatermarkEntity {
     var toModel: WatermarkModel {
         return .init(
-//            id: self.id,
+            id: self.id,
             text: self.textSetting.toModel,
             stickers: self.stickers.compactMap { $0.toModel },
             array: self.arraySetting.toModel,

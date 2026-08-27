@@ -41,14 +41,14 @@ public struct PopupContentDescription: PopupContent {
 
 public struct PopupContentView<Content: View>: PopupContent {
     public init(
-        @ViewBuilder content: () -> Content
+        @ViewBuilder content: @escaping () -> Content
     ) {
-        self.view = content()
+        self.content = content
     }
-    
-    public var view: Content
-    
+
+    public var content: () -> Content
+
     public func eraseToAnyView() -> AnyView {
-        AnyView(view)
+        AnyView(content())
     }
 }

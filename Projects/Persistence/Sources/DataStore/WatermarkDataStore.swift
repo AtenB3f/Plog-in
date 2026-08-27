@@ -57,6 +57,11 @@ extension WatermarkDataStore: WatermarkRepository {
         return list.map { $0.toModel }
     }
     
+    public func getWatermark(id: UUID) -> WatermarkModel? {
+        let list = store.fetch(type: WatermarkEntity.self)
+        return list.first(where: { $0.id == id })?.toModel
+    }
+    
     public func setWatermark(_ watermark: WatermarkModel) {
         store.save(model: watermark.toEntity)
     }

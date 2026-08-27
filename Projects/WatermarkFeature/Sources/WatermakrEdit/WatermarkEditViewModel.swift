@@ -101,7 +101,7 @@ public class WatermarkEditViewModel: ObservableObject {
             self.savedSnapshot = watermark
         } else {
             var new = WatermarkModel()
-            new.text.text = (words.first ?? "PLAVE")
+            new.text.text = (words.first ?? "")
             self.store.setWatermark(new)
             self.savedSnapshot = nil
         }
@@ -110,6 +110,7 @@ public class WatermarkEditViewModel: ObservableObject {
     }
 }
 
+// MARK: - Initialize
 private extension WatermarkEditViewModel {
     func bind() {
         store.objectWillChange
@@ -194,6 +195,7 @@ private extension WatermarkEditViewModel {
     }
 }
 
+// MARK: - Action
 @MainActor
 extension WatermarkEditViewModel {
     func action(_ action: Action) {
@@ -363,6 +365,8 @@ private extension WatermarkEditViewModel {
         switch step {
         case .dismiss:
             popup.pop()
+        case .wordStart:
+            popup.push(route: .word)
         case .wordFinished(let word):
             words = usecase.fetchWords().map { $0.text }
             store.watermark.text.text = word
