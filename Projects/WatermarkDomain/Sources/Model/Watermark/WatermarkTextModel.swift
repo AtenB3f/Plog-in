@@ -25,10 +25,10 @@ public struct WatermarkTextModel: Hashable {
         fontName: String = "",
         fontSize: CGFloat = .zero,
         rotation: CGFloat = -30,
-        color: ColorData = .init(red: .zero, green: .zero, blue: .zero, opacity: .zero),
+        color: ColorData = .init(red: .zero, green: .zero, blue: .zero, opacity: 0.25),
         spacingWidthRatio: CGFloat = 0.25,
         spacingHeightRatio: CGFloat = 0.25,
-        date: Date? = nil,
+        date: Date? = Date(),
         gradientColors: [ColorData] = []
     ) {
         self.text = text

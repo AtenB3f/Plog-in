@@ -27,7 +27,7 @@ public enum BasicWatermarkType: String, CaseIterable {
     public var description: String {
         switch self {
         case .melonStreaming:
-            return "멜론에서 저장한 스트리밍 카드에 \n워터마크를 넣은 인증미지 만들기"
+            return "멜론에서 저장한 스트리밍 카드에 \n워터마크를 넣은 인증 이미지 만들기"
         case .melonWeekly:
             return "주간 인기상 투표 화면을 캡쳐하여\n인증 이미지 만들기"
         case .youtubeStreaming:
@@ -47,6 +47,7 @@ public extension BasicWatermarkType {
                     color: .init(red: 1, green: 1, blue: 1, opacity: 0.25),
                     spacingWidthRatio: 0.25,
                     spacingHeightRatio: 0.25,
+                    date: Date()
                 ),
                 stickers: [],
                 array: .init(type: .none, rows: 1, columns: 1),
@@ -61,6 +62,7 @@ public extension BasicWatermarkType {
                     color: .init(red: 1, green: 1, blue: 1, opacity: 0.25),
                     spacingWidthRatio: 0.25,
                     spacingHeightRatio: 0.25,
+                    date: Date()
                 ),
                 stickers: [],
                 array: .init(type: .none, rows: 1, columns: 1),
@@ -74,6 +76,7 @@ public extension BasicWatermarkType {
                     color: .init(red: 1, green: 1, blue: 1, opacity: 0.25),
                     spacingWidthRatio: 0.25,
                     spacingHeightRatio: 0.25,
+                    date: Date()
                 ),
                 stickers: [],
                 array: .init(type: .none, rows: 2, columns: 1),

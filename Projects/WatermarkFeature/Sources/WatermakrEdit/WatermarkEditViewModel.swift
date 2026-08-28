@@ -100,9 +100,7 @@ public class WatermarkEditViewModel: ObservableObject {
             self.store.setWatermark(watermark)
             self.savedSnapshot = watermark
         } else {
-            var new = WatermarkModel()
-            new.text.text = (words.first ?? "")
-            self.store.setWatermark(new)
+            self.store.setWatermark(WatermarkModel())
             self.savedSnapshot = nil
         }
 
@@ -164,21 +162,11 @@ private extension WatermarkEditViewModel {
 
     func originInit() {
         if !picker.images.isEmpty {
-            store.setExport(format.makeExportModel(
-                origins: picker.images,
-                array: store.watermark.array
-            ))
+            usecase.setupWatermark(origins: picker.images, current: &store.watermark)
             store.watermark.text.fontName = FontType.body1.fontName
-            store.watermark.text.date = Date()
-            store.watermark.text.gradientColors = Color.disablePrimarys.map { ColorData($0, alpha: 0.3) }
-            format.makeTextModel(
-                origins: picker.images,
-                array: store.watermark.array,
-                current: &store.watermark.text
-            )
         }
         if let color = colorPalet.first {
-            store.watermark.text.color = ColorData(color)
+            store.watermark.text.color = ColorData(color, alpha: store.watermark.text.color.opacity)
         }
         words = usecase.fetchWords().map { $0.text }
     }

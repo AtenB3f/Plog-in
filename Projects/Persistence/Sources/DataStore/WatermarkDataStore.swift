@@ -21,15 +21,18 @@ public class WatermarkDataStore {
 // MARK: - Watermark Word
 extension WatermarkDataStore: WatermarkWordRepository {
     public func getWords() -> [WatermarkWordModel] {
-        let list = store.fetch(type: WatermarkWordEntity.self)
+        let list = store.fetch(
+            type: WatermarkWordEntity.self,
+            sortBy: [SortDescriptor(\.date, order: .reverse)]
+        )
         return list.map { $0.toModel }
     }
     
     public func setWord(_ text: String) {
         let list = getWords()
         if list.count >= 10 {
-            if let first = list.first?.toEntity {
-                store.delete(model: first)
+            if let oldest = list.last?.toEntity {
+                store.delete(model: oldest)
             }
         }
         let data = WatermarkWordEntity(text: text)

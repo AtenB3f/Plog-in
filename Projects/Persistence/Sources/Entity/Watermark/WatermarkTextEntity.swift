@@ -29,10 +29,10 @@ public final class WatermarkTextEntity {
         fontName: String = "",
         fontSize: CGFloat = .zero,
         rotation: CGFloat = .zero,
-        color: ColorData = .init(red: .zero, green: .zero, blue: .zero, opacity: 1.0),
+        color: ColorData = .init(red: .zero, green: .zero, blue: .zero, opacity: 0.25),
         spacingWidthRatio: CGFloat = .zero,
         spacingHeightRatio: CGFloat = .zero,
-        date: Date? = nil,
+        date: Date? = Date(),
         gradientColors: [ColorData] = []
     ) {
         self.text = text

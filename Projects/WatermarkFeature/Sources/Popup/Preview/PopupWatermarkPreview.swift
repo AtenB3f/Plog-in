@@ -69,7 +69,7 @@ extension PopupWatermarkPreview {
                     viewModel.action(.input)
                 } label: {
                     IconLabel(
-                        text: viewModel.text,
+                        text: viewModel.store.watermark.text.text,
                         icon: .iconChevronRightSM,
                         color: .Text.light,
                         size: 24
