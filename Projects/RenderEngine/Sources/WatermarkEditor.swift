@@ -29,15 +29,16 @@ public class WatermarkEditor {
 
     public func generateWatermarks() -> [PImage] {
         guard !origins.isEmpty else { return [] }
-        let exportSize = watermark.export.getSize()
 
         guard watermark.array.type != .none else {
-            let watermarkSize = origins.first?.size ?? exportSize
-            return origins.map {
-                drawWatermark(on: $0, exportSize: exportSize, watermarkSize: watermarkSize)
+            let referenceSize = format.getWatermarkImageSize(origins: origins, array: watermark.array)
+            return origins.map { image in
+                let size = format.getExportSize(for: image, export: watermark.export)
+                return drawWatermark(on: image, exportSize: size, watermarkSize: referenceSize)
             }
         }
 
+        let exportSize = watermark.export.getSize()
         let watermarkSize = format.getWatermarkImageSize(origins: origins, array: watermark.array)
         let merged = mergeImages(origins: origins, array: watermark.array, exportSize: exportSize)
         return [drawWatermark(on: merged, exportSize: exportSize, watermarkSize: watermarkSize)]
@@ -227,6 +228,9 @@ public extension WatermarkEditor {
             let y = CGFloat(row - 1) * cellSize.height
             let cellRect = CGRect(x: x, y: y, width: cellSize.width, height: cellSize.height)
 
+            context.setFillColor(PColor.black.cgColor)
+            context.fill(cellRect)
+
             resizeFitImage(image: image, rect: cellRect, context: context)
         }
     }
@@ -237,18 +241,15 @@ public extension WatermarkEditor {
         context: CGContext
     ) {
         let imageSize = image.size
-        let targetSize = rect.size
-        var ratio: CGFloat = 1.0
-        if targetSize.width > targetSize.height {
-            ratio = imageSize.height / targetSize.height
-        } else {
-            ratio = imageSize.width / targetSize.width
-        }
-        let scaledWidth: CGFloat = imageSize.width * (ratio > 1 ? (1 / ratio) : ratio)
-        let scaledHeight: CGFloat = imageSize.height * (ratio > 1 ? (1 / ratio) : ratio)
+        guard imageSize.width > 0, imageSize.height > 0 else { return }
+
+        // 비율을 유지한 채 최대 사이즈로 계산
+        let scale = min(rect.width / imageSize.width, rect.height / imageSize.height)
+        let scaledWidth = imageSize.width * scale
+        let scaledHeight = imageSize.height * scale
         let drawRect = CGRect(
-            x: rect.minX,
-            y: rect.minY,
+            x: rect.minX + (rect.width - scaledWidth) / 2,
+            y: rect.minY + (rect.height - scaledHeight) / 2,
             width: scaledWidth,
             height: scaledHeight
         )

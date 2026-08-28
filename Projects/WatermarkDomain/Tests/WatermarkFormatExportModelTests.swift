@@ -72,6 +72,29 @@ struct MakeExportModelAutoTests {
         let export = format.makeExportModel(origins: images, array: array)
         expectEqual(export.getSize(), expected)
     }
+
+    @Test("WatarmarkArrayType.grid — origins.first가 아니라 가장 세로가 긴 이미지 기준으로 셀 비율 결정, 최대값 이하")
+    func gridWithMixedRatioImagesUnderMax() {
+        let images = [
+            PImage.testFixture(width: 100, height: 100), // origins.first, 정사각형
+            PImage.testFixture(width: 100, height: 200)  // 더 세로로 긴 이미지
+        ]
+        let array = WatermarkArrayModel(type: .grid, rows: 1, columns: 2)
+        let export = format.makeExportModel(origins: images, array: array)
+        // origins.first(100x100)만 봤다면 (200, 100)이 되지만, 더 세로로 긴 두 번째 이미지 기준으로 (200, 200)이어야 함
+        expectEqual(export.getSize(), CGSize(width: 200, height: 200))
+    }
+
+    @Test("WatarmarkArrayType.grid — 가장 세로가 긴 이미지 기준 셀 비율 + 최대값(1500) 초과")
+    func gridWithMixedRatioImagesOverMax() {
+        let images = [
+            PImage.testFixture(width: 800, height: 800),  // origins.first, 정사각형
+            PImage.testFixture(width: 800, height: 1600)  // 더 세로로 긴 이미지
+        ]
+        let array = WatermarkArrayModel(type: .grid, rows: 1, columns: 1)
+        let export = format.makeExportModel(origins: images, array: array)
+        expectEqual(export.getSize(), CGSize(width: 750, height: 1500))
+    }
 }
 
 @Suite("WatermarkFormat.makeExportModel — WatermarkExportType.multiple")
@@ -129,5 +152,37 @@ struct MakeExportModelMultipleTests {
         let array = WatermarkArrayModel(type: .grid, rows: rows, columns: columns)
         let export = format.makeExportModel(origins: images, array: array, multiple: multiple)
         expectEqual(export.getSize(), expected)
+    }
+}
+
+/// array.type == .none일 때 이미지 각각의 원본 비율을 유지한 채 export 사이즈를 구하는 테스트
+@Suite("WatermarkFormat.getExportSize(for:export:)")
+struct GetExportSizeTests {
+    let format = WatermarkFormat()
+
+    @Test("auto 타입은 이미지 원본 크기를 그대로 반환")
+    func auto() {
+        let image = PImage.testFixture(width: 400, height: 800)
+        let export = WatermarkExportModel(type: .auto, width: 0, height: 0, multiple: 1)
+        expectEqual(format.getExportSize(for: image, export: export), CGSize(width: 400, height: 800))
+    }
+
+    @Test("multiple 타입은 이미지 원본 크기에 배율을 곱해서 반환")
+    func multiple() {
+        let image = PImage.testFixture(width: 300, height: 600)
+        let export = WatermarkExportModel(type: .multiple, width: 0, height: 0, multiple: 2.5)
+        expectEqual(format.getExportSize(for: image, export: export), CGSize(width: 750, height: 1500))
+    }
+
+    @Test("이미지마다 원본 비율이 달라도 각자의 비율을 그대로 유지한다 (origins.first 기준으로 통일되지 않음)")
+    func perImageAspectRatioPreserved() {
+        let images = [
+            PImage.testFixture(width: 800, height: 600), // 4:3
+            PImage.testFixture(width: 600, height: 800)  // 3:4
+        ]
+        let export = WatermarkExportModel(type: .auto, width: 0, height: 0, multiple: 1)
+        let sizes = images.map { format.getExportSize(for: $0, export: export) }
+        expectEqual(sizes[0], CGSize(width: 800, height: 600))
+        expectEqual(sizes[1], CGSize(width: 600, height: 800))
     }
 }

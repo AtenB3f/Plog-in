@@ -191,6 +191,20 @@ public extension WatermarkFormat {
         return model
     }
 
+    /// array.type == .none일 때, 각 이미지를 기준으로 export 크기를 계산
+    /// 각 이미지의 비율을 그대로 유지함
+    func getExportSize(for image: PImage, export: WatermarkExportModel) -> CGSize {
+        switch export.type {
+        case .auto:
+            return image.size
+        case .multiple:
+            return CGSize(
+                width: image.size.width * export.multiple,
+                height: image.size.height * export.multiple
+            )
+        }
+    }
+
     /// max 너비 1500px로 제한
     /// auto 타입인 경우 사용
     func makeExportModel(
@@ -225,23 +239,27 @@ public extension WatermarkFormat {
                 height *= CGFloat(array.rows)
             }
         case .grid:
+            // 셀의 비율은 가장 세로로 긴 이미지를 기준으로 함
+            let gridSize = getGridSize(origins: origins, rows: array.rows, columns: array.columns)
+            let gridTotalW = gridSize.width
+            let gridTotalH = gridSize.height
             if width > height {
-                if totalW >= max {
-                    ratio = max / totalW
+                if gridTotalW >= max {
+                    ratio = max / gridTotalW
                     width = max
-                    height = totalH * ratio
+                    height = gridTotalH * ratio
                 } else {
-                    width = totalW
-                    height = totalH
+                    width = gridTotalW
+                    height = gridTotalH
                 }
             } else {
-                if totalH >= max {
-                    ratio = max / totalH
+                if gridTotalH >= max {
+                    ratio = max / gridTotalH
                     height = max
-                    width = totalW * ratio
+                    width = gridTotalW * ratio
                 } else {
-                    width = totalW
-                    height = totalH
+                    width = gridTotalW
+                    height = gridTotalH
                 }
             }
         }
@@ -288,8 +306,10 @@ public extension WatermarkFormat {
                 height *= CGFloat(array.rows) * multiple
             }
         case .grid:
-            let totalW = width * CGFloat(array.columns) * multiple
-            let totalH = height * CGFloat(array.rows) * multiple
+            // 셀의 비율은 가장 세로로 긴 이미지를 기준으로 함
+            let gridSize = getGridSize(origins: origins, rows: array.rows, columns: array.columns)
+            let totalW = gridSize.width * multiple
+            let totalH = gridSize.height * multiple
             if width > height {
                 if totalW >= max {
                     ratio = max / totalW
