@@ -57,11 +57,19 @@ private extension WatermarkSticker {
         ZStack {
             ForEach(viewModel.store.watermark.stickers.indices, id: \.self) { index in
                 let isSelected = viewModel.mode.stickerIndex == index
-                
+                let fallback = viewModel.store.watermark.stickers[index]
+
                 StickerItem(
                     sticker: Binding(
-                        get: { viewModel.store.watermark.stickers[index] },
-                        set: { viewModel.store.watermark.stickers[index] = $0 }
+                        get: {
+                            viewModel.store.watermark.stickers.indices.contains(index)
+                                ? viewModel.store.watermark.stickers[index]
+                                : fallback
+                        },
+                        set: { newValue in
+                            guard viewModel.store.watermark.stickers.indices.contains(index) else { return }
+                            viewModel.store.watermark.stickers[index] = newValue
+                        }
                     ),
                     renderRatio: renderRatio,
                     magnify: isSelected ? magnify : 1.0,
