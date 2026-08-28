@@ -83,9 +83,6 @@ extension PopupWatermarkPreviewVM {
 @MainActor
 extension PopupWatermarkPreviewVM {
     func appear() async {
-        if store.watermark.text.text.isEmpty {
-            await loadWord()
-        }
         guard picker.images.isEmpty else { return }
         isShowPicker = true
     }
