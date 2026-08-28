@@ -153,6 +153,49 @@ struct MakeExportModelMultipleTests {
         let export = format.makeExportModel(origins: images, array: array, multiple: multiple)
         expectEqual(export.getSize(), expected)
     }
+
+    @Test(
+        "multiple=1.0은 항상 auto(1500px 캡) 결과와 동일해야 함",
+        arguments: [
+            (WatermarkArrayModel(type: .horizontal, rows: 1, columns: 2), CGSize(width: 600, height: 300)),
+            (WatermarkArrayModel(type: .vertical, rows: 3, columns: 1), CGSize(width: 300, height: 1000)),
+            (WatermarkArrayModel(type: .grid, rows: 2, columns: 2), CGSize(width: 1000, height: 1200))
+        ]
+    )
+    func multipleOneEqualsAuto(array: WatermarkArrayModel, imageSize: CGSize) {
+        let images = [PImage.testFixture(width: imageSize.width, height: imageSize.height)]
+        let autoExport = format.makeExportModel(origins: images, array: array)
+        let multipleExport = format.makeExportModel(origins: images, array: array, multiple: 1.0)
+        expectEqual(multipleExport.getSize(), autoExport.getSize())
+    }
+
+    @Test(".horizontal — columns가 많아 auto 자체가 이미 1500px 캡에 걸려도, multiple=1.0은 auto와 동일해야 함")
+    func horizontalManyColumnsMultipleOneMatchesAuto() {
+        let images = [PImage.testFixture(width: 800, height: 600)]
+        let array = WatermarkArrayModel(type: .horizontal, rows: 1, columns: 10)
+        let autoExport = format.makeExportModel(origins: images, array: array)
+        let multipleExport = format.makeExportModel(origins: images, array: array, multiple: 1.0)
+        // auto 자체도 캡에 걸려야 의미 있는 회귀 테스트가 됨 (예전 공식이면 여기서 3000으로 잘못 나왔음)
+        expectEqual(autoExport.getSize(), CGSize(width: 1500, height: 112.5))
+        expectEqual(multipleExport.getSize(), autoExport.getSize())
+    }
+
+    @Test(".grid — multiple 값에 비례해서 auto 결과가 스케일되어야 함")
+    func gridScalesProportionallyWithMultiple() {
+        let images = [PImage.testFixture(width: 1000, height: 800)]
+        let array = WatermarkArrayModel(type: .grid, rows: 2, columns: 2)
+        let autoSize = format.makeExportModel(origins: images, array: array).getSize()
+        let multipleExport = format.makeExportModel(origins: images, array: array, multiple: 1.5)
+        expectEqual(multipleExport.getSize(), CGSize(width: autoSize.width * 1.5, height: autoSize.height * 1.5))
+    }
+
+    @Test(".grid — 2.0을 넘는 레거시 multiple 값이 들어와도 3000px로 안전 클램프되어야 함")
+    func gridClampsLegacyMultipleAboveTwo() {
+        let images = [PImage.testFixture(width: 1000, height: 800)]
+        let array = WatermarkArrayModel(type: .grid, rows: 2, columns: 2)
+        let export = format.makeExportModel(origins: images, array: array, multiple: 3.0)
+        expectEqual(export.getSize(), CGSize(width: 3000, height: 2400))
+    }
 }
 
 /// array.type == .none일 때 이미지 각각의 원본 비율을 유지한 채 export 사이즈를 구하는 테스트
