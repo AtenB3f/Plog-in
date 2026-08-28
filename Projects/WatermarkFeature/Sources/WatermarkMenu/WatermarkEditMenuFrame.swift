@@ -30,6 +30,7 @@ struct WatermarkEditMenuFrame: View {
                 CategoryTitle("설정 가져오기")
                 FrameList(
                     list: viewModel.frames.map { PImage(data: $0.frame.thumbnailData ?? Data()) ?? PImage() },
+                    titles: viewModel.frames.map { $0.frame.title },
                     state: $viewModel.frameState,
                     onDelete: { viewModel.action(.removeAt(.frame, $0)) },
                     onMove: { viewModel.action(.move(.frame, $0, $1)) }
@@ -38,8 +39,8 @@ struct WatermarkEditMenuFrame: View {
                     viewModel.action(.update(.frame(.load)))
                 }
                 .padding(.vertical, 6)
-                .foldingHeight(!viewModel.frames.isEmpty)
             }
+            .foldingHeight(!viewModel.frames.isEmpty)
             
             Button {
                 viewModel.action(.update(.frame(.save)))
@@ -69,3 +70,9 @@ struct WatermarkEditMenuFrame: View {
         .padding(.vertical, 12)
     }
 }
+
+#if DEBUG
+#Preview {
+    makePreviewWatermarkEditView()
+}
+#endif

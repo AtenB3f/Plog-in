@@ -20,13 +20,14 @@ public final class WatermarkEntity: Identifiable, ObservableObject {
     public var frameSetting: WatermarkFrameEntity
     
     public init(
+        id: UUID = UUID(),
         textSetting: WatermarkTextEntity,
         stickers: [WatermarkStickerEntity],
         arraySetting: WatermarkArrayEntity,
         exportSetting: WatermarkExportEntity,
         frameSetting: WatermarkFrameEntity
     ) {
-        self.id = UUID()
+        self.id = id
         self.textSetting = textSetting
         self.stickers = stickers
         self.arraySetting = arraySetting

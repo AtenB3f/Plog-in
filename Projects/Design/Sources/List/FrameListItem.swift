@@ -14,21 +14,26 @@ public struct FrameItemState: Codable {
     public var id: UUID
     public var data: Data
     public var image: PImage { PImage(data: data) ?? PImage() }
+    public var title: String
     
     public init(
         id: UUID = UUID(),
-        image: PImage
+        image: PImage,
+        title: String = ""
     ) {
         self.id = id
         self.data = image.pngData() ?? Data()
+        self.title = title
     }
     
     public init(
         id: UUID = UUID(),
-        data: Data
+        data: Data,
+        title: String = ""
     ) {
         self.id = id
         self.data = data
+        self.title = title
     }
 }
 

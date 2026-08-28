@@ -7,6 +7,7 @@
 //
 
 import SwiftUI
+import Persistence
 
 // MARK: - Home
 extension DIContainer {
@@ -21,28 +22,25 @@ extension DIContainer {
     }
     
     func makeHomeVM() -> HomeViewModel {
-        return HomeViewModel(navigation: navigation, watermarkPopup: popupWatermark)
+        return HomeViewModel(
+            navigation: navigation,
+            watermarkPopup: popupWatermark,
+            watermarkStore: watermarkStore
+        )
     }
 }
 
 extension DIContainer {
-    func startHomeFlow() {
-        homeCancellables.removeAll()
-        navigation.push(route: TabNavigationRouter.watermarkEdit)
-    }
-
     internal func handleHomeStep(_ step: HomeFlowStep) {
         switch step {
         case .newWatermrk:
             startWatermarkFlow()
 
-        case .basicWatermark:
-            // pendingHomeResult = HomeResultPayload(...)
-            break
+        case .basicWatermark(let id):
+            startWatermarkPopupFlow(id: id)
 
-        case .custromWatermark:
-            // TODO: .basicWatermark와 동일한 패턴으로 구현.
-            break
+        case .custromWatermark(let id):
+            startWatermarkPopupFlow(id: id)
         }
     }
 }

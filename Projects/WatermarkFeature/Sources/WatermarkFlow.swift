@@ -15,6 +15,7 @@ public enum WatermarkFlowStep {
 
 public enum WatermarkPopupFlowStep {
     case dismiss
+    case wordStart
     case wordFinished(word: String)
     case titleFinished(title: String)
     case previewFinished

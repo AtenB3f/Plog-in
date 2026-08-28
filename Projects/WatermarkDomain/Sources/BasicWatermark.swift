@@ -6,6 +6,7 @@
 //  Copyright © 2025 AtenB. All rights reserved.
 //
 
+import PlatformCore
 import Foundation
 
 public enum BasicWatermarkType: String, CaseIterable {
@@ -23,20 +24,15 @@ public enum BasicWatermarkType: String, CaseIterable {
             return "유튜브 스트리밍"
         }
     }
-    
-    public var description: String {
-        switch self {
-        case .melonStreaming:
-            return "멜론에서 저장한 스트리밍 카드에 \n워터마크를 넣은 인증미지 만들기"
-        case .melonWeekly:
-            return "주간 인기상 투표 화면을 캡쳐하여\n인증 이미지 만들기"
-        case .youtubeStreaming:
-            return "영상의 시작과 끝 화면을 캡쳐한 두 장의 \n이미지를 합쳐 하나의 인증 이미지 만들기"
-        }
-    }
 }
 
 public extension BasicWatermarkType {
+    func watermark(thumnail: PImage) -> WatermarkModel {
+        var data = self.watermark
+        data.frame.thumbnailData = thumnail.pngData()
+        return data
+    }
+    
     var watermark: WatermarkModel {
         switch self {
         case .melonStreaming:
@@ -47,11 +43,12 @@ public extension BasicWatermarkType {
                     color: .init(red: 1, green: 1, blue: 1, opacity: 0.25),
                     spacingWidthRatio: 0.25,
                     spacingHeightRatio: 0.25,
+                    date: Date()
                 ),
                 stickers: [],
                 array: .init(type: .none, rows: 1, columns: 1),
                 export: .init(type: .auto, width: 650, height: 650),
-                frame: .init(title: self.rawValue, type: .basic)
+                frame: .init(title: self.title, code: self.rawValue)
             )
         case .melonWeekly:
             return .init(
@@ -61,11 +58,12 @@ public extension BasicWatermarkType {
                     color: .init(red: 1, green: 1, blue: 1, opacity: 0.25),
                     spacingWidthRatio: 0.25,
                     spacingHeightRatio: 0.25,
+                    date: Date()
                 ),
                 stickers: [],
                 array: .init(type: .none, rows: 1, columns: 1),
                 export: .init(type: .auto, width: 650, height: 650),
-                frame: .init(title: self.rawValue, type: .basic)
+                frame: .init(title: self.title, code: self.rawValue)
             )
         case .youtubeStreaming:
             return .init(
@@ -74,11 +72,12 @@ public extension BasicWatermarkType {
                     color: .init(red: 1, green: 1, blue: 1, opacity: 0.25),
                     spacingWidthRatio: 0.25,
                     spacingHeightRatio: 0.25,
+                    date: Date()
                 ),
                 stickers: [],
-                array: .init(type: .none, rows: 2, columns: 1),
+                array: .init(type: .vertical, rows: 2, columns: 1),
                 export: .init(type: .auto, width: 650, height: 650),
-                frame: .init(title: self.rawValue, type: .basic)
+                frame: .init(title: self.title, code: self.rawValue)
             )
         }
     }

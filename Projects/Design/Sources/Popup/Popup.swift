@@ -109,13 +109,13 @@ struct PopupButtonRender: View {
                 switch two.alignment {
                 case .horizonatal:
                     HStack {
-                        two.first
-                        two.second
+                        two.first()
+                        two.second()
                     }
                 case .vertical:
                     VStack {
-                        two.first
-                        two.second
+                        two.first()
+                        two.second()
                     }
                 }
             }

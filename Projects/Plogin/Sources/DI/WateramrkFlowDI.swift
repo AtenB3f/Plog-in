@@ -14,13 +14,34 @@ import WatermarkFeature
 import WatermarkDomain
 import RenderEngine
 
+// MARK: - 워터마크 편집
+extension DIContainer {
+    func startWatermarkFlow() {
+        watermarkCancellables.removeAll()
+        navigation.push(route: TabNavigationRouter.watermarkEdit)
+    }
+
+    private func handleWatermarkStep(_ step: WatermarkFlowStep) {
+        switch step {
+        case .editFinished(let watermark, let origins):
+            pendingWatermarkResult = .init(watermark: watermark, origins: origins)
+            navigation.push(route: TabNavigationRouter.watermarkResult)
+
+        case .resultFinished:
+            navigation.popRoot()
+            pendingWatermarkResult = nil
+            watermarkCancellables.removeAll()
+        }
+    }
+}
+
 // MARK: - Watermark
 extension DIContainer {
     func makeWatermarkVM(
         picker: AssetPicker,
         stickerPicker: AssetPicker,
         store: WatermarkStore,
-        editMode: WatermarkEditModeStore?
+        editMode: WatermarkEditModeStore? = nil
     ) -> WatermarkViewModel {
         return WatermarkViewModel(
             picker: picker,
@@ -35,7 +56,6 @@ extension DIContainer {
         stickerPicker: AssetPicker = AssetPicker(mediaType: .image, limit: 10),
         store: WatermarkStore = WatermarkStore()
     ) -> WatermarkEditView {
-        // 캔버스와 편집 메뉴가 같은 편집모드를 보도록 하나의 인스턴스를 양쪽에 넘긴다.
         let editMode = WatermarkEditModeStore()
         let editVM = makeWatermarkEditVM(
             picker: picker,
@@ -105,25 +125,5 @@ extension DIContainer {
             imageExportRepository: imageExportRepository
         )
         return WatermarkResultViewModel(editor: editor, watermarkUsecase: usecase)
-    }
-}
-
-extension DIContainer {
-    func startWatermarkFlow() {
-        watermarkCancellables.removeAll()
-        navigation.push(route: TabNavigationRouter.watermarkEdit)
-    }
-
-    private func handleWatermarkStep(_ step: WatermarkFlowStep) {
-        switch step {
-        case .editFinished(let watermark, let origins):
-            pendingWatermarkResult = .init(watermark: watermark, origins: origins)
-            navigation.push(route: TabNavigationRouter.watermarkResult)
-
-        case .resultFinished:
-            navigation.popRoot()
-            pendingWatermarkResult = nil
-            watermarkCancellables.removeAll()
-        }
     }
 }

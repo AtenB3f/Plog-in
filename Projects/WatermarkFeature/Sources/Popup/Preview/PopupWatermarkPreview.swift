@@ -10,14 +10,18 @@ import SwiftUI
 import Combine
 import UISchema
 import Design
+import PlatformExport
 
 public struct PopupWatermarkPreview: View {
     @StateObject var viewModel: PopupWatermarkPreviewVM
+    let wateramrkVM: WatermarkViewModel
     
     public init(
-        viewModel: PopupWatermarkPreviewVM
+        viewModel: PopupWatermarkPreviewVM,
+        wateramrkVM: WatermarkViewModel
     ) {
         self._viewModel = StateObject(wrappedValue: viewModel)
+        self.wateramrkVM = wateramrkVM
     }
     
     public var body: some View {
@@ -33,6 +37,12 @@ public struct PopupWatermarkPreview: View {
                         second: { makeRightButton() }
                     )
                 )
+                viewModel.action(.appear)
+            }
+            .fullScreenCover(isPresented: $viewModel.isShowPicker) {
+                viewModel.action(.select)
+            } content: {
+                AssetPickerView(picker: viewModel.picker)
             }
     }
 }
@@ -41,18 +51,14 @@ extension PopupWatermarkPreview {
     @ViewBuilder
     func makeContent() -> some View {
         VStack(spacing: 20) {
-            Color.Gray.disable
+            Color.clear
                 .aspectRatio(contentMode: .fit)
                 .frame(maxWidth: .infinity, alignment: .center)
-                .cornerRadius(4, corner: .all)
                 .overlay {
-                    // thumbhnail
-                    viewModel.preview?
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
-                        .frame(maxWidth: .infinity, alignment: .center)
+                    WatermarkView(viewModel: wateramrkVM)
                 }
-            
+                .cornerRadius(4, corner: .all)
+                
             HStack {
                 Text("문구")
                     .font(.body1)
@@ -60,9 +66,10 @@ extension PopupWatermarkPreview {
                 Spacer()
                 
                 Button {
+                    viewModel.action(.input)
                 } label: {
                     IconLabel(
-                        text: viewModel.text,
+                        text: viewModel.store.watermark.text.text,
                         icon: .iconChevronRightSM,
                         color: .Text.light,
                         size: 24
@@ -89,4 +96,3 @@ extension PopupWatermarkPreview {
         }
     }
 }
-

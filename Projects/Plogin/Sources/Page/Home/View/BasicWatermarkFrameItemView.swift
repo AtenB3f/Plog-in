@@ -23,11 +23,23 @@ struct BasicWatermarkItemView: View {
                 Text(type.title)
                     .font(.sub1)
                     .foreground(.Text.light)
-                
-                Text(type.description)
-                    .font(.body1)
-                    .foreground(.Text.dark)
-                    .multilineTextAlignment(.leading)
+                switch type {
+                case .melonStreaming:
+                    Text("멜론에서 저장한 스트리밍 카드에 \n워터마크를 넣은 인증 이미지 만들기")
+                        .font(.body1)
+                        .foreground(.Text.dark)
+                        .multilineTextAlignment(.leading)
+                case .melonWeekly:
+                    Text("주간 인기상 투표 화면을 캡쳐하여\n인증 이미지 만들기")
+                        .font(.body1)
+                        .foreground(.Text.dark)
+                        .multilineTextAlignment(.leading)
+                case .youtubeStreaming:
+                    Text("영상의 시작과 끝 화면을 캡쳐한 두 장의 \n이미지를 합쳐 하나의 인증 이미지 만들기")
+                        .font(.body1)
+                        .foreground(.Text.dark)
+                        .multilineTextAlignment(.leading)
+                }
             }
             
             Spacer()
@@ -39,8 +51,8 @@ struct BasicWatermarkItemView: View {
     }
 }
 
-//#Preview {
-//    BasicWatermarkItemView(type: .melonStreaming)
-//    BasicWatermarkItemView(type: .melonWeekly)
-//    BasicWatermarkItemView(type: .youtubeStreaming)
-//}
+#Preview {
+    BasicWatermarkItemView(type: .melonStreaming)
+    BasicWatermarkItemView(type: .melonWeekly)
+    BasicWatermarkItemView(type: .youtubeStreaming)
+}

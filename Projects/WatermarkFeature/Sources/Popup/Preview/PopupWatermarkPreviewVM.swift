@@ -8,102 +8,135 @@
 
 import SwiftUI
 import Combine
-import Design
 import UISchema
-import WatermarkDomain
+import Design
 import PlatformCore
+import PlatformExport
+import Persistence
+import RenderEngine
+import WatermarkDomain
 
 public class PopupWatermarkPreviewVM: PopupViewModel {
     enum Action {
+        case appear
         case input
-        case save
-        case clear
+        case select
         case cancel
         case confirm
     }
     
-    @Published var assets: [AssetData] = []
-    @Published var words: [String] = []
-    @Published var text: String = ""
-    @Published var isShowInput: Bool = false
-    @Published var preview: Image?
-    var previewData: PImage? {
-        didSet {
-            guard let previewData = previewData else { return }
-            preview = Image(uiImage: previewData)
-        }
-    }
+    @Published var previews: [PImage] = []
+
+    @Published var isShowPicker: Bool = false
+    @Published var pickerType: WatermarkEditPickerType?
     
-    var usecase: WatermarkUsecase
-    var coodinator: WatermarkPopupCoordinator
+    private let usecase: WatermarkUsecase
+    private let coodinator: WatermarkPopupCoordinator
+    let store: WatermarkStore
+    let picker: AssetPicker
+    private var editor: WatermarkEditor?
     
     public init(
+        id: UUID,
         usecase: WatermarkUsecase,
-        coodinator: WatermarkPopupCoordinator
+        coodinator: WatermarkPopupCoordinator,
+        store: WatermarkStore,
+        picker: AssetPicker
     ) {
         self.usecase = usecase
         self.coodinator = coodinator
+        self.store = store
+        self.picker = picker
         super.init()
-        self.loadWords()
+        _ = loadWatermark(id: id)
     }
 }
 
 extension PopupWatermarkPreviewVM {
     @MainActor
     func action(_ action: Action) {
-        switch action {
-        case .input:
-            input()
-        case .save:
-            save()
-        case .clear:
-            clear()
-        case .cancel:
-            cancel()
-        case .confirm:
-            confirm()
+        Task {
+            switch action {
+            case .appear:
+                await appear()
+            case .input:
+                input()
+            case .select:
+                await select()
+            case .cancel:
+                cancel()
+            case .confirm:
+                await confirm()
+            }
         }
+    }
+    
+    public func applyWord(_ word: String) {
+        store.watermark.text.text = word
+
+        guard !picker.images.isEmpty else { return }
+        setEditor()
+        makePreview()
     }
 }
 
 @MainActor
 extension PopupWatermarkPreviewVM {
+    func appear() async {
+        guard picker.images.isEmpty else { return }
+        isShowPicker = true
+    }
+
+    // 문구 입력
     func input() {
-//        dataManager.saveWatermarkWord(text)
-//            isShowInput = false
+        coodinator.stepSubject.send(.wordStart)
     }
-    
-    func save() {
-//        dataManager.saveWatermarkWord(text)
-//        text = dataManager.loadWatermarkWord().first?.text ?? ""
+
+    func select() async {
+        if picker.images.isEmpty {
+            cancel()
+        } else {
+            usecase.setupWatermark(origins: picker.images, current: &store.watermark)
+            setEditor()
+            makePreview()
+        }
     }
-    
-    func clear() {
-        text = ""
-    }
-    
+
     func cancel() {
-        // popup dismiss
-//        coordinator.pop()
-        coodinator.stepSubject.send(.previewFinished)
+        coodinator.stepSubject.send(.dismiss)
     }
-    
-    func confirm() {
-        // data save
-        
+
+    func confirm() async {
+        _ = await usecase.saveWatermarkImage(previews)
         coodinator.stepSubject.send(.previewFinished)
     }
 }
 
-extension PopupWatermarkPreviewVM {
-    func loadWords() {
-//        self.words = dataManager.loadWatermarkWord().map { $0.text }
-        self.words = []
+private extension PopupWatermarkPreviewVM {
+    func setEditor() {
+        editor = WatermarkEditor(watermark: store.watermark, origins: picker.images)
     }
     
-    func makePreview(_ watermark: WatermarkModel) {
-        guard let image = assets.first?.imageAsset else { return }
-//        watermark.textSetting.text = text
-//        previewData = editer.drawWatermark(image: image, watermark: watermark)
-    }    
+    @MainActor
+    func loadWord() async {
+        if let recent = usecase.fetchWords().first {
+            store.watermark.text.text = recent.text
+        } else {
+            input()
+        }
+    }
+
+    func loadWatermark(id: UUID) -> WatermarkModel {
+        let watermarks = usecase.fetchWatermarks()
+        if let watermark = watermarks.first(where: { $0.id == id }) {
+            store.watermark = watermark
+        }
+        return store.watermark
+    }
+    
+    func makePreview() {
+        if let images = editor?.generateWatermarks() {
+            previews = images
+        }
+    }
 }

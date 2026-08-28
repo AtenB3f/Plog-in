@@ -28,48 +28,48 @@ public struct PopupButtonNone: PopupButton {
 
 public struct PopupButtonOne<Content: View>: PopupButton {
     public init(
-        @ViewBuilder content: () -> Content
+        @ViewBuilder content: @escaping () -> Content
     ) {
-        self.button = content()
+        self.content = content
     }
-    
-    public let button: Content
-    
+
+    public let content: () -> Content
+
     public func eraseToAnyView() -> AnyView {
-        AnyView(button)
+        AnyView(content())
     }
 }
 
 public struct PopupButtonTwo: PopupButton {
     public init(
         alignment: Alignment.Perpendicular,
-        @ViewBuilder first: () -> View,
-        @ViewBuilder second: () -> View
+        @ViewBuilder first: @escaping () -> View,
+        @ViewBuilder second: @escaping () -> View
     ) {
         self.alignment = alignment
-        self.first = AnyView(first())
-        self.second = AnyView(second())
+        self.first = { AnyView(first()) }
+        self.second = { AnyView(second()) }
     }
-    
+
     public let alignment: Alignment.Perpendicular
-    public let first: AnyView
-    public let second: AnyView
-    
+    public let first: () -> AnyView
+    public let second: () -> AnyView
+
     public func eraseToAnyView() -> AnyView {
-        AnyView(Group { first; second })
+        AnyView(Group { first(); second() })
     }
 }
 
 public struct PopupButtonContent<Content: View>: PopupButton {
     public init(
-        @ViewBuilder content: () -> Content
+        @ViewBuilder content: @escaping () -> Content
     ) {
-        self.view = content()
+        self.content = content
     }
-    
-    public let view: Content
-    
+
+    public let content: () -> Content
+
     public func eraseToAnyView() -> AnyView {
-        AnyView(view)
+        AnyView(content())
     }
 }

@@ -26,6 +26,7 @@ public extension WatermarkWordModel {
 public extension WatermarkModel {
     var toEntity: WatermarkEntity {
         return .init(
+            id: self.id,
             textSetting: self.text.toEntity,
             stickers: self.stickers.map { $0.toEntity },
             arraySetting: self.array.toEntity,
@@ -38,7 +39,7 @@ public extension WatermarkModel {
 public extension WatermarkEntity {
     var toModel: WatermarkModel {
         return .init(
-//            id: self.id,
+            id: self.id,
             text: self.textSetting.toModel,
             stickers: self.stickers.compactMap { $0.toModel },
             array: self.arraySetting.toModel,
@@ -150,6 +151,7 @@ public extension WatermarkFrameModel {
     var toEntity: WatermarkFrameEntity {
         return .init(
             id: self.id,
+            code: self.code,
             thumnail: self.thumbnailData,
             title: self.title,
             type: self.type
@@ -159,10 +161,18 @@ public extension WatermarkFrameModel {
 
 public extension WatermarkFrameEntity {
     var toModel: WatermarkFrameModel {
-        return .init(
-            thumbnailData: self.thumbnailData,
-            title: self.title,
-            type: self.type
-        )
+        switch self.type {
+        case .basic:
+            return .init(
+                thumbnailData: self.thumbnailData,
+                title: self.title,
+                code: self.code
+            )
+        case .custom:
+            return .init(
+                thumbnailData: self.thumbnailData,
+                title: self.title
+            )
+        }
     }
 }

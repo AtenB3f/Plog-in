@@ -16,16 +16,17 @@ public enum WatermarkFrameType: String, Codable {
 
 public struct WatermarkFrameModel: Identifiable, Hashable {
     public let id: UUID
+    public var code: String
     public var thumbnailData: Data?
     public var title: String
     public var date: Date
     public var lastDate: Date
     public var type: WatermarkFrameType
 
+    /// WatermarkFrameType가 .custom인 경우 사용
     public init(
         thumnail: PImage,
-        title: String = "",
-        type: WatermarkFrameType = .custom
+        title: String = ""
     ) {
         self.id = UUID()
         self.thumbnailData = thumnail.pngData()
@@ -33,13 +34,30 @@ public struct WatermarkFrameModel: Identifiable, Hashable {
         let current = Date()
         self.date = current
         self.lastDate = current
-        self.type = type
+        self.type = .custom
+        self.code = id.uuidString
     }
     
+    /// WatermarkFrameType가 .basic인 경우 사용
+    public init(
+        thumnail: PImage,
+        title: String = "",
+        code: String
+    ) {
+        self.id = UUID()
+        self.thumbnailData = thumnail.pngData()
+        self.title = title
+        let current = Date()
+        self.date = current
+        self.lastDate = current
+        self.type = .basic
+        self.code = code
+    }
+    
+    /// WatermarkFrameType가 .custom인 경우 사용
     public init(
         thumbnailData: Data? = nil,
-        title: String = "",
-        type: WatermarkFrameType = .custom
+        title: String = ""
     ) {
         self.id = UUID()
         self.thumbnailData = thumbnailData
@@ -47,6 +65,23 @@ public struct WatermarkFrameModel: Identifiable, Hashable {
         let current = Date()
         self.date = current
         self.lastDate = current
-        self.type = type
+        self.type = .custom
+        self.code = id.uuidString
+    }
+    
+    /// WatermarkFrameType가 .basic인 경우 사용
+    public init(
+        thumbnailData: Data? = nil,
+        title: String = "",
+        code: String
+    ) {
+        self.id = UUID()
+        self.thumbnailData = thumbnailData
+        self.title = title
+        let current = Date()
+        self.date = current
+        self.lastDate = current
+        self.type = .basic
+        self.code = code
     }
 }

@@ -34,7 +34,7 @@ public enum FrameListMode {
 }
 
 public struct FrameList: View {
-    let list: [FrameItemState]
+    var list: [FrameItemState]
     @Binding var state: FrameListState
     let onDelete: ((Int) -> Void)?
     let onMove: ((IndexSet, Int) -> Void)?
@@ -45,12 +45,16 @@ public struct FrameList: View {
     
     public init(
         list: [PImage],
+        titles: [String] = [],
         state: Binding<FrameListState>,
         size: Double = 76,
         onDelete: ((Int) -> Void)? = nil,
         onMove: ((IndexSet, Int) -> Void)? = nil
     ) {
         self.list = list.map { .init(image: $0)}
+        for index in list.indices {
+            self.list[index].title = titles.count > index ? titles[index] : ""
+        }
         self._state = state
         self.size = size
         self.onDelete = onDelete
@@ -61,12 +65,16 @@ public struct FrameList: View {
         ScrollView(.horizontal) {
             LazyHStack(spacing: 0) {
                 ForEach(list.indices, id: \.self) { index in
-                    item(state.mode, index: index, item: list[index])
+                    item(
+                        state.mode,
+                        index: index,
+                        item: list[index]
+                    )
                 }
             }
             .padding(.horizontal, state.mode == .sort ? 0 : 16)
         }
-        .frame(height: size)
+        .fixedSize(horizontal: false, vertical: true)
         .scrollIndicators(.hidden)
         .onTapGesture {
             guard state.mode != .edit else { return }
@@ -78,82 +86,93 @@ public struct FrameList: View {
     
     @ViewBuilder
     func item(_ mode: FrameListMode, index: Int, item: FrameItemState) -> some View {
-        HStack(spacing: 0) {
-            switch mode {
-            case .sort:
-                Rectangle()
-                    .foreground(.Base.dark)
-                    .frame(
-                        width: (hoverIndex == index) ? size : (index == 0 ? 16 : spacing),
-                        height: size
-                    )
-                    .dropDestination(for: FrameItemState.self) { items, _ in
-                        return onDropHander(items: items)
-                    } isTargeted: { isTarget in
-                        guard isTarget else { return }
-                        onDragHandler(index: index)
-                    }
-                
-                FrameItemView(
-                    image: item.image,
-                    index: index,
-                    mode: .sort,
-                    size: size,
-                    onDelete: { onDelete?(index) }
-                )
-                .draggable(item)
-                .overlay {
-                    RoundedRectangle(cornerRadius: 4)
-                        .stroke()
-                        .foreground(state.index == index ? .Text.light : .clear)
-                }
-                .dropDestination(for: FrameItemState.self) { items, _ in
-                    return onDropHander(items: items)
-                } isTargeted: { isTarget in
-                    guard isTarget else { return }
-                    onDragHandler(index: list.count - 1 == index ? index+1 : index)
-                }
-                
-                if list.count - 1 == index {
+        VStack(spacing: 2) {
+            HStack(spacing: 0) {
+                switch mode {
+                case .sort:
                     Rectangle()
                         .foreground(.Base.dark)
                         .frame(
-                            width: hoverIndex == list.count ? size : 16,
+                            width: (hoverIndex == index) ? size : (index == 0 ? 16 : spacing),
                             height: size
                         )
                         .dropDestination(for: FrameItemState.self) { items, _ in
                             return onDropHander(items: items)
                         } isTargeted: { isTarget in
                             guard isTarget else { return }
-                            onDragHandler(index: index+1)
+                            onDragHandler(index: index)
                         }
+                    
+                    FrameItemView(
+                        image: item.image,
+                        index: index,
+                        mode: .sort,
+                        size: size,
+                        onDelete: { onDelete?(index) }
+                    )
+                    .draggable(item)
+                    .overlay {
+                        RoundedRectangle(cornerRadius: 4)
+                            .stroke()
+                            .foreground(state.index == index ? .Text.light : .clear)
+                    }
+                    .dropDestination(for: FrameItemState.self) { items, _ in
+                        return onDropHander(items: items)
+                    } isTargeted: { isTarget in
+                        guard isTarget else { return }
+                        onDragHandler(index: list.count - 1 == index ? index+1 : index)
+                    }
+                    
+                    if list.count - 1 == index {
+                        Rectangle()
+                            .foreground(.Base.dark)
+                            .frame(
+                                width: hoverIndex == list.count ? size : 16,
+                                height: size
+                            )
+                            .dropDestination(for: FrameItemState.self) { items, _ in
+                                return onDropHander(items: items)
+                            } isTargeted: { isTarget in
+                                guard isTarget else { return }
+                                onDragHandler(index: index+1)
+                            }
+                    }
+                    
+                default:
+                    FrameItemView(
+                        image: item.image,
+                        index: index,
+                        mode: state.mode == .edit ? .edit : (state.index == index ? .select : .none),
+                        size: size,
+                        onDelete: { onDelete?(index) }
+                    )
+                    .overlay {
+                        RoundedRectangle(cornerRadius: 4)
+                            .stroke()
+                            .foreground(state.index == index ? .Text.light : .clear)
+                    }
+                    .onTapGesture {
+                        state.mode = state.mode == .edit ? .edit : .select
+                        state.index = index
+                        hoverIndex = nil
+                    }
+                    .onLongPressGesture(minimumDuration: 0.5) {
+                        state.mode = .sort
+                        state.index = nil
+                    }
+                    
+                    Spacer()
+                        .frame(width: spacing, height: size)
                 }
-                
-            default:
-                FrameItemView(
-                    image: item.image,
-                    index: index,
-                    mode: state.mode == .edit ? .edit : (state.index == index ? .select : .none),
-                    size: size,
-                    onDelete: { onDelete?(index) }
-                )
-                .overlay {
-                    RoundedRectangle(cornerRadius: 4)
-                        .stroke()
-                        .foreground(state.index == index ? .Text.light : .clear)
-                }
-                .onTapGesture {
-                    state.mode = state.mode == .edit ? .edit : .select
-                    state.index = index
-                    hoverIndex = nil
-                }
-                .onLongPressGesture(minimumDuration: 0.5) {
-                    state.mode = .sort
-                    state.index = nil
-                }
-                
-                Spacer()
-                    .frame(width: spacing, height: size)
+            }
+            
+            if !item.title.isEmpty {
+                Text(item.title)
+                    .font(.body1)
+                    .foreground(.Text.light)
+                    .frame(width: size, alignment: .leading)
+                    .lineLimit(1)
+                    .truncationMode(.tail)
             }
         }
     }
@@ -175,7 +194,6 @@ public struct FrameList: View {
             hoverIndex = nil
             return false
         }
-//        print(from, to)
         if from > to {
             if to == list.count {
                 to = list.count - 1
@@ -201,6 +219,7 @@ public struct FrameList: View {
 
     FrameList(
         list: list,
+        titles: ["starstarstar", "star", "moon", "moon"],
         state: $state,
         size: 76,
         onDelete: {_ in

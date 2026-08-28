@@ -11,6 +11,7 @@ import Combine
 import PlatformCore
 import WatermarkDomain
 import WatermarkFeature
+import Persistence
 
 class HomeViewModel: ObservableObject {
     @Published var isShowPicker: Bool = false
@@ -19,6 +20,7 @@ class HomeViewModel: ObservableObject {
     
     private let navigation: TabNavigaionCoordinator
     private let watermarkPopup: WatermarkPopupCoordinator
+    private let watermarkStore: WatermarkDataStore
     
     // Home Flow Step
     private let stepSubject = PassthroughSubject<HomeFlowStep, Never>()
@@ -26,10 +28,12 @@ class HomeViewModel: ObservableObject {
     
     init(
         navigation: TabNavigaionCoordinator,
-        watermarkPopup: WatermarkPopupCoordinator
+        watermarkPopup: WatermarkPopupCoordinator,
+        watermarkStore: WatermarkDataStore
     ) {
         self.navigation = navigation
         self.watermarkPopup = watermarkPopup
+        self.watermarkStore = watermarkStore
     }
 }
 
@@ -48,16 +52,23 @@ extension HomeViewModel {
 @MainActor
 extension HomeViewModel {
     func clickBasicFrame(_ type: BasicWatermarkType) {
-//        if let watermark = dataManager.getWatermark(type: type) {
-//            manager.pushPopup(.watermarkPreview(watermark: watermark))
-//        }
-        switch type {
-        case .melonStreaming:
-            watermarkPopup.push(route: .title)
-        case .melonWeekly:
-            watermarkPopup.push(route: .word)
-        case .youtubeStreaming:
-            watermarkPopup.push(route: .preview)
+        var basics = watermarkStore.getWatermarks(type: .basic)
+        
+        // 기본 프레임이 없는 경우
+        if basics.isEmpty {
+            for type in BasicWatermarkType.allCases {
+                if let pimage = PImage(named: type.rawValue) {
+                    let wateramrk = type.watermark(thumnail: pimage)
+                    watermarkStore.setWatermark(wateramrk)
+                } else {
+                    let wateramrk = type.watermark
+                    watermarkStore.setWatermark(wateramrk)
+                }
+            }
+            basics = watermarkStore.getWatermarks(type: .basic)
         }
+        let frames = basics.filter({ $0.frame.code == type.rawValue })
+        guard let id = frames.first?.id else { return }
+        stepSubject.send(.basicWatermark(id: id))
     }
 }

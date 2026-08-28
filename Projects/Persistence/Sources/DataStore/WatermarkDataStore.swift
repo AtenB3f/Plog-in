@@ -21,15 +21,18 @@ public class WatermarkDataStore {
 // MARK: - Watermark Word
 extension WatermarkDataStore: WatermarkWordRepository {
     public func getWords() -> [WatermarkWordModel] {
-        let list = store.fetch(type: WatermarkWordEntity.self)
+        let list = store.fetch(
+            type: WatermarkWordEntity.self,
+            sortBy: [SortDescriptor(\.date, order: .reverse)]
+        )
         return list.map { $0.toModel }
     }
     
     public func setWord(_ text: String) {
         let list = getWords()
         if list.count >= 10 {
-            if let first = list.first?.toEntity {
-                store.delete(model: first)
+            if let oldest = list.last?.toEntity {
+                store.delete(model: oldest)
             }
         }
         let data = WatermarkWordEntity(text: text)
@@ -57,6 +60,11 @@ extension WatermarkDataStore: WatermarkRepository {
         return list.map { $0.toModel }
     }
     
+    public func getWatermark(id: UUID) -> WatermarkModel? {
+        let list = store.fetch(type: WatermarkEntity.self)
+        return list.first(where: { $0.id == id })?.toModel
+    }
+    
     public func setWatermark(_ watermark: WatermarkModel) {
         store.save(model: watermark.toEntity)
     }
@@ -72,45 +80,3 @@ extension WatermarkDataStore: WatermarkRepository {
         return list.filter { $0.frameSetting.type == type }.map { $0.toModel }
     }
 }
-/*
-extension WatermarkDataStore {
-    /// curstom 워터마크
-    func getWatermark(_ frameTitle: String) -> WatermarkEntity? {
-        let list = getWatermarks()
-        if let data = list.first(where: { $0.frameSetting.title == frameTitle
-            && $0.frameSetting.type == WatermarkFrameType.custom}) {
-            return data
-        }
-        return nil
-    }
-    
-    /// Basic 워터마크
-    func getWatermark(type: BasicWatermarkType) -> WatermarkEntity? {
-        let watermarkName = type.rawValue
-        let list = store.fetch(
-            type: WatermarkEntity.self,
-            predicate: #Predicate<WatermarkEntity>{
-                $0.frameSetting.title == watermarkName
-            }
-        )
-        
-        return list.filter { $0.frameSetting.type == WatermarkFrameType.basic }.first
-    }
-}
-
-public extension WatermarkDataStore {
-    func installBasicWatermark() {
-        let frame = WatermarkFrameType.basic
-        let list = store.fetch(
-            type: WatermarkEntity.self,
-            predicate: #Predicate<WatermarkEntity>{ $0.frameSetting.type == frame })
-        
-        for type in BasicWatermarkType.allCases {
-            let watermark = list.first(where: { $0.frameSetting.title == type.rawValue })
-            if watermark == nil {
-                store.save(model: type.watermark.toEntity)
-            }
-        }
-    }
-}
-*/
