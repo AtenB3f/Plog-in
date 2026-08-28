@@ -57,7 +57,13 @@ extension HomeViewModel {
         // 기본 프레임이 없는 경우
         if basics.isEmpty {
             for type in BasicWatermarkType.allCases {
-                watermarkStore.setWatermark(type.watermark)
+                if let pimage = PImage(named: type.rawValue) {
+                    let wateramrk = type.watermark(thumnail: pimage)
+                    watermarkStore.setWatermark(wateramrk)
+                } else {
+                    let wateramrk = type.watermark
+                    watermarkStore.setWatermark(wateramrk)
+                }
             }
             basics = watermarkStore.getWatermarks(type: .basic)
         }
