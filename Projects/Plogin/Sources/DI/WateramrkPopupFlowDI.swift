@@ -133,9 +133,14 @@ extension DIContainer {
         if let session = sessionWatermarkPopup, session.id == id {
             return PopupWatermarkPreview(viewModel: session.viewModel, wateramrkVM: session.watermarkVM)
         }
-
-        let picker = AssetPicker(mediaType: .image, limit: 10)
-        let store = WatermarkStore(watermark: watermarkStore.getWatermark(id: id) ?? WatermarkModel())
+        
+        let watermark = watermarkStore.getWatermark(id: id) ?? WatermarkModel()
+        
+        let picker = AssetPicker(
+            mediaType: .image,
+            limit: watermark.frame.code == BasicWatermarkType.youtubeStreaming.rawValue ? 2 : 30
+        )
+        let store = WatermarkStore(watermark: watermark)
         let viewModel = makePopupWatermarkPreviewVM(id: id, store: store, picker: picker)
         let watermarkVM = makeWatermarkVM(picker: picker, stickerPicker: picker, store: store)
 
