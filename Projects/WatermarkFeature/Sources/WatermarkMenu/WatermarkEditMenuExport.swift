@@ -12,6 +12,7 @@ import WatermarkDomain
 
 struct WatermarkEditMenuExport: View {
     @EnvironmentObject var viewModel: WatermarkEditViewModel
+    @EnvironmentObject var watermarkViewModel: WatermarkViewModel
     
     var body: some View {
         VStack {
@@ -28,7 +29,7 @@ struct WatermarkEditMenuExport: View {
                                     .padding(.horizontal, 6)
                             }
                             
-                            Text(viewModel.store.watermark.export.getSizeStr())
+                            Text(viewModel.exportSizeStr(currentImageIndex: watermarkViewModel.page))
                                 .font(.bold1)
                                 .foreground(.Text.light)
                             

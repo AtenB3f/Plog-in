@@ -57,6 +57,7 @@ public struct WatermarkEditView: View {
             
             WatermarkEditMenu()
                 .environmentObject(viewModel)
+                .environmentObject(watermarkViewModel)
         }
         .frame(maxHeight: .infinity)
         .background(Color.black)

@@ -191,6 +191,20 @@ public extension WatermarkFormat {
         return model
     }
 
+    /// array.type == .none일 때, 각 이미지를 기준으로 export 크기를 계산
+    /// 각 이미지의 비율을 그대로 유지함
+    func getExportSize(for image: PImage, export: WatermarkExportModel) -> CGSize {
+        switch export.type {
+        case .auto:
+            return image.size
+        case .multiple:
+            return CGSize(
+                width: image.size.width * export.multiple,
+                height: image.size.height * export.multiple
+            )
+        }
+    }
+
     /// max 너비 1500px로 제한
     /// auto 타입인 경우 사용
     func makeExportModel(
@@ -225,23 +239,27 @@ public extension WatermarkFormat {
                 height *= CGFloat(array.rows)
             }
         case .grid:
+            // 셀의 비율은 가장 세로로 긴 이미지를 기준으로 함
+            let gridSize = getGridSize(origins: origins, rows: array.rows, columns: array.columns)
+            let gridTotalW = gridSize.width
+            let gridTotalH = gridSize.height
             if width > height {
-                if totalW >= max {
-                    ratio = max / totalW
+                if gridTotalW >= max {
+                    ratio = max / gridTotalW
                     width = max
-                    height = totalH * ratio
+                    height = gridTotalH * ratio
                 } else {
-                    width = totalW
-                    height = totalH
+                    width = gridTotalW
+                    height = gridTotalH
                 }
             } else {
-                if totalH >= max {
-                    ratio = max / totalH
+                if gridTotalH >= max {
+                    ratio = max / gridTotalH
                     height = max
-                    width = totalW * ratio
+                    width = gridTotalW * ratio
                 } else {
-                    width = totalW
-                    height = totalH
+                    width = gridTotalW
+                    height = gridTotalH
                 }
             }
         }
@@ -261,54 +279,14 @@ public extension WatermarkFormat {
         multiple: CGFloat
     ) -> WatermarkExportModel {
         let max: CGFloat = 3000
-        var width: CGFloat = origins.first?.size.width ?? 0
-        var height: CGFloat = origins.first?.size.height ?? 0
-        var ratio: CGFloat = 1.0
-        
-        switch array.type {
-        case .none:
-            width *= multiple
-            height *= multiple
-        case .horizontal:
-            if width * CGFloat(array.columns) * multiple >= max {
-                ratio = max / (width * CGFloat(array.columns) * multiple)
-                width = max
-                height *= (multiple * ratio)
-            } else {
-                width = width * CGFloat(array.columns) * multiple
-                height *= multiple
-            }
-        case .vertical:
-            if height * CGFloat(array.rows) * multiple >= max {
-                ratio = max / (height * CGFloat(array.rows) * multiple)
-                height = max
-                width *= (multiple * ratio)
-            } else {
-                width *= multiple
-                height *= CGFloat(array.rows) * multiple
-            }
-        case .grid:
-            let totalW = width * CGFloat(array.columns) * multiple
-            let totalH = height * CGFloat(array.rows) * multiple
-            if width > height {
-                if totalW >= max {
-                    ratio = max / totalW
-                    width = max
-                    height = totalH * ratio
-                } else {
-                    width = totalW
-                    height = totalH
-                }
-            } else {
-                if totalH >= max {
-                    ratio = max / totalH
-                    height = max
-                    width = totalW * ratio
-                } else {
-                    width = totalW
-                    height = totalH
-                }
-            }
+        let autoModel = makeExportModel(origins: origins, array: array)
+        var width = autoModel.width * multiple
+        var height = autoModel.height * multiple
+
+        if array.type != .none, width > max || height > max {
+            let ratio = max / Swift.max(width, height)
+            width *= ratio
+            height *= ratio
         }
         return .init(
             type: .multiple,

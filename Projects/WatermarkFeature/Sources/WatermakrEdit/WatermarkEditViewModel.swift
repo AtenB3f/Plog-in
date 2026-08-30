@@ -34,7 +34,6 @@ public class WatermarkEditViewModel: ObservableObject {
     // MARK: - Picker
     @Published var isShowPicker: Bool = false
     @Published var pickerType: WatermarkEditPickerType?
-    @Published var page: Int = 0
     
     // MARK: - Watermark Word
     @Published var words: [String] = []
@@ -211,6 +210,22 @@ extension WatermarkEditViewModel {
         case .replicate(let type):
             replicate(type)
         }
+    }
+}
+
+// MARK: - Export Size Display
+extension WatermarkEditViewModel {
+    /// 메뉴에 표시할 출력 사이즈 문자열.
+    /// `.none` 타입은 이미지마다 원본 비율을 유지한 채 개별 출력되므로, 저장된 단일 `export` 값이 아니라
+    /// 현재 보고 있는 이미지(`currentImageIndex`) 기준으로 실제 저장될 사이즈를 계산해서 보여준다.
+    func exportSizeStr(currentImageIndex: Int) -> String {
+        guard store.watermark.array.type == .none,
+              picker.images.indices.contains(currentImageIndex)
+        else {
+            return store.watermark.export.getSizeStr()
+        }
+        let size = format.getExportSize(for: picker.images[currentImageIndex], export: store.watermark.export)
+        return WatermarkExportModel(width: size.width, height: size.height).getSizeStr()
     }
 }
 
