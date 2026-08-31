@@ -19,7 +19,13 @@ private final class PreviewWatermarkRepository: WatermarkWordRepository, Waterma
     func removeLast() { if !words.isEmpty { words.removeLast() } }
 
     func getWatermarks() -> [WatermarkModel] { watermarks }
-    func setWatermark(_ watermark: WatermarkModel) { watermarks.append(watermark) }
+    func setWatermark(_ watermark: WatermarkModel) {
+        if let index = watermarks.firstIndex(where: { $0.id == watermark.id }) {
+            watermarks[index] = watermark
+        } else {
+            watermarks.append(watermark)
+        }
+    }
     func removeWatermark(_ id: UUID) { watermarks.removeAll { $0.id == id } }
     func getWatermarks(type: WatermarkFrameType) -> [WatermarkModel] {
         watermarks.filter { $0.frame.type == type }

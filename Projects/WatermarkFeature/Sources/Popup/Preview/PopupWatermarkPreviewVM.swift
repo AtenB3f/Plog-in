@@ -12,7 +12,6 @@ import UISchema
 import Design
 import PlatformCore
 import PlatformExport
-import Persistence
 import RenderEngine
 import WatermarkDomain
 

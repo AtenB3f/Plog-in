@@ -21,13 +21,11 @@ public struct BasicTextField: View {
     
     public var body: some View {
         HStack(spacing: 6) {
-
             TextField(text: $text) {
                 Text(placeholder)
                     .font(.body2)
                     .foreground(.Gray.disable)
                     .lineLimit(1)
-                    .frame(height: 20)
             }
             .body2()
             .foreground(.Text.light)
@@ -40,13 +38,12 @@ public struct BasicTextField: View {
                 isFocused = false
                 text = ""
             } label: {
-                Image.iconCloseSM
+                Image.iconCloseMD
                     .resizable()
                     .renderingMode(.template)
                     .aspectRatio(contentMode: .fit)
                     .foreground(.Gray.medium)
-                    .frame(width: 20)
-                    
+                    .frame(width: 20, height: 20)
             }
         }
         .padding(.vertical, 10)
@@ -59,14 +56,17 @@ public struct BasicTextField: View {
                 .foreground(.Gray.disable)
         }
     }
-    
 }
 
-//#Preview {
-//    @State var text: String = ""
-//    ZStack {
-//        Color.Base.dark
-//        BasicTextField(text: $text, placeholder: "워터마크 문구를 입력하세요.")
-//            .padding(30)
-//    }
-//}
+#Preview {
+    @Previewable @State var text: String = ""
+    ZStack {
+        Color.Base.dark
+        
+        BasicTextField(
+            text: $text,
+            placeholder: "워터마크 문구를 입력하세요."
+        )
+        .padding(30)
+    }
+}

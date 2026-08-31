@@ -79,10 +79,12 @@ public struct CategoryImage: View {
     }
 }
 
-//#Preview {
-//    @Previewable @State var mode: CategoryImageMode? = .order
-//    let image = Image(systemName: "star.fill")
-//    CategoryImageItemView(mode: $mode, image: image, callback: { _ in
-//        
-//    })
-//}
+#Preview {
+    @Previewable @State var mode: CategoryImageMode? = .order
+    let image = Image(systemName: "star.fill")
+    CategoryImage(
+        mode: $mode,
+        image: image,
+        callback: { _ in
+    })
+}

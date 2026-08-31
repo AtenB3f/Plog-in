@@ -72,6 +72,15 @@ public final class DataStore {
             print("[\(T.self)] 삭제 실패: \(error)")
         }
     }
+
+    public func performAndSave(_ changes: (ModelContext) -> Void) {
+        changes(context)
+        do {
+            try context.save()
+        } catch {
+            print("[DataStore] 저장 실패: \(error)")
+        }
+    }
 }
 
 extension DataStore {

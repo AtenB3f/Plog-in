@@ -66,12 +66,48 @@ extension WatermarkDataStore: WatermarkRepository {
     }
     
     public func setWatermark(_ watermark: WatermarkModel) {
-        store.save(model: watermark.toEntity)
+        store.performAndSave { context in
+            let existing = (try? context.fetch(FetchDescriptor<WatermarkEntity>()))?
+                .first(where: { $0.id == watermark.id })
+
+            let newFrameSetting = watermark.frame.toEntity
+            if let existing {
+                // lastDate 현재 시각으로 갱신
+                newFrameSetting.date = existing.frameSetting.date
+            }
+            newFrameSetting.lastDate = Date()
+
+            if let existing {
+                context.delete(existing.textSetting)
+                existing.stickers.forEach { context.delete($0) }
+                context.delete(existing.arraySetting)
+                context.delete(existing.exportSetting)
+                context.delete(existing.frameSetting)
+
+                existing.textSetting = watermark.text.toEntity
+                existing.stickers = watermark.stickers.map { $0.toEntity }
+                existing.arraySetting = watermark.array.toEntity
+                existing.exportSetting = watermark.export.toEntity
+                existing.frameSetting = newFrameSetting
+            } else {
+                context.insert(WatermarkEntity(
+                    id: watermark.id,
+                    textSetting: watermark.text.toEntity,
+                    stickers: watermark.stickers.map { $0.toEntity },
+                    arraySetting: watermark.array.toEntity,
+                    exportSetting: watermark.export.toEntity,
+                    frameSetting: newFrameSetting
+                ))
+            }
+        }
     }
-    
+
     public func removeWatermark(_ id: UUID) {
-        if let entity = getWatermarks().first(where: { $0.id == id })?.toEntity {
-            store.delete(model: entity)
+        store.performAndSave { context in
+            if let existing = (try? context.fetch(FetchDescriptor<WatermarkEntity>()))?
+                .first(where: { $0.id == id }) {
+                context.delete(existing)
+            }
         }
     }
     
