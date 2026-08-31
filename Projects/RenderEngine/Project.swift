@@ -21,6 +21,7 @@ private let project = Project(
                 .project(target: "PlatformExport", path: .relativeToRoot("Projects/PlatformExport"))
             ],
             settings: ManifestShared.moduleSettings()
-        )
+        ),
+        ManifestShared.unitTestTarget(for: name)
     ]
 )
