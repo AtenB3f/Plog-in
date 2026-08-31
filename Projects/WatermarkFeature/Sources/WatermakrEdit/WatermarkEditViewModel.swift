@@ -376,6 +376,9 @@ private extension WatermarkEditViewModel {
             popup.pop()
         case .titleFinished(let title):
             store.watermark.frame.title = title
+            if let index = frames.firstIndex(where: { $0.id == store.watermark.id }) {
+                frames[index].frame.title = title
+            }
             popup.pop()
         case .previewFinished:
             // save preview
@@ -497,10 +500,14 @@ private extension WatermarkEditViewModel {
             setArray(.type(store.watermark.array.type))
             setExport(.type(store.watermark.export.type))
         case .save:
+            if !picker.images.isEmpty {
+                let editor = WatermarkEditor(watermark: store.watermark, origins: picker.images)
+                store.watermark.frame.thumbnailData = editor.generateThumbnail().pngData()
+            }
             usecase.saveWatermark(store.watermark)
             savedSnapshot = store.watermark
             currentFrameUUID = store.watermark.id
-            print(store.watermark)
+            frames = usecase.fetchWatermarks()
 
         case .title:
             popup(.title)

@@ -11,7 +11,7 @@ import SwiftData
 
 @Model
 public final class WatermarkEntity: Identifiable, ObservableObject {
-    public var id: UUID
+    @Attribute(.unique) public var id: UUID
     
     public var textSetting: WatermarkTextEntity
     public var stickers: [WatermarkStickerEntity]
