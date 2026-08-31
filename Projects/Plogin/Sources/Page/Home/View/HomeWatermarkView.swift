@@ -25,7 +25,7 @@ struct HomeWatermarkView: View {
                 .padding(.bottom, 28)
             
             Button {
-                viewModel.push(.watermarkEdit)
+                viewModel.action(.editWatermark(id: nil))
             } label: {
                 IconLabel(text: "새로 만들기", icon: .iconChevronRightSM, color: .white, size: 24)
                     .padding(.vertical, 6)

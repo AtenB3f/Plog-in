@@ -30,7 +30,7 @@ struct TabNavigationView: View {
                     case .home:
                         diContainer.makeHomeView()
                     case .setting:
-                        SettingView()
+                        EmptyView()
                     }
                 }
                 .hiddenNavigationBarStyle()

@@ -16,9 +16,17 @@ import RenderEngine
 
 // MARK: - 워터마크 편집
 extension DIContainer {
+    /// 신규 워터마크 편집 플로우
     func startWatermarkFlow() {
         watermarkCancellables.removeAll()
-        navigation.push(route: TabNavigationRouter.watermarkEdit)
+        navigation.push(route: TabNavigationRouter.watermarkEdit(id: nil))
+    }
+    
+    /// 기존 워터마크 편집 플로우
+    /// - Parameter id: Watermark UUID
+    func startWatermarkFlow(id: UUID) {
+        watermarkCancellables.removeAll()
+        navigation.push(route: TabNavigationRouter.watermarkEdit(id: id))
     }
 
     private func handleWatermarkStep(_ step: WatermarkFlowStep) {

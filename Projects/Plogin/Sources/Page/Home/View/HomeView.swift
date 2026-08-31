@@ -20,9 +20,9 @@ struct HomeView: View {
     }
     
     let columns = [
-        GridItem(.flexible(), spacing: 2),
-        GridItem(.flexible(), spacing: 2),
-        GridItem(.flexible(), spacing: 2)
+        GridItem(.flexible(), spacing: 1),
+        GridItem(.flexible(), spacing: 1),
+        GridItem(.flexible(), spacing: 1)
     ]
     
     var body: some View {
@@ -42,7 +42,7 @@ struct HomeView: View {
                     VStack(spacing: 2) {
                         ForEach(BasicWatermarkType.allCases, id: \.self) { type in
                             Button {
-                                viewModel.clickBasicFrame(type)
+                                viewModel.action(.shortcutWatermark(type: type))
                             } label: {
                                 BasicWatermarkItemView(type: type)
                             }
@@ -52,12 +52,12 @@ struct HomeView: View {
                     
                     HomeMenuTitle(title: "커스텀 프레임")
                         .padding(.top, 20)
-                    LazyVGrid(columns: columns, spacing: 2) {
-                        ForEach(0..<9, id: \.self) { index in
+                    LazyVGrid(columns: columns, spacing: 1) {
+                        ForEach(viewModel.customWatermarks) { custom in
                             Button {
-                                viewModel.push(.watermarkEdit)
+                                viewModel.action(.editWatermark(id: custom.id))
                             } label: {
-                                CustomFrameItemView()
+                                CustomFrameItemView(data: custom)
                             }
                             .fillBoxLabelButtonStyle()
                         }
@@ -66,12 +66,9 @@ struct HomeView: View {
                 .padding(.bottom, 50)
             }
             .background(Color.Base.dark)
-            .sheet(isPresented: $viewModel.isShowPicker,
-                   onDismiss: {
-                
-            }) {
-//                AssetPickerView(avAsset: $viewModel.assets, type: viewModel.mediaType)
-            }
+        }
+        .task {
+            viewModel.action(.appear)
         }
     }
 }

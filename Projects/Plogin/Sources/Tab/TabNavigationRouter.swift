@@ -10,7 +10,7 @@ import Foundation
 import UISchema
 
 public enum TabNavigationRouter: NavigationRoute {
-    case watermarkEdit
+    case watermarkEdit(id: UUID?)
     case watermarkComplete
     case watermarkResult
 }
