@@ -7,7 +7,6 @@
 import SwiftUI
 import PlatformCore
 import WatermarkDomain
-import Design
 
 /// Preview 전용 더미 이미지 (픽셀 내용이 필요한 스티커 확인용으로 단색 채움)
 private func makeDummyImage(width: CGFloat, height: CGFloat, color: PColor = .darkGray) -> PImage {
@@ -55,7 +54,7 @@ private func makeThumbnailScenario(
 
     var textModel = WatermarkTextModel(
         text: text,
-        fontName: FontType.body1.fontName,
+        fontName: "",
         rotation: textRotation,
         color: textColor,
         date: nil

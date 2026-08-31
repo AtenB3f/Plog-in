@@ -107,6 +107,7 @@ public struct FrameItemView: View {
                 RoundedCorner(radius: 4, corner: .all)
                     .stroke()
                     .foreground(.Text.light)
+                    .padding(0.5)
             }
         }
         .frame(width: size, height: size)

@@ -12,6 +12,7 @@ import Design
 
 public struct PopupWatermarkTitle: View {
     @StateObject var viewModel: PopupWatermarkTitleVM
+    @FocusState var isFocusField: Bool
     
     public init(
         viewModel: PopupWatermarkTitleVM
@@ -32,15 +33,29 @@ public struct PopupWatermarkTitle: View {
                     )
                 )
             }
+            .onAppear {
+                viewModel.action(.appear)
+            }
+            .onChange(of: isFocusField) {
+                viewModel.isFocusField = isFocusField
+            }
+            .onChange(of: viewModel.isFocusField) {
+                isFocusField = viewModel.isFocusField
+            }
+            .onTapGesture {
+                viewModel.action(.focus(false))
+            }
     }
     
     @ViewBuilder
     func makeContent() -> some View {
-        BasicTextField(text: $viewModel.title, placeholder: "제목을 입력하세요.")
+        BasicTextField(
+            text: $viewModel.text,
+            placeholder: "제목을 입력하세요."
+        )
+        .focused($isFocusField, equals: true)
+        .onSubmit { viewModel.action(.confirm) }
         .padding(.vertical)
-        .onChange(of: viewModel.title) {
-            viewModel.action(.input)
-        }
     }
     
     @ViewBuilder

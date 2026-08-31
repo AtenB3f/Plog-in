@@ -63,7 +63,7 @@ public struct FrameList: View {
     
     public var body: some View {
         ScrollView(.horizontal) {
-            LazyHStack(spacing: 0) {
+            LazyHStack(alignment: .top, spacing: 0) {
                 ForEach(list.indices, id: \.self) { index in
                     item(
                         state.mode,

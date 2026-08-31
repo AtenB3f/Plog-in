@@ -10,56 +10,69 @@ import Combine
 import UISchema
 
 public class PopupWatermarkTitleVM: PopupViewModel {
-    @Published var title: String
-    var coodinator: WatermarkPopupCoordinator
-    
-    public init(
-        coodinator: WatermarkPopupCoordinator,
-        title: String = ""
-    ) {
-        self.coodinator = coodinator
-        self.title = title
-    }
-    
     public enum Action {
-        case input
+        case appear
+        case focus(_ isFocus: Bool)
         case clear
         case cancel
         case confirm
+    }
+    
+    @Published var text: String = ""
+    @Published var isFocusField: Bool = false
+    
+    var coodinator: WatermarkPopupCoordinator
+    
+    public init(
+        coodinator: WatermarkPopupCoordinator
+    ) {
+        self.coodinator = coodinator
     }
 }
 
 @MainActor
 public extension PopupWatermarkTitleVM {
+    @MainActor
     func action(_ action: Action) {
-        switch action {
-        case .input:
-            input()
-        case .clear:
-            clear()
-        case .cancel:
-            cancel()
-        case .confirm:
-            confirm()
+        Task {
+            switch action {
+            case .appear:
+                await appear()
+            case .focus(let isFocus):
+                focus(isFocus)
+            case .clear:
+                clear()
+            case .cancel:
+                cancel()
+            case .confirm:
+                confirm()
+            }
         }
     }
 }
 
 @MainActor
 private extension PopupWatermarkTitleVM {
-    func input() {
-        
+    func appear() async {
+        try? await Task.sleep(for: .microseconds(300))
+        focus(true)
+    }
+    
+    func focus(_ isFocus: Bool) {
+        isFocusField = isFocus
     }
     
     func clear() {
-        title = ""
+        text = ""
     }
     
     func cancel() {
+        isFocusField = false
         coodinator.stepSubject.send(.dismiss)
     }
     
     func confirm() {
-        coodinator.stepSubject.send(.titleFinished(title: self.title))
+        isFocusField = false
+        coodinator.stepSubject.send(.titleFinished(title: self.text))
     }
 }
