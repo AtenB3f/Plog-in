@@ -17,6 +17,7 @@ private let project = Project(
             resources: ["Resources/**"],
             scripts: [ManifestShared.swiftLintScript],
             dependencies: [
+                .project(target: "CoreDomain", path: .relativeToRoot("Projects/CoreDomain")),
                 .project(target: "WatermarkDomain", path: .relativeToRoot("Projects/WatermarkDomain"))
             ],
             settings: ManifestShared.moduleSettings()

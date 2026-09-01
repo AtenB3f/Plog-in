@@ -30,7 +30,8 @@ private let project = Project(
         developmentRegion: "ko"
     ),
     packages: [
-        .package(url: "https://github.com/alexeichhorn/YouTubeKit", .upToNextMajor(from: "0.2.9"))
+        .package(url: "https://github.com/alexeichhorn/YouTubeKit", .upToNextMajor(from: "0.2.9")),
+        .package(url: "https://github.com/firebase/firebase-ios-sdk", .upToNextMajor(from: "12.18.0"))
     ],
     targets: [
         .target(
@@ -46,7 +47,9 @@ private let project = Project(
             scripts: [ManifestShared.swiftLintScript],
             dependencies: [
                 .package(product: "YouTubeKit"),
+                .package(product: "FirebaseCrashlytics"),
                 .project(target: "Design", path: .relativeToRoot("Projects/Design")),
+                .project(target: "CoreDomain", path: .relativeToRoot("Projects/CoreDomain")),
                 .project(target: "WatermarkDomain", path: .relativeToRoot("Projects/WatermarkDomain")),
                 .project(target: "Persistence", path: .relativeToRoot("Projects/Persistence")),
                 .project(target: "PlatformCore", path: .relativeToRoot("Projects/PlatformCore")),
