@@ -31,36 +31,12 @@ struct HomeView: View {
             
             ScrollView {
                 VStack(alignment: .leading, spacing: 0) {
-                    HomeWatermarkView()
-                        .environmentObject(viewModel)
+                    newWatermark()
                     
-                    LineDivider(color: Color.Etc.divider)
-                        .padding(.horizontal, 20)
-                        .padding(.vertical, 16)
+                    basicWatermark()
                     
-                    HomeMenuTitle(title: "기본 프레임")
-                    VStack(spacing: 2) {
-                        ForEach(BasicWatermarkType.allCases, id: \.self) { type in
-                            Button {
-                                viewModel.action(.shortcutWatermark(type: type))
-                            } label: {
-                                BasicWatermarkItemView(type: type)
-                            }
-                            .buttonStyle(.plain)
-                        }
-                    }
-                    
-                    HomeMenuTitle(title: "커스텀 프레임")
-                        .padding(.top, 20)
-                    LazyVGrid(columns: columns, spacing: 2) {
-                        ForEach(viewModel.customWatermarks) { custom in
-                            Button {
-                                viewModel.action(.editWatermark(id: custom.id))
-                            } label: {
-                                CustomFrameItemView(data: custom)
-                            }
-                            .fillBoxLabelButtonStyle()
-                        }
+                    if !viewModel.customWatermarks.isEmpty {
+                        customWatermark()
                     }
                 }
                 .padding(.bottom, 50)
@@ -73,6 +49,51 @@ struct HomeView: View {
     }
 }
 
-//#Preview {
-//    HomeView()
-//}
+extension HomeView {
+    @ViewBuilder
+    func newWatermark() -> some View {
+        VStack(alignment: .leading, spacing: 0) {
+            HomeWatermarkView()
+                .environmentObject(viewModel)
+            
+            LineDivider(color: Color.Etc.divider)
+                .padding(.horizontal, 20)
+                .padding(.vertical, 16)
+        }
+    }
+    
+    @ViewBuilder
+    func basicWatermark() -> some View {
+        VStack(alignment: .leading, spacing: 0) {
+            HomeMenuTitle(title: "기본 프레임")
+            VStack(spacing: 2) {
+                ForEach(BasicWatermarkType.allCases, id: \.self) { type in
+                    Button {
+                        viewModel.action(.shortcutWatermark(type: type))
+                    } label: {
+                        BasicWatermarkItemView(type: type)
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+        }
+    }
+    
+    @ViewBuilder
+    func customWatermark() -> some View {
+        VStack(alignment: .leading, spacing: 0) {
+            HomeMenuTitle(title: "커스텀 프레임")
+                .padding(.top, 20)
+            LazyVGrid(columns: columns, spacing: 2) {
+                ForEach(viewModel.customWatermarks) { custom in
+                    Button {
+                        viewModel.action(.editWatermark(id: custom.id))
+                    } label: {
+                        CustomFrameItemView(data: custom)
+                    }
+                    .fillBoxLabelButtonStyle()
+                }
+            }
+        }
+    }
+}
