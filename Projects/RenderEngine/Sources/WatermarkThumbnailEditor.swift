@@ -93,8 +93,19 @@ private extension WatermarkEditor {
         guard !displayText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
 
         let referenceFontSize: CGFloat = 100
-        let referenceFont = PFont(name: watermark.text.fontName, size: referenceFontSize)
-            ?? PFont.systemFont(ofSize: referenceFontSize)
+        let referenceFont: PFont
+        if let resolved = PFont(name: watermark.text.fontName, size: referenceFontSize) {
+            referenceFont = resolved
+        } else {
+            crashReport?.send(
+                title: "WatermarkEditor",
+                function: "drawThumbnailText",
+                key: "fontName",
+                value: watermark.text.fontName,
+                error: RenderEngineError.fontNotFound(name: watermark.text.fontName)
+            )
+            referenceFont = PFont.systemFont(ofSize: referenceFontSize)
+        }
         let baseSize = format.getTextArea(text: displayText, font: referenceFont, fontSize: referenceFontSize)
         guard baseSize.width > 0, baseSize.height > 0 else { return }
 
@@ -110,7 +121,19 @@ private extension WatermarkEditor {
         let fontSize = referenceFontSize * scale
         guard fontSize > 0 else { return }
 
-        let drawFont = PFont(name: watermark.text.fontName, size: fontSize) ?? PFont.systemFont(ofSize: fontSize)
+        let drawFont: PFont
+        if let resolved = PFont(name: watermark.text.fontName, size: fontSize) {
+            drawFont = resolved
+        } else {
+            crashReport?.send(
+                title: "WatermarkEditor",
+                function: "drawThumbnailText",
+                key: "fontName",
+                value: watermark.text.fontName,
+                error: RenderEngineError.fontNotFound(name: watermark.text.fontName)
+            )
+            drawFont = PFont.systemFont(ofSize: fontSize)
+        }
         let attributes: [NSAttributedString.Key: Any] = [
             .font: drawFont,
             .foregroundColor: watermark.text.color.toPColor

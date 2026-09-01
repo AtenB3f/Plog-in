@@ -11,6 +11,7 @@ import Combine
 import UISchema
 import Design
 import PlatformCore
+import CoreDomain
 import PlatformExport
 import RenderEngine
 import WatermarkDomain
@@ -34,18 +35,21 @@ public class PopupWatermarkPreviewVM: PopupViewModel {
     let store: WatermarkStore
     let picker: AssetPicker
     private var editor: WatermarkEditor?
-    
+    private let crashReport: CrashReport?
+
     public init(
         id: UUID,
         usecase: WatermarkUsecase,
         coodinator: WatermarkPopupCoordinator,
         store: WatermarkStore,
-        picker: AssetPicker
+        picker: AssetPicker,
+        crashReport: CrashReport? = nil
     ) {
         self.usecase = usecase
         self.coodinator = coodinator
         self.store = store
         self.picker = picker
+        self.crashReport = crashReport
         super.init()
         _ = loadWatermark(id: id)
     }
@@ -113,7 +117,11 @@ extension PopupWatermarkPreviewVM {
 
 private extension PopupWatermarkPreviewVM {
     func setEditor() {
-        editor = WatermarkEditor(watermark: store.watermark, origins: picker.images)
+        editor = WatermarkEditor(
+            watermark: store.watermark,
+            origins: picker.images,
+            crashReport: crashReport
+        )
     }
     
     @MainActor

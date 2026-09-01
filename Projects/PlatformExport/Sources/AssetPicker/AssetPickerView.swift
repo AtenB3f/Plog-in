@@ -58,14 +58,41 @@ extension AssetPickerView {
             picker.dismiss(animated: true)
             
             for result in results {
-                guard let assetId = result.assetIdentifier else { return }
-                
+                guard let assetId = result.assetIdentifier else {
+                    self.parent.picker.crashReport?.send(
+                        title: "AssetPickerView",
+                        function: "picker",
+                        key: "assetIdentifier",
+                        value: "nil",
+                        error: AssetPickerError.missingAssetIdentifier
+                    )
+                    continue
+                }
+
                 let fetchResult = PHAsset.fetchAssets(withLocalIdentifiers: [assetId], options: nil)
-                guard let phAsset = fetchResult.firstObject else { return }
+                guard let phAsset = fetchResult.firstObject else {
+                    self.parent.picker.crashReport?.send(
+                        title: "AssetPickerView",
+                        function: "picker",
+                        key: "assetIdentifier",
+                        value: assetId,
+                        error: AssetPickerError.assetNotFound
+                    )
+                    continue
+                }
                 if phAsset.mediaType == .video {
-                    PHImageManager.default().requestAVAsset(forVideo: phAsset, options: nil) { avAsset, _, _ in
+                    PHImageManager.default().requestAVAsset(forVideo: phAsset, options: nil) { avAsset, _, info in
                         guard let avAsset = avAsset,
-                                let data = AssetData(type: .video, data: avAsset).videoAsset else { return }
+                                let data = AssetData(type: .video, data: avAsset).videoAsset else {
+                            self.parent.picker.crashReport?.send(
+                                title: "AssetPickerView",
+                                function: "requestAVAsset",
+                                key: "assetIdentifier",
+                                value: assetId,
+                                error: (info?[PHImageErrorKey] as? Error) ?? AssetPickerError.videoLoadFailed
+                            )
+                            return
+                        }
                         DispatchQueue.main.async {
                             self.parent.picker.videos.append(data)
                         }
@@ -78,9 +105,18 @@ extension AssetPickerView {
                         for: phAsset,
                         targetSize: CGSize(width: phAsset.pixelWidth, height: phAsset.pixelHeight),
                         contentMode: .aspectFit,
-                        options: options) { image, _ in
+                        options: options) { image, info in
                             guard let image = image,
-                                    let data = AssetData(type: .image, data: image).imageAsset else { return }
+                                    let data = AssetData(type: .image, data: image).imageAsset else {
+                                self.parent.picker.crashReport?.send(
+                                    title: "AssetPickerView",
+                                    function: "requestImage",
+                                    key: "assetIdentifier",
+                                    value: assetId,
+                                    error: (info?[PHImageErrorKey] as? Error) ?? AssetPickerError.imageLoadFailed
+                                )
+                                return
+                            }
                             self.parent.picker.images.append(data)
                     }
                 }
@@ -89,7 +125,6 @@ extension AssetPickerView {
     }
 }
 #elseif os(macOS)
-// TODO: macOS 전용
 public struct AssetPickerView: View {
     @Binding var assetDatas: [AssetData]
     var mediaType: MediaType
