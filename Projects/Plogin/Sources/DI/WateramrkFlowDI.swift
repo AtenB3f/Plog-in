@@ -140,6 +140,10 @@ extension DIContainer {
             watermarkDataStore: watermarkStore,
             imageExportRepository: imageExportRepository
         )
-        return WatermarkResultViewModel(editor: editor, watermarkUsecase: usecase)
+        return WatermarkResultViewModel(
+            editor: editor,
+            watermarkUsecase: usecase,
+            crashReport: FirebaseCrashReportImpl()
+        )
     }
 }

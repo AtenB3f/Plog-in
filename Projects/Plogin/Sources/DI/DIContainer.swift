@@ -35,7 +35,9 @@ public class DIContainer: ObservableObject {
     
     public init(
         watermarkStore: WatermarkDataStore = DIContainer.makeDefaultWatermarkStore(),
-        imageExportRepository: PhotoLibraryExport = PhotoLibraryExport()
+        imageExportRepository: PhotoLibraryExport = PhotoLibraryExport(
+            crashReport: FirebaseCrashReportImpl()
+        )
     ) {
         self.watermarkStore = watermarkStore
         self.imageExportRepository = imageExportRepository
