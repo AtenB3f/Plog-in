@@ -53,10 +53,14 @@ public extension WatermarkUsecase {
     /// 2) 이미지 크기 기준 fontSize 재계산 (WatermarkFormat.makeTextModel)
     /// 3) array 타입 기준 출력 사이즈 재계산 (WatermarkFormat.makeExportModel)
     /// 4) text.date가 이미 설정돼 있다면 현재 시각으로 갱신 (nil이면 설정 안함)
-    func setupWatermark(origins: [PImage], current: inout WatermarkModel) {
+    func setupWatermark(
+        isUpdateText: Bool = true,
+        origins: [PImage],
+        current: inout WatermarkModel
+    ) {
         guard !origins.isEmpty else { return }
 
-        if let recent = fetchWords().first {
+        if let recent = fetchWords().first, isUpdateText {
             current.text.text = recent.text
         }
         format.makeTextModel(

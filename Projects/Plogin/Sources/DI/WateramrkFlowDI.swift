@@ -60,12 +60,18 @@ extension DIContainer {
     }
     
     func makeWatermarkEditView(
+        id: UUID? = nil,
         picker: AssetPicker = AssetPicker(mediaType: .image, limit: 36),
         stickerPicker: AssetPicker = AssetPicker(mediaType: .image, limit: 10),
         store: WatermarkStore = WatermarkStore()
     ) -> WatermarkEditView {
+        var watermark: WatermarkModel?
+        if let id = id {
+            watermark = watermarkStore.getWatermark(id: id)
+        }
         let editMode = WatermarkEditModeStore()
         let editVM = makeWatermarkEditVM(
+            watermark: watermark,
             picker: picker,
             stickerPicker: stickerPicker,
             store: store,
@@ -88,6 +94,7 @@ extension DIContainer {
     }
     
     func makeWatermarkEditVM(
+        watermark: WatermarkModel? = nil,
         picker: AssetPicker,
         stickerPicker: AssetPicker,
         store: WatermarkStore,
@@ -99,6 +106,7 @@ extension DIContainer {
             imageExportRepository: imageExportRepository
         )
         return WatermarkEditViewModel(
+            watermark: watermark,
             popup: popupWatermark,
             usecase: usecase,
             picker: picker,
