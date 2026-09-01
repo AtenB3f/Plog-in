@@ -20,9 +20,9 @@ struct HomeView: View {
     }
     
     let columns = [
-        GridItem(.flexible(), spacing: 1),
-        GridItem(.flexible(), spacing: 1),
-        GridItem(.flexible(), spacing: 1)
+        GridItem(.flexible(), spacing: 2),
+        GridItem(.flexible(), spacing: 2),
+        GridItem(.flexible(), spacing: 2)
     ]
     
     var body: some View {
@@ -52,7 +52,7 @@ struct HomeView: View {
                     
                     HomeMenuTitle(title: "커스텀 프레임")
                         .padding(.top, 20)
-                    LazyVGrid(columns: columns, spacing: 1) {
+                    LazyVGrid(columns: columns, spacing: 2) {
                         ForEach(viewModel.customWatermarks) { custom in
                             Button {
                                 viewModel.action(.editWatermark(id: custom.id))

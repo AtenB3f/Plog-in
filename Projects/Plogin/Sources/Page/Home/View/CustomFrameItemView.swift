@@ -23,6 +23,8 @@ struct CustomFrameItemView: View {
         ZStack(alignment: .bottomTrailing) {
             Color.Shadow.dark
             Image(pImage: data.thumbnail)
+                .resizable()
+                .aspectRatio(contentMode: .fill)
             
             Text(data.title)
                 .font(.bold2)
