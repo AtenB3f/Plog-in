@@ -9,6 +9,7 @@
 import SwiftUI
 import Design
 import WatermarkFeature
+import Firebase
 
 enum RootStatus {
     case splash
@@ -17,7 +18,9 @@ enum RootStatus {
 }
 
 public final class RootUIManager: ObservableObject {
-    public init() {}
+    public init() {
+        FirebaseApp.configure()
+    }
 
     // MARK: Toast
     @Published var rootToast: ToastData?

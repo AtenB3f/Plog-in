@@ -8,6 +8,7 @@
 
 import SwiftUI
 import Combine
+import CoreDomain
 import Persistence
 import WatermarkFeature
 import WatermarkDomain
@@ -43,9 +44,11 @@ public class DIContainer: ObservableObject {
 }
 
 extension DIContainer {
-    public static func makeDefaultWatermarkStore() -> WatermarkDataStore {
+    public static func makeDefaultWatermarkStore(
+        crashReport: CrashReport = FirebaseCrashReportImpl()
+    ) -> WatermarkDataStore {
         do {
-            let dataStore = try DataStore.makePersistent()
+            let dataStore = try DataStore.makePersistent(crashReport: crashReport)
             return WatermarkDataStore(store: dataStore)
         } catch {
             fatalError("영구 저장소 초기화 실패: \(error)")
