@@ -11,7 +11,7 @@ public enum ManifestShared {
     public static let destinations: Destinations = [.iPhone, .iPad, .mac, .macCatalyst]
     public static let deploymentTargets: DeploymentTargets = .multiplatform(iOS: iOSVersion, macOS: macOSVersion)
 
-    public static let marketingVersion = "0.0.1"
+    public static let marketingVersion = "1.0.0"
     public static let buildVersion = "1"
     public static let teamID = "MHP823U965"
 
