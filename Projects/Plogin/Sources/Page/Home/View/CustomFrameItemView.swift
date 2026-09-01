@@ -8,16 +8,25 @@
 
 import SwiftUI
 import Design
+import PlatformCore
+
+public struct HomeCustomFrameViewState: Identifiable {
+    public var id: UUID
+    public var title: String
+    public var thumbnail: PImage
+}
 
 struct CustomFrameItemView: View {
-    let title: String = "주간 인기상"
-    let thumbnail: Image = Image("Logo_Name")
+    let data: HomeCustomFrameViewState
+    
     var body: some View {
         ZStack(alignment: .bottomTrailing) {
             Color.Shadow.dark
-            thumbnail
+            Image(pImage: data.thumbnail)
+                .resizable()
+                .aspectRatio(contentMode: .fill)
             
-            Text(title)
+            Text(data.title)
                 .font(.bold2)
                 .foreground(.Text.light)
                 .padding(.vertical, 8)
@@ -32,5 +41,5 @@ struct CustomFrameItemView: View {
 }
 
 #Preview {
-    CustomFrameItemView()
+    CustomFrameItemView(data: .init(id: UUID(), title: "제목없음", thumbnail: PImage()))
 }

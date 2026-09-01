@@ -57,8 +57,8 @@ extension DIContainer {
 extension DIContainer {
     func makeTabView(_ route: TabNavigationRouter) -> some View {
         switch route {
-        case .watermarkEdit:
-            return AnyView(makeWatermarkEditView())
+        case .watermarkEdit(let id):
+            return AnyView(makeWatermarkEditView(id: id))
         case .watermarkComplete:
             return AnyView(makeWatermarkEditView())
         case .watermarkResult:

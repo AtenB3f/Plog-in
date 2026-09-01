@@ -16,9 +16,17 @@ import RenderEngine
 
 // MARK: - 워터마크 편집
 extension DIContainer {
+    /// 신규 워터마크 편집 플로우
     func startWatermarkFlow() {
         watermarkCancellables.removeAll()
-        navigation.push(route: TabNavigationRouter.watermarkEdit)
+        navigation.push(route: TabNavigationRouter.watermarkEdit(id: nil))
+    }
+    
+    /// 기존 워터마크 편집 플로우
+    /// - Parameter id: Watermark UUID
+    func startWatermarkFlow(id: UUID) {
+        watermarkCancellables.removeAll()
+        navigation.push(route: TabNavigationRouter.watermarkEdit(id: id))
     }
 
     private func handleWatermarkStep(_ step: WatermarkFlowStep) {
@@ -52,12 +60,18 @@ extension DIContainer {
     }
     
     func makeWatermarkEditView(
+        id: UUID? = nil,
         picker: AssetPicker = AssetPicker(mediaType: .image, limit: 36),
         stickerPicker: AssetPicker = AssetPicker(mediaType: .image, limit: 10),
         store: WatermarkStore = WatermarkStore()
     ) -> WatermarkEditView {
+        var watermark: WatermarkModel?
+        if let id = id {
+            watermark = watermarkStore.getWatermark(id: id)
+        }
         let editMode = WatermarkEditModeStore()
         let editVM = makeWatermarkEditVM(
+            watermark: watermark,
             picker: picker,
             stickerPicker: stickerPicker,
             store: store,
@@ -80,6 +94,7 @@ extension DIContainer {
     }
     
     func makeWatermarkEditVM(
+        watermark: WatermarkModel? = nil,
         picker: AssetPicker,
         stickerPicker: AssetPicker,
         store: WatermarkStore,
@@ -91,6 +106,7 @@ extension DIContainer {
             imageExportRepository: imageExportRepository
         )
         return WatermarkEditViewModel(
+            watermark: watermark,
             popup: popupWatermark,
             usecase: usecase,
             picker: picker,

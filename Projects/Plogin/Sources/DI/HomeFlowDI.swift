@@ -22,10 +22,11 @@ extension DIContainer {
     }
     
     func makeHomeVM() -> HomeViewModel {
+        let usecase = HomeUsecase(watermarkDataStore: watermarkStore)
         return HomeViewModel(
             navigation: navigation,
             watermarkPopup: popupWatermark,
-            watermarkStore: watermarkStore
+            usecase: usecase
         )
     }
 }
@@ -35,6 +36,9 @@ extension DIContainer {
         switch step {
         case .newWatermrk:
             startWatermarkFlow()
+            
+        case .editWatermark(let id):
+            startWatermarkFlow(id: id)
 
         case .basicWatermark(let id):
             startWatermarkPopupFlow(id: id)

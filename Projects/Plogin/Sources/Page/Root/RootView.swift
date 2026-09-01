@@ -27,7 +27,7 @@ struct RootView: View {
             case .splash:
                 SplashView(rootUI: rootUI)
             case .login:
-                LoginView()
+                EmptyView()
             case .navigation:
                 TabNavigationView(diContainer: diContainer, viewModel: diContainer.makeTabNavigationVM())
             }

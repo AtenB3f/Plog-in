@@ -10,6 +10,7 @@ import Foundation
 
 public enum HomeFlowStep {
     case newWatermrk
+    case editWatermark(id: UUID)
     case basicWatermark(id: UUID)
     case custromWatermark(id: UUID)
 }

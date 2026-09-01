@@ -54,6 +54,7 @@ public class WatermarkEditViewModel: ObservableObject {
     @Published var frames: [WatermarkModel] = []
     @Published var currentFrameUUID: UUID?
     
+    private var isNewWatermark: Bool
     private var savedSnapshot: WatermarkModel?
     var hasUnsavedChanges: Bool {
         guard let savedSnapshot else { return true }
@@ -98,9 +99,11 @@ public class WatermarkEditViewModel: ObservableObject {
         if let watermark = watermark {
             self.store.setWatermark(watermark)
             self.savedSnapshot = watermark
+            self.isNewWatermark = false
         } else {
             self.store.setWatermark(WatermarkModel())
             self.savedSnapshot = nil
+            self.isNewWatermark = true
         }
 
         bind()
@@ -161,10 +164,15 @@ private extension WatermarkEditViewModel {
 
     func originInit() {
         if !picker.images.isEmpty {
-            usecase.setupWatermark(origins: picker.images, current: &store.watermark)
+            store.watermark.array.setRowColumn(picker.images.count)
+            usecase.setupWatermark(
+                isUpdateText: isNewWatermark,
+                origins: picker.images,
+                current: &store.watermark
+            )
             store.watermark.text.fontName = FontType.body1.fontName
         }
-        if let color = colorPalet.first {
+        if let color = colorPalet.first, isNewWatermark {
             store.watermark.text.color = ColorData(color, alpha: store.watermark.text.color.opacity)
         }
         words = usecase.fetchWords().map { $0.text }
@@ -215,9 +223,7 @@ extension WatermarkEditViewModel {
 
 // MARK: - Export Size Display
 extension WatermarkEditViewModel {
-    /// 메뉴에 표시할 출력 사이즈 문자열.
-    /// `.none` 타입은 이미지마다 원본 비율을 유지한 채 개별 출력되므로, 저장된 단일 `export` 값이 아니라
-    /// 현재 보고 있는 이미지(`currentImageIndex`) 기준으로 실제 저장될 사이즈를 계산해서 보여준다.
+    /// 실제 저장될 사이즈를 계산하여 출력 메뉴에 표기
     func exportSizeStr(currentImageIndex: Int) -> String {
         guard store.watermark.array.type == .none,
               picker.images.indices.contains(currentImageIndex)
@@ -335,7 +341,6 @@ private extension WatermarkEditViewModel {
         case .array:
             picker.images.move(fromOffsets: from, toOffset: to)
         case .sticker:
-            // 순서가 바뀌어도 선택이 같은 스티커를 따라가도록 보정한다.
             if let selected = stickerState.index {
                 var indices = Array(store.watermark.stickers.indices)
                 indices.move(fromOffsets: from, toOffset: to)
@@ -370,9 +375,9 @@ private extension WatermarkEditViewModel {
             popup.pop()
         case .wordStart:
             popup.push(route: .word)
-        case .wordFinished(let word):
+        case .wordFinished(let text):
             words = usecase.fetchWords().map { $0.text }
-            store.watermark.text.text = word
+            word(text)
             popup.pop()
         case .titleFinished(let title):
             store.watermark.frame.title = title
@@ -391,7 +396,7 @@ private extension WatermarkEditViewModel {
     func setText(_ menu: WatermarkEditMenuType.TextMenu) {
         switch menu {
         case .word(let text):
-            store.watermark.text.text = text
+            word(text)
         case .color(let color):
             let alpha = store.watermark.text.color.opacity
             store.watermark.text.color = ColorData(color, alpha: alpha)
