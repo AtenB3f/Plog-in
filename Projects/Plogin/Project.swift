@@ -19,7 +19,7 @@ private let infoPlist: [String: Plist.Value] = [
             "CFBundleURLSchemes": ["Plogin"]
         ]
     ],
-    "NSPhotoLibraryUsageDescription": "사진 및 영상 권한"
+    "NSPhotoLibraryUsageDescription": "이미지 편집 및 생성을 위해 사진 및 영상 권한 허용이 필요합니다."
 ]
 
 // Firebase Crashlytics: 빌드마다 dSYM을 자동으로 업로드해 크래시 리포트가 심볼화되도록 함
