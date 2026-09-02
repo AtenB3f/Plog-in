@@ -7,12 +7,18 @@
 //
 import Foundation
 import SwiftData
+import CoreDomain
 
 public final class DataStore {
     private let context: ModelContext
-    
-    public init(modelContainer: ModelContainer) {
+    private let crashReport: CrashReport?
+
+    public init(
+        modelContainer: ModelContainer,
+        crashReport: CrashReport? = nil
+    ) {
         self.context = ModelContext(modelContainer)
+        self.crashReport = crashReport
     }
 
 #if DEBUG
@@ -31,7 +37,7 @@ public final class DataStore {
                 for: schema,
                 configurations: [configuration]
             )
-            self.init(modelContainer: container)
+            self.init(modelContainer: container, crashReport: nil)
         } catch {
             fatalError("DataStore(Debug): in-memory ModelContainer 생성 실패: \(error)")
         }
@@ -43,7 +49,13 @@ public final class DataStore {
         do {
             try context.save()
         } catch {
-            print("[\(T.self)] 저장 실패: \(error)")
+            crashReport?.send(
+                title: "DataStore",
+                function: "save",
+                key: "PersistentModel",
+                value: model,
+                error: error
+            )
         }
     }
 
@@ -59,32 +71,51 @@ public final class DataStore {
         do {
             return try context.fetch(descriptor)
         } catch {
-            print("[\(T.self)] 불러오기 실패: \(error)")
+            crashReport?.send(
+                title: "DataStore",
+                function: "fetch",
+                key: "FetchDescriptor",
+                value: descriptor,
+                error: error
+            )
             return []
         }
     }
-    
+
     public func delete<T: PersistentModel>(model: T) {
         context.delete(model)
         do {
             try context.save()
         } catch {
-            print("[\(T.self)] 삭제 실패: \(error)")
+            crashReport?.send(
+                title: "DataStore",
+                function: "delete",
+                key: "PersistentModel",
+                value: model,
+                error: error
+            )
         }
     }
 
-    public func performAndSave(_ changes: (ModelContext) -> Void) {
+    public func performAndSave(entityName: String, _ changes: (ModelContext) -> Void) {
         changes(context)
         do {
             try context.save()
         } catch {
-            print("[DataStore] 저장 실패: \(error)")
+            crashReport?.send(
+                title: "DataStore",
+                function: "performAndSave",
+                key: entityName,
+                value: context,
+                error: error
+            )
+            print("[\(entityName)] 저장 실패: \(error)")
         }
     }
 }
 
 extension DataStore {
-    public static func makePersistent() throws -> DataStore {
+    public static func makePersistent(crashReport: CrashReport? = nil) throws -> DataStore {
         let schema = Schema([
             WatermarkEntity.self,
             WatermarkWordEntity.self
@@ -94,6 +125,6 @@ extension DataStore {
             isStoredInMemoryOnly: false
         )
         let container = try ModelContainer(for: schema, configurations: [configuration])
-        return DataStore(modelContainer: container)
+        return DataStore(modelContainer: container, crashReport: crashReport)
     }
 }

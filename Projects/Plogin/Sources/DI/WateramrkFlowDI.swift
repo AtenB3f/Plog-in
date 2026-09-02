@@ -61,8 +61,8 @@ extension DIContainer {
     
     func makeWatermarkEditView(
         id: UUID? = nil,
-        picker: AssetPicker = AssetPicker(mediaType: .image, limit: 36),
-        stickerPicker: AssetPicker = AssetPicker(mediaType: .image, limit: 10),
+        picker: AssetPicker = .init(type: .watermark, crashReport: FirebaseCrashReportImpl()),
+        stickerPicker: AssetPicker = .init(type: .sticker, crashReport: FirebaseCrashReportImpl()),
         store: WatermarkStore = WatermarkStore()
     ) -> WatermarkEditView {
         var watermark: WatermarkModel?
@@ -112,7 +112,8 @@ extension DIContainer {
             picker: picker,
             stickerPicker: stickerPicker,
             store: store,
-            editMode: editMode
+            editMode: editMode,
+            crashReport: FirebaseCrashReportImpl()
         )
     }
     
@@ -133,13 +134,18 @@ extension DIContainer {
     ) -> WatermarkResultViewModel {
         let editor = WatermarkEditor(
             watermark: watermark,
-            origins: origins
+            origins: origins,
+            crashReport: FirebaseCrashReportImpl()
         )
         let usecase = WatermarkUsecase(
             wordDataStore: watermarkStore,
             watermarkDataStore: watermarkStore,
             imageExportRepository: imageExportRepository
         )
-        return WatermarkResultViewModel(editor: editor, watermarkUsecase: usecase)
+        return WatermarkResultViewModel(
+            editor: editor,
+            watermarkUsecase: usecase,
+            crashReport: FirebaseCrashReportImpl()
+        )
     }
 }

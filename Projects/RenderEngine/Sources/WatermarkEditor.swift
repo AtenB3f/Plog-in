@@ -8,6 +8,7 @@
 import SwiftUI
 import PlatformCore
 import Photos
+import CoreDomain
 
 import WatermarkDomain
 #if os(iOS)
@@ -21,10 +22,16 @@ public class WatermarkEditor {
 
     var origins: [PImage]
     var watermark: WatermarkModel
+    let crashReport: CrashReport?
 
-    public init(watermark: WatermarkModel, origins: [PImage]) {
+    public init(
+        watermark: WatermarkModel,
+        origins: [PImage],
+        crashReport: CrashReport? = nil
+    ) {
         self.watermark = watermark
         self.origins = origins
+        self.crashReport = crashReport
     }
 
     public func generateWatermarks() -> [PImage] {
@@ -65,6 +72,14 @@ public class WatermarkEditor {
                         start: .zero,
                         end: CGPoint(x: exportSize.width, y: exportSize.height),
                         options: []
+                    )
+                } else {
+                    crashReport?.send(
+                        title: "WatermarkEditor",
+                        function: "drawWatermark",
+                        key: "gradientColors.count",
+                        value: watermark.text.gradientColors.count,
+                        error: RenderEngineError.gradientCreationFailed
                     )
                 }
             }
@@ -117,7 +132,19 @@ public class WatermarkEditor {
         renderRatio: CGFloat
     ) {
         let fontSize = textSetting.fontSize * renderRatio
-        let font = PFont(name: textSetting.fontName, size: fontSize) ?? PFont.systemFont(ofSize: fontSize)
+        let font: PFont
+        if let resolved = PFont(name: textSetting.fontName, size: fontSize) {
+            font = resolved
+        } else {
+            crashReport?.send(
+                title: "WatermarkEditor",
+                function: "drawText",
+                key: "fontName",
+                value: textSetting.fontName,
+                error: RenderEngineError.fontNotFound(name: textSetting.fontName)
+            )
+            font = PFont.systemFont(ofSize: fontSize)
+        }
         let text = format.getDisplayText(for: textSetting)
 
         let textArea = format.getTextArea(text: text, font: font, fontSize: fontSize)
@@ -258,6 +285,14 @@ public extension WatermarkEditor {
 #elseif os(macOS)
         if let cgImage = image.cgImage(forProposedRect: nil, context: nil, hints: nil) {
             context.draw(cgImage, in: drawRect)
+        } else {
+            crashReport?.send(
+                title: "WatermarkEditor",
+                function: "resizeFitImage",
+                key: "imageSize",
+                value: "\(imageSize)",
+                error: RenderEngineError.imageConversionFailed
+            )
         }
 #endif
     }

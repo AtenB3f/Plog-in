@@ -22,6 +22,23 @@ private let infoPlist: [String: Plist.Value] = [
     "NSPhotoLibraryUsageDescription": "사진 및 영상 권한"
 ]
 
+// Firebase Crashlytics: 빌드마다 dSYM을 자동으로 업로드해 크래시 리포트가 심볼화되도록 함
+private let firebaseCrashlyticsScript: TargetScript = .post(
+    script: """
+    if [ "${CONFIGURATION}" != "Release" ]; then
+        echo "Debug 빌드: Crashlytics dSYM 업로드 건너뜀"
+        exit 0
+    fi
+    "${BUILD_DIR%Build/*}SourcePackages/checkouts/firebase-ios-sdk/Crashlytics/run"
+    """,
+    name: "Firebase Crashlytics dSYM Upload",
+    inputPaths: [
+        "$(DWARF_DSYM_FOLDER_PATH)/$(DWARF_DSYM_FILE_NAME)/Contents/Resources/DWARF/$(TARGET_NAME)",
+        "$(SRCROOT)/$(BUILT_PRODUCTS_DIR)/$(INFOPLIST_PATH)"
+    ],
+    basedOnDependencyAnalysis: false
+)
+
 private let project = Project(
     name: name,
     organizationName: ManifestShared.organization,
@@ -30,7 +47,8 @@ private let project = Project(
         developmentRegion: "ko"
     ),
     packages: [
-        .package(url: "https://github.com/alexeichhorn/YouTubeKit", .upToNextMajor(from: "0.2.9"))
+        .package(url: "https://github.com/alexeichhorn/YouTubeKit", .upToNextMajor(from: "0.2.9")),
+        .package(url: "https://github.com/firebase/firebase-ios-sdk", .upToNextMajor(from: "12.18.0"))
     ],
     targets: [
         .target(
@@ -43,10 +61,12 @@ private let project = Project(
             sources: ["Sources/**"],
             resources: ["Resources/**"],
             entitlements: .dictionary([:]),
-            scripts: [ManifestShared.swiftLintScript],
+            scripts: [ManifestShared.swiftLintScript, firebaseCrashlyticsScript],
             dependencies: [
                 .package(product: "YouTubeKit"),
+                .package(product: "FirebaseCrashlytics"),
                 .project(target: "Design", path: .relativeToRoot("Projects/Design")),
+                .project(target: "CoreDomain", path: .relativeToRoot("Projects/CoreDomain")),
                 .project(target: "WatermarkDomain", path: .relativeToRoot("Projects/WatermarkDomain")),
                 .project(target: "Persistence", path: .relativeToRoot("Projects/Persistence")),
                 .project(target: "PlatformCore", path: .relativeToRoot("Projects/PlatformCore")),

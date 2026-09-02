@@ -138,7 +138,8 @@ extension DIContainer {
         
         let picker = AssetPicker(
             mediaType: .image,
-            limit: watermark.frame.code == BasicWatermarkType.youtubeStreaming.rawValue ? 2 : 30
+            limit: watermark.frame.code == BasicWatermarkType.youtubeStreaming.rawValue ? 2 : 30,
+            crashReport: FirebaseCrashReportImpl()
         )
         let store = WatermarkStore(watermark: watermark)
         let viewModel = makePopupWatermarkPreviewVM(id: id, store: store, picker: picker)
@@ -163,7 +164,8 @@ extension DIContainer {
             usecase: usecase,
             coodinator: popupWatermark,
             store: store,
-            picker: picker
+            picker: picker,
+            crashReport: FirebaseCrashReportImpl()
         )
     }
 }

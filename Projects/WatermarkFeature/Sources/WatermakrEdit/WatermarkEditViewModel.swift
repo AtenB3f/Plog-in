@@ -10,6 +10,7 @@ import SwiftUI
 import Design
 import Combine
 import PlatformCore
+import CoreDomain
 import WatermarkDomain
 import PlatformExport
 import RenderEngine
@@ -69,9 +70,10 @@ public class WatermarkEditViewModel: ObservableObject {
     private let format: WatermarkFormat
     let picker: AssetPicker
     let sticker: AssetPicker
+    private let crashReport: CrashReport?
 
     private var cancellables = Set<AnyCancellable>()
-    
+
     // Watermark Flow Step
     private let stepSubject = PassthroughSubject<WatermarkFlowStep, Never>()
     public var step: AnyPublisher<WatermarkFlowStep, Never> { stepSubject.eraseToAnyPublisher() }
@@ -84,7 +86,8 @@ public class WatermarkEditViewModel: ObservableObject {
         stickerPicker: AssetPicker,
         store: WatermarkStore,
         editMode: WatermarkEditModeStore,
-        format: WatermarkFormat = WatermarkFormat()
+        format: WatermarkFormat = WatermarkFormat(),
+        crashReport: CrashReport? = nil
     ) {
         self.popup = popup
         self.usecase = usecase
@@ -93,6 +96,7 @@ public class WatermarkEditViewModel: ObservableObject {
         self.sticker = stickerPicker
         self.store = store
         self.editMode = editMode
+        self.crashReport = crashReport
         words = usecase.fetchWords().map { $0.text }
         frames = usecase.fetchWatermarks()
 
@@ -506,7 +510,11 @@ private extension WatermarkEditViewModel {
             setExport(.type(store.watermark.export.type))
         case .save:
             if !picker.images.isEmpty {
-                let editor = WatermarkEditor(watermark: store.watermark, origins: picker.images)
+                let editor = WatermarkEditor(
+                    watermark: store.watermark,
+                    origins: picker.images,
+                    crashReport: crashReport
+                )
                 store.watermark.frame.thumbnailData = editor.generateThumbnail().pngData()
             }
             usecase.saveWatermark(store.watermark)

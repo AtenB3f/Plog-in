@@ -10,7 +10,13 @@ import PlatformCore
 import CoreDomain
 
 public class PhotoLibraryExport {
-    public init() {}
+    private let crashReport: CrashReport?
+
+    public init(
+        crashReport: CrashReport? = nil
+    ) {
+        self.crashReport = crashReport
+    }
 }
 
 private extension PhotoLibraryExport {
@@ -35,13 +41,20 @@ extension PhotoLibraryExport: ImageExportRepository {
         }
 
         var results: [Bool] = []
-        for image in images {
+        for (index, image) in images.enumerated() {
             do {
                 try await PHPhotoLibrary.shared().performChanges {
                     PHAssetChangeRequest.creationRequestForAsset(from: image)
                 }
                 results.append(true)
             } catch {
+                crashReport?.send(
+                    title: "PhotoLibraryExport",
+                    function: "save",
+                    key: "PImage.index",
+                    value: index,
+                    error: error
+                )
                 results.append(false)
             }
         }

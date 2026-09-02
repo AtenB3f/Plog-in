@@ -66,10 +66,10 @@ extension WatermarkDataStore: WatermarkRepository {
     }
     
     public func setWatermark(_ watermark: WatermarkModel) {
-        store.performAndSave { context in
-            let existing = (try? context.fetch(FetchDescriptor<WatermarkEntity>()))?
-                .first(where: { $0.id == watermark.id })
+        let existing = store.fetch(type: WatermarkEntity.self)
+            .first(where: { $0.id == watermark.id })
 
+        store.performAndSave(entityName: "WatermarkEntity") { context in
             let newFrameSetting = watermark.frame.toEntity
             if let existing {
                 // lastDate 현재 시각으로 갱신
@@ -103,9 +103,11 @@ extension WatermarkDataStore: WatermarkRepository {
     }
 
     public func removeWatermark(_ id: UUID) {
-        store.performAndSave { context in
-            if let existing = (try? context.fetch(FetchDescriptor<WatermarkEntity>()))?
-                .first(where: { $0.id == id }) {
+        let existing = store.fetch(type: WatermarkEntity.self)
+            .first(where: { $0.id == id })
+
+        store.performAndSave(entityName: "WatermarkEntity") { context in
+            if let existing {
                 context.delete(existing)
             }
         }

@@ -21,6 +21,7 @@ private let project = Project(
                 .project(target: "PlatformExport", path: .relativeToRoot("Projects/PlatformExport")),
                 .project(target: "Design", path: .relativeToRoot("Projects/Design")),
                 .project(target: "UISchema", path: .relativeToRoot("Projects/UISchema")),
+                .project(target: "CoreDomain", path: .relativeToRoot("Projects/CoreDomain")),
                 .project(target: "WatermarkDomain", path: .relativeToRoot("Projects/WatermarkDomain")),
                 .project(target: "RenderEngine", path: .relativeToRoot("Projects/RenderEngine")),
                 .project(target: "WatermarkPreviewSupport", path: .relativeToRoot("Projects/WatermarkPreviewSupport")),

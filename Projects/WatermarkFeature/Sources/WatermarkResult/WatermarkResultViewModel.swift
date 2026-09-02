@@ -8,6 +8,7 @@
 import Foundation
 import Combine
 import PlatformCore
+import CoreDomain
 import WatermarkDomain
 import RenderEngine
 
@@ -28,16 +29,19 @@ public class WatermarkResultViewModel: ObservableObject {
     // Watermark Flow Step
     var editor: WatermarkEditor
     let usecase: WatermarkUsecase
-    
+    private let crashReport: CrashReport?
+
     private let stepSubject = PassthroughSubject<WatermarkFlowStep, Never>()
     public var step: AnyPublisher<WatermarkFlowStep, Never> { stepSubject.eraseToAnyPublisher() }
-    
+
     public init(
         editor: WatermarkEditor,
-        watermarkUsecase: WatermarkUsecase
+        watermarkUsecase: WatermarkUsecase,
+        crashReport: CrashReport? = nil
     ) {
         self.editor = editor
         self.usecase = watermarkUsecase
+        self.crashReport = crashReport
     }
 }
 
@@ -63,7 +67,13 @@ private extension WatermarkResultViewModel {
             _ = try await (delay, make)
             viewState = .content
         } catch {
-            debugPrint(error)
+            crashReport?.send(
+                title: "WatermarkResultViewModel",
+                function: "appear",
+                key: "preview.count",
+                value: preview.count,
+                error: error
+            )
         }
     }
     
