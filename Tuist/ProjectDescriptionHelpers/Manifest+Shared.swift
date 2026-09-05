@@ -8,11 +8,11 @@ public enum ManifestShared {
 
     public static let iOSVersion = "17.0"
     public static let macOSVersion = "14.0"
-    public static let destinations: Destinations = [.iPhone, .iPad, .mac, .macCatalyst]
+    public static let destinations: Destinations = [.iPhone, .mac, .macCatalyst]
     public static let deploymentTargets: DeploymentTargets = .multiplatform(iOS: iOSVersion, macOS: macOSVersion)
 
     public static let marketingVersion = "1.0.0"
-    public static let buildVersion = "1"
+    public static let buildVersion = "2"
     public static let teamID = "MHP823U965"
 
     public static func moduleBundleID(_ module: String) -> String {
