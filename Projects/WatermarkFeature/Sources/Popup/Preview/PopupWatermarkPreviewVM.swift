@@ -8,6 +8,7 @@
 
 import SwiftUI
 import Combine
+import Photos
 import UISchema
 import PlatformCore
 import CoreDomain
@@ -19,7 +20,6 @@ public class PopupWatermarkPreviewVM: PopupViewModel {
     enum Action {
         case appear
         case input
-        case select
         case cancel
         case confirm
     }
@@ -35,6 +35,9 @@ public class PopupWatermarkPreviewVM: PopupViewModel {
     let picker: AssetPicker
     private var editor: WatermarkEditor?
     private let crashReport: CrashReport?
+    private var cancellables = Set<AnyCancellable>()
+    // 선택한 사진 중 접근 권한이 없는 사진이 있는지. 로드 완료(.finished) 시 처리
+    private var isLimitedAccess = false
 
     public init(
         id: UUID,
@@ -51,6 +54,7 @@ public class PopupWatermarkPreviewVM: PopupViewModel {
         self.crashReport = crashReport
         super.init()
         _ = loadWatermark(id: id)
+        bind()
     }
 }
 
@@ -63,8 +67,6 @@ extension PopupWatermarkPreviewVM {
                 await appear()
             case .input:
                 input()
-            case .select:
-                await select()
             case .cancel:
                 cancel()
             case .confirm:
@@ -86,22 +88,17 @@ extension PopupWatermarkPreviewVM {
 extension PopupWatermarkPreviewVM {
     func appear() async {
         guard picker.images.isEmpty else { return }
+        if let route = await picker.authorize().deniedRoute {
+            cancel()
+            coodinator.push(route: route)
+            return
+        }
         isShowPicker = true
     }
 
     // 문구 입력
     func input() {
         coodinator.stepSubject.send(.wordStart)
-    }
-
-    func select() async {
-        if picker.images.isEmpty {
-            cancel()
-        } else {
-            usecase.setupWatermark(origins: picker.images, current: &store.watermark)
-            setEditor()
-            makePreview()
-        }
     }
 
     func cancel() {
@@ -115,6 +112,51 @@ extension PopupWatermarkPreviewVM {
 }
 
 private extension PopupWatermarkPreviewVM {
+    func bind() {
+        picker.event
+            .sink { [weak self] event in
+                guard let self = self else { return }
+                Task {
+                    await self.eventHandler(event)
+                }
+            }
+            .store(in: &cancellables)
+    }
+    
+    @MainActor
+    func eventHandler(_ event: AssetPickerEvent) {
+        switch event {
+        case .error(let error):
+            switch error {
+            case .limitedAccess:
+                isLimitedAccess = true
+            default:
+                break
+            }
+        case .finished:
+            if isLimitedAccess {
+                // 사진 접근 권한 팝업은 미리보기 팝업을 닫은 뒤 표시
+                isLimitedAccess = false
+                cancel()
+                coodinator.push(route: .photoLimited)
+            } else {
+                select()
+            }
+        }
+    }
+
+    // 이미지 로드 완료 후 미리보기 생성. 선택한 이미지가 없으면(취소) 팝업 닫기
+    @MainActor
+    func select() {
+        if picker.images.isEmpty {
+            cancel()
+        } else {
+            usecase.setupWatermark(origins: picker.images, current: &store.watermark)
+            setEditor()
+            makePreview()
+        }
+    }
+
     func setEditor() {
         editor = WatermarkEditor(
             watermark: store.watermark,

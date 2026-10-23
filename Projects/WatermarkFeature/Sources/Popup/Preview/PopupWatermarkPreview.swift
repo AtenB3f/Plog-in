@@ -40,8 +40,6 @@ public struct PopupWatermarkPreview: View {
                 viewModel.action(.appear)
             }
             .fullScreenCover(isPresented: $viewModel.isShowPicker) {
-                viewModel.action(.select)
-            } content: {
                 AssetPickerView(picker: viewModel.picker)
             }
     }
