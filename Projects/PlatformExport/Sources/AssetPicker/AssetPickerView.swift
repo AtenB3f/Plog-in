@@ -155,8 +155,10 @@ extension AssetPickerView {
 
             if isLimitedAsset { parent.picker.eventSubject.send(.error(.limitedAccess)) }
 
-            group.notify(queue: .main) { [weak self] in
-                self?.parent.picker.eventSubject.send(.finished)
+            // picker가 닫히면 Coordinator가 먼저 해제될 수 있으므로, VM이 소유한 AssetPicker를 직접 캡처해서 전달
+            let assetPicker = parent.picker
+            group.notify(queue: .main) {
+                assetPicker.eventSubject.send(.finished)
             }
         }
     }
