@@ -87,6 +87,10 @@ extension DIContainer {
             return AnyView(PopupWatermarkWord(viewModel: makePopupWatermarkWordVM()))
         case .preview(let id):
             return AnyView(makePopupWatermarkPreview(id: id))
+        case .photoDenied:
+            return AnyView(makePopupPhotoAuthorization(type: .denied))
+        case .photoLimited:
+            return AnyView(makePopupPhotoAuthorization(type: .limited))
         }
     }
     
@@ -110,6 +114,12 @@ extension DIContainer {
         return PopupWatermarkTitleVM(coodinator: popupWatermark)
     }
     
+    func makePopupPhotoAuthorization(type: PopupPhotoAuthorizationVM.PopupType) -> PopupPhotoAuthorization {
+        return PopupPhotoAuthorization(
+            viewModel: PopupPhotoAuthorizationVM(type: type, coodinator: popupWatermark)
+        )
+    }
+
     func makePopupWatermarkWord() -> PopupWatermarkWord {
         return PopupWatermarkWord(viewModel: makePopupWatermarkWordVM())
     }
