@@ -37,7 +37,7 @@ iOS 및 macOS에서 워터마크가 있는 사진 편집 프로젝트
 - 순환참조 금지
 - Feature 모듈은 다른 Feature 모듈을 직접 참조 금지
 - Persistence는 Domain 레이어에서만 접근, Feature에서 직접 접근 금지 (단, Plogin은 DIContainer 구성을 위해 예외적으로 직접 참조)
-- **Plogin**: PlatformCore, WatermarkFeature, WatermarkDomain, VideoFeature, ImageFeature, Persistence, Design, RenderEngine, YouTubeKit 참조(역방향 금지)
+- **Plogin**: PlatformCore, CoreDomain, WatermarkFeature, WatermarkDomain, VideoFeature, ImageFeature, Persistence, Design, RenderEngine, PlatformExport, UISchema, YouTubeKit 참조(역방향 금지)
 - **CoreDomain**: 앱 전체에서 사용하는 Domain영역이기에 PlatformCore를 제외한 참조가 있으면 안됨
 - **WatermarkDomain**: CoreDomain와 PlatformCore를 제외한 참조가 있으면 안됨
 - **PlatformCore**: 최하위 모듈. 다른 모듈 참조 금지
