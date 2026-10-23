@@ -6,8 +6,6 @@
 //  Copyright © 2025 AtenB. All rights reserved.
 //
 
-import Foundation
-
 public enum WatermarkArrayType: String, Codable, CaseIterable {
     case none
     case horizontal

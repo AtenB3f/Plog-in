@@ -7,8 +7,6 @@
 
 import SwiftUI
 import PlatformCore
-import Design
-import WatermarkDomain
 
 /// 워터마크 텍스트 레이어
 public struct WatermarkText: View {

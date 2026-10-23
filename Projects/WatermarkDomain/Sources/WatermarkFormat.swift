@@ -5,8 +5,8 @@
 //  Created by AtenB on 4/27/26.
 //
 
+import Foundation
 import PlatformCore
-import SwiftUI
 
 public class WatermarkFormat {
     public init() {}

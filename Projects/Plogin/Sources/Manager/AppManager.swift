@@ -8,7 +8,6 @@
 
 import SwiftUI
 import Design
-import WatermarkFeature
 import Firebase
 
 enum RootStatus {

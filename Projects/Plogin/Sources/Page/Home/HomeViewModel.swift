@@ -11,7 +11,6 @@ import Combine
 import PlatformCore
 import WatermarkDomain
 import WatermarkFeature
-import Persistence
 
 class HomeViewModel: ObservableObject {
     enum Action {

@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import PlatformCore
 import Design
 import WatermarkDomain
 

@@ -8,7 +8,6 @@
 import SwiftUI
 import Combine
 import UISchema
-import WatermarkDomain
 
 public class WatermarkPopupCoordinator: ObservableObject {
     @Published public var path: [WatermarkPopupRoute] = []
@@ -59,4 +58,10 @@ public enum WatermarkPopupRoute: PopupRoute {
     /// 워터마크 미리보기, 워터마크 생성 shortcut
     /// - Parameter id: WatermarkModel UUID
     case preview(id: UUID)
+
+    /// 사진 접근 거부/제한
+    case photoDenied
+
+    /// 선택한 사진만 허용된 상태에서 허용되지 않은 사진 선택
+    case photoLimited
 }

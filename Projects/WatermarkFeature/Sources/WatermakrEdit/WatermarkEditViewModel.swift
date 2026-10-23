@@ -9,6 +9,7 @@
 import SwiftUI
 import Design
 import Combine
+import Photos
 import PlatformCore
 import CoreDomain
 import WatermarkDomain
@@ -134,6 +135,33 @@ private extension WatermarkEditViewModel {
                 self?.objectWillChange.send()
             }
             .store(in: &cancellables)
+
+        // 이미지 로드 완료 후 초기화. picker가 닫히는 시점에는 비동기 로드가 끝나지 않았을 수 있음
+        picker.event
+            .sink { [weak self] event in
+                switch event {
+                case .finished:
+                    self?.originInit()
+                case .error(.limitedAccess):
+                    self?.popup.push(route: .photoLimited)
+                case .error:
+                    break
+                }
+            }
+            .store(in: &cancellables)
+
+        sticker.event
+            .sink { [weak self] event in
+                switch event {
+                case .finished:
+                    self?.stickerInit()
+                case .error(.limitedAccess):
+                    self?.popup.push(route: .photoLimited)
+                case .error:
+                    break
+                }
+            }
+            .store(in: &cancellables)
         
         popup.step
             .sink { [weak self] step in
@@ -200,7 +228,8 @@ extension WatermarkEditViewModel {
     func action(_ action: Action) {
         switch action {
         case .open(let type):
-            open(type)
+            // 권한 확인이 필요한 picker 표시만 비동기 처리
+            Task { await open(type) }
         case .picker:
             actionPicker()
         case .menu:
@@ -240,20 +269,19 @@ extension WatermarkEditViewModel {
 }
 
 private extension WatermarkEditViewModel {
-    func open(_ type: WatermarkEditPickerType) {
+    @MainActor
+    func open(_ type: WatermarkEditPickerType) async {
+        let target = type == .sticker ? sticker : picker
+        if let route = await target.authorize().deniedRoute {
+            popup.push(route: route)
+            return
+        }
         isShowPicker = true
         pickerType = type
     }
     
+    // 초기화는 이미지 로드 완료(.finished) 시점에 bind()에서 처리
     func actionPicker() {
-        switch pickerType {
-        case .picture:
-            originInit()
-        case .sticker:
-            stickerInit()
-        case .none:
-            break
-        }
         pickerType = nil
     }
     

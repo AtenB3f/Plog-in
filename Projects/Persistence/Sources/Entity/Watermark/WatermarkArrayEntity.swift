@@ -6,7 +6,6 @@
 //  Copyright © 2025 AtenB. All rights reserved.
 //
 
-import Foundation
 import SwiftData
 import WatermarkDomain
 

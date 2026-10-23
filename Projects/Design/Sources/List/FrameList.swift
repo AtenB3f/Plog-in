@@ -8,7 +8,6 @@
 
 import SwiftUI
 import PlatformCore
-import UniformTypeIdentifiers
 
 public struct FrameListState {
     public var mode: FrameListMode

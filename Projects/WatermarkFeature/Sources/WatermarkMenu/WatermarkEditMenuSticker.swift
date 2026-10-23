@@ -8,7 +8,6 @@
 
 import SwiftUI
 import Design
-import PlatformCore
 
 struct WatermarkEditMenuSticker: View {
     @EnvironmentObject var viewModel: WatermarkEditViewModel

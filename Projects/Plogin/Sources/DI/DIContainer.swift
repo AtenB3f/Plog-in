@@ -11,10 +11,7 @@ import Combine
 import CoreDomain
 import Persistence
 import WatermarkFeature
-import WatermarkDomain
-import PlatformCore
 import PlatformExport
-import RenderEngine
 
 public class DIContainer: ObservableObject {
     internal var homeCancellables = Set<AnyCancellable>()

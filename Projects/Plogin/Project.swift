@@ -74,7 +74,9 @@ private let project = Project(
                 .project(target: "RenderEngine", path: .relativeToRoot("Projects/RenderEngine")),
                 .project(target: "WatermarkFeature", path: .relativeToRoot("Projects/WatermarkFeature")),
                 .project(target: "ImageFeature", path: .relativeToRoot("Projects/ImageFeature")),
-                .project(target: "VideoFeature", path: .relativeToRoot("Projects/VideoFeature"))
+                .project(target: "VideoFeature", path: .relativeToRoot("Projects/VideoFeature")),
+                .project(target: "PlatformExport", path: .relativeToRoot("Projects/PlatformExport")),
+                .project(target: "UISchema", path: .relativeToRoot("Projects/UISchema"))
             ],
             settings: ManifestShared.appSettings()
         )
