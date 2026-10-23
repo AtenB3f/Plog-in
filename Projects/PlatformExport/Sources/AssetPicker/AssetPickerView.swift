@@ -52,10 +52,14 @@ extension AssetPickerView {
         public func picker(_ picker: PHPickerViewController, didFinishPicking results: [PHPickerResult]) {
             if results.isEmpty {
                 picker.dismiss(animated: true)
+                parent.picker.eventSubject.send(.finished)
                 return
             }
             
             picker.dismiss(animated: true)
+
+            var isLimitedAsset = false
+            let group = DispatchGroup()
             
             for result in results {
                 guard let assetId = result.assetIdentifier else {
@@ -66,11 +70,18 @@ extension AssetPickerView {
                         value: "nil",
                         error: AssetPickerError.missingAssetIdentifier
                     )
+                    parent.picker.eventSubject.send(.error(.missingAssetIdentifier))
                     continue
                 }
 
                 let fetchResult = PHAsset.fetchAssets(withLocalIdentifiers: [assetId], options: nil)
+                
                 guard let phAsset = fetchResult.firstObject else {
+                    // 권한 체크
+                    let status = PHPhotoLibrary.authorizationStatus(for: .readWrite)
+                    if status == .limited { isLimitedAsset = true }
+                    
+                    self.parent.picker.crashReport?.setValue("photoAuthorization", status.reportName)
                     self.parent.picker.crashReport?.send(
                         title: "AssetPickerView",
                         function: "picker",
@@ -78,26 +89,38 @@ extension AssetPickerView {
                         value: assetId,
                         error: AssetPickerError.assetNotFound
                     )
+                    
+                    if status != .limited { parent.picker.eventSubject.send(.error(.assetNotFound)) }
+                    
                     continue
                 }
-                if phAsset.mediaType == .video {
+                switch phAsset.mediaType {
+                case .video:
+                    group.enter()
                     PHImageManager.default().requestAVAsset(forVideo: phAsset, options: nil) { avAsset, _, info in
                         guard let avAsset = avAsset,
                                 let data = AssetData(type: .video, data: avAsset).videoAsset else {
+                            let error = (info?[PHImageErrorKey] as? Error) ?? AssetPickerError.videoLoadFailed
                             self.parent.picker.crashReport?.send(
                                 title: "AssetPickerView",
                                 function: "requestAVAsset",
                                 key: "assetIdentifier",
                                 value: assetId,
-                                error: (info?[PHImageErrorKey] as? Error) ?? AssetPickerError.videoLoadFailed
+                                error: error
                             )
+                            DispatchQueue.main.async {
+                                self.parent.picker.eventSubject.send(.error(.videoLoadFailed))
+                                group.leave()
+                            }
                             return
                         }
                         DispatchQueue.main.async {
                             self.parent.picker.videos.append(data)
+                            group.leave()
                         }
                     }
-                } else if phAsset.mediaType == .image {
+                case .image:
+                    group.enter()
                     let options = PHImageRequestOptions()
                     options.deliveryMode = .highQualityFormat
                     options.isSynchronous = false
@@ -108,19 +131,46 @@ extension AssetPickerView {
                         options: options) { image, info in
                             guard let image = image,
                                     let data = AssetData(type: .image, data: image).imageAsset else {
+                                let error = (info?[PHImageErrorKey] as? Error) ?? AssetPickerError.imageLoadFailed
                                 self.parent.picker.crashReport?.send(
                                     title: "AssetPickerView",
                                     function: "requestImage",
                                     key: "assetIdentifier",
                                     value: assetId,
-                                    error: (info?[PHImageErrorKey] as? Error) ?? AssetPickerError.imageLoadFailed
+                                    error: error
                                 )
+                                DispatchQueue.main.async {
+                                    self.parent.picker.eventSubject.send(.error(.imageLoadFailed))
+                                    group.leave()
+                                }
                                 return
                             }
                             self.parent.picker.images.append(data)
+                            group.leave()
                     }
+                default:
+                    break
                 }
             }
+
+            if isLimitedAsset { parent.picker.eventSubject.send(.error(.limitedAccess)) }
+
+            group.notify(queue: .main) { [weak self] in
+                self?.parent.picker.eventSubject.send(.finished)
+            }
+        }
+    }
+}
+
+private extension PHAuthorizationStatus {
+    var reportName: String {
+        switch self {
+        case .notDetermined: return "notDetermined"
+        case .restricted: return "restricted"
+        case .denied: return "denied"
+        case .authorized: return "authorized"
+        case .limited: return "limited"
+        @unknown default: return "unknown(\(rawValue))"
         }
     }
 }
