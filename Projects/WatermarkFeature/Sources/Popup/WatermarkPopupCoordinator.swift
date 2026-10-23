@@ -8,7 +8,6 @@
 import SwiftUI
 import Combine
 import UISchema
-import WatermarkDomain
 
 public class WatermarkPopupCoordinator: ObservableObject {
     @Published public var path: [WatermarkPopupRoute] = []

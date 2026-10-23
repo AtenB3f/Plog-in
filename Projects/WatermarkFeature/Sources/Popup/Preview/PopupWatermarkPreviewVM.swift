@@ -9,7 +9,6 @@
 import SwiftUI
 import Combine
 import UISchema
-import Design
 import PlatformCore
 import CoreDomain
 import PlatformExport

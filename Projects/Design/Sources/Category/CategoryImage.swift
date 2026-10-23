@@ -7,7 +7,6 @@
 //
 
 import SwiftUI
-import PlatformCore
 
 public enum CategoryImageMode {
     case select

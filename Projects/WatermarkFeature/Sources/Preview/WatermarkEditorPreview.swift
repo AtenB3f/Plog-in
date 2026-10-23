@@ -5,6 +5,7 @@
 
 #if DEBUG
 import SwiftUI
+import Design
 import PlatformCore
 import PlatformExport
 import WatermarkDomain

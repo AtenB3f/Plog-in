@@ -7,7 +7,6 @@
 
 import SwiftUI
 import PlatformCore
-import Design
 import WatermarkDomain
 
 // MARK: - 워터마크 스티커 레이어

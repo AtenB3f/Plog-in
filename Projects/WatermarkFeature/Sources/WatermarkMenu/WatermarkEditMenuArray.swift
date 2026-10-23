@@ -8,7 +8,6 @@
 
 import SwiftUI
 import Design
-import PlatformCore
 import WatermarkDomain
 
 struct WatermarkEditMenuArray: View {

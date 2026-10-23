@@ -7,7 +7,6 @@
 //
 
 import SwiftUI
-import Foundation
 
 public struct TextSlider: View {
     @Binding var value: CGFloat

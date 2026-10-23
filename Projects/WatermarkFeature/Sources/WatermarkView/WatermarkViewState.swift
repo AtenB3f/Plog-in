@@ -7,7 +7,6 @@
 
 import Foundation
 import PlatformCore
-import Design
 import WatermarkDomain
 
 public struct WatermarkTextLayout {
